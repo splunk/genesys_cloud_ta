@@ -1,6 +1,6 @@
 # genesys_cloud_ta
 
-#Getting Started 
+# Getting Started 
 
 * If making UI changes --> 
     * Build the App: ucc-gen build --ta-version 1.0.0
