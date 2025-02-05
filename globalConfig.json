@@ -1,0 +1,402 @@
+{
+    "pages": {
+        "configuration": {
+            "tabs": [
+                {
+                    "name": "account",
+                    "table": {
+                        "actions": [
+                            "edit",
+                            "delete",
+                            "clone"
+                        ],
+                        "header": [
+                            {
+                                "label": "Name",
+                                "field": "name"
+                            }
+                        ]
+                    },
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Account Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the account.",
+                            "required": true
+                        },
+                        {
+                            "type": "text",
+                            "label": "Client ID",
+                            "field": "client_id",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 8192",
+                                    "minLength": 1,
+                                    "maxLength": 8192
+                                }
+                            ],
+                            "required": true
+                        },
+                        {
+                            "type": "text",
+                            "label": "Client Secret",
+                            "field": "client_secret",
+                            "required": true,
+                            "encrypted": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of API key should be between 1 and 8192",
+                                    "minLength": 1,
+                                    "maxLength": 8192
+                                }
+                            ]
+                        },
+                        {
+                            "type": "text",
+                            "label": "Region",
+                            "field": "region",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 8192",
+                                    "minLength": 1,
+                                    "maxLength": 8192
+                                }
+                            ],
+                            "required": true
+                        }
+                    ],
+                    "title": "Accounts"
+                },
+                {
+                    "type": "loggingTab"
+                }
+            ],
+            "title": "Configuration",
+            "description": "Set up your add-on"
+        },
+        "inputs": {
+            "services": [
+                {
+                    "template": "input_with_helper",
+                    "name": "queue_observations",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "field": "region",
+                            "label": "Region",
+                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
+                            "required": true,
+                            "type": "singleSelect",
+                            "options": {
+                                "disableSearch": true,
+                                "autoCompleteFields": [
+                                    {
+                                        "value": "us_east_1",
+                                        "label": "us_east_1"
+                                    },
+                                    {
+                                        "value": "us_west_2",
+                                        "label": "us_west_2"
+                                    },
+                                    {
+                                        "value": "eu_west_1",
+                                        "label": "eu_west_1"
+                                    },
+                                    {
+                                        "value": "ap_southeast_2",
+                                        "label": "ap_southeast_2"
+                                    },
+                                    {
+                                        "value": "ap_northeast_1",
+                                        "label": "ap_northeast_1"
+                                    },
+                                    {
+                                        "value": "eu_central_1",
+                                        "label": "eu_central_1"
+                                    },
+                                    {
+                                        "value": "ca_central_1",
+                                        "label": "ca_central_1"
+                                    },
+                                    {
+                                        "value": "ap_northeast_2",
+                                        "label": "ap_northeast_2"
+                                    },
+                                    {
+                                        "value": "eu_west_2",
+                                        "label": "eu_west_2"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "queue_observations_helper",
+                    "title": "queue_observations"
+                },
+                {
+                    "template": "input_with_helper",
+                    "name": "queue_lookup",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "field": "region",
+                            "label": "Region",
+                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
+                            "required": true,
+                            "type": "singleSelect",
+                            "options": {
+                                "disableSearch": true,
+                                "autoCompleteFields": [
+                                    {
+                                        "value": "us_east_1",
+                                        "label": "us_east_1"
+                                    },
+                                    {
+                                        "value": "us_west_2",
+                                        "label": "us_west_2"
+                                    },
+                                    {
+                                        "value": "eu_west_1",
+                                        "label": "eu_west_1"
+                                    },
+                                    {
+                                        "value": "ap_southeast_2",
+                                        "label": "ap_southeast_2"
+                                    },
+                                    {
+                                        "value": "ap_northeast_1",
+                                        "label": "ap_northeast_1"
+                                    },
+                                    {
+                                        "value": "eu_central_1",
+                                        "label": "eu_central_1"
+                                    },
+                                    {
+                                        "value": "ca_central_1",
+                                        "label": "ca_central_1"
+                                    },
+                                    {
+                                        "value": "ap_northeast_2",
+                                        "label": "ap_northeast_2"
+                                    },
+                                    {
+                                        "value": "eu_west_2",
+                                        "label": "eu_west_2"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "queue_lookup_helper",
+                    "title": "queue_lookup"
+                }
+            ],
+            "title": "Inputs",
+            "description": "Manage your data inputs",
+            "table": {
+                "actions": [
+                    "edit",
+                    "delete",
+                    "clone"
+                ],
+                "header": [
+                    {
+                        "label": "Name",
+                        "field": "name"
+                    },
+                    {
+                        "label": "Interval",
+                        "field": "interval"
+                    },
+                    {
+                        "label": "Index",
+                        "field": "index"
+                    },
+                    {
+                        "label": "Status",
+                        "field": "disabled"
+                    }
+                ],
+                "moreInfo": [
+                    {
+                        "label": "Name",
+                        "field": "name"
+                    },
+                    {
+                        "label": "Interval",
+                        "field": "interval"
+                    },
+                    {
+                        "label": "Index",
+                        "field": "index"
+                    },
+                    {
+                        "label": "Status",
+                        "field": "disabled",
+                        "mapping": {
+                            "true": "Inactive",
+                            "false": "Active"
+                        }
+                    },
+                    {
+                        "field": "region",
+                        "label": "Region"
+                    },
+                    {
+                        "field": "account",
+                        "label": "Account"
+                    }
+                ]
+            }
+        },
+        "dashboard": {
+            "panels": [
+                {
+                    "name": "default"
+                }
+            ]
+        }
+    },
+    "meta": {
+        "name": "genesys_cloud_ta",
+        "restRoot": "genesys_cloud_ta",
+        "version": "1.0.0",
+        "displayName": "Genesys Cloud Add-on",
+        "schemaVersion": "0.0.9",
+        "supportedThemes": [
+            "light",
+            "dark"
+        ]
+    }
+}
