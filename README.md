@@ -1,12 +1,21 @@
-# genesys_cloud_ta
+# Add-on for Genesys Cloud
 
-# Getting Started
+## Getting Started
+### Installation
+TODO
+Explain how to install the add-on in Splunk
+Point to Splunk official documentation
+Which Splunk tier?
 
-* If making UI changes -->
-    * Build the App: ucc-gen build --ta-version 1.0.0
-    * Copy the TA to Splunk Apps directory: cp -R output/genesys_cloud_ta/ $SPLUNK_HOME/etc/apps/
-    * Restart Splunk
+### Configuration
+TODO
+Explain how to configure the add-on
+REMEMBER: only admins are supposed to access that tab!
 
-* If making changes to python file -->
-    * symlink output/genesys_cloud_ta to $SPLUNK_HOME/etc/apps
-    * Run debug/refresh (https://splunk_url:8000/en-US/debug/refresh)
+### Usage
+TODO
+Explain how to configure inputs in the add-on
+
+
+## Contributing
+See contributing [guidelines](CONTRIBUTING.md)
