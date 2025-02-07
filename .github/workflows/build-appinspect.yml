@@ -1,0 +1,99 @@
+name: Package Splunk Add-On and Run AppInspect
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+  # push:
+  #   paths:
+  #     - package/**
+
+jobs:
+  build:
+    name: Bundle the App
+    runs-on: ubuntu-latest
+    outputs:
+      app_name: ${{ steps.app.outputs.name }}
+      app_version: ${{ steps.app.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade crudini splunk-packaging-toolkit splunk-add-on-ucc-framework
+
+      - name: Get App Info
+        id: app
+        run: |
+          MANIFEST="app.manifest"
+          APP_CONF="default/app.conf"
+          if [ -f "$MANIFEST" ]; then
+            app_id=$(cat "$MANIFEST" | jq -r '.info.id.name')
+            app_version=$(cat "$MANIFEST" | jq -r '.info.id.version')
+            echo "name=${app_id}" >> $GITHUB_OUTPUT
+            echo "version=${app_version}" >> $GITHUB_OUTPUT
+          else
+            app_id=$(crudini --get "$APP_CONF" package id 2>/dev/null || echo "")
+            if [ -z "$app_id" ] && [ -f "$APP_CONF" ]; then
+              app_id=$(crudini --get "$APP_CONF" id name 2>/dev/null || echo "")
+            fi
+            app_version=$(crudini --get "$APP_CONF" launcher version 2>/dev/null || echo "")
+            echo "name=${app_id}" >> $GITHUB_OUTPUT
+            echo "version=${app_version}" >> $GITHUB_OUTPUT
+          fi
+        working-directory: ./package
+
+      - name: Add files to package
+        run: |
+          sed -i '/^!/d' README.md
+          cp README.md package/
+
+      - name: Build and bundle TA
+        run: |
+          ucc-gen build --ta-version ${{ steps.app.outputs.version }}
+          chmod -R +r output
+          chmod -R go-w output
+          ucc-gen package --path output/${{ steps.app.outputs.name }}
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.app.outputs.name }}-${{ steps.app.outputs.version }}
+          path: ${{ steps.app.outputs.name }}*.tar.gz
+
+  appinspect-cli:
+    name: appinspect-cli ${{ matrix.tags }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: build
+    strategy:
+      matrix:
+        tags:
+          - "cloud"
+          - "appapproval"
+          - "deprecated_feature"
+          - "developer_guidance"
+          - "future"
+          - "self-service"
+          - "splunk_appinspect"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.7
+      - uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}
+          path: dist
+      - uses: splunk/appinspect-cli-action@v2.8
+        with:
+          app_path: dist/${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}.tar.gz
+          included_tags: ${{ matrix.tags }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appinspect_result_${{ matrix.tags }}
+          path: appinspect_result.json
