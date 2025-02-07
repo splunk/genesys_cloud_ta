@@ -1,3 +1,8 @@
 __pycache__/
 local/
 local.meta
+.venv
+.vscode
+.DS_Store
+output/
+.env
