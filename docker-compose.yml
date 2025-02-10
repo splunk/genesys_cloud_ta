@@ -1,0 +1,33 @@
+services:
+    splunk:
+        image: "splunk/splunk:latest"
+        platform: "linux/amd64"
+        container_name: genesyscloud
+        volumes:
+            # Mount a volume from your local app to the remote /etc/apps
+            # - ./packages/${APP_NAME}/stage:/opt/splunk/etc/apps/${APP_NAME}
+            # Mount a volume to retain any packaged apps locally in ./app_packages
+            # - ./app_packages:/opt/splunk/share/splunk/app_packages
+            # Mount output folder from local app to the remote /etc/apps
+            - ./output/${APP_NAME}:/opt/splunk/etc/apps/${APP_NAME}
+        environment:
+            # This skips the license acceptance step
+            - SPLUNK_START_ARGS=--answer-yes --no-prompt --accept-license
+            # This pre-defines a HTTP Event Collector token
+            - SPLUNK_HEC_TOKEN=11111111-1111-1111-1111-1111111111113
+            # This pre-defines the admin password
+            - SPLUNK_PASSWORD=changed!
+            # This defines a tarball of apps to be pre-installed, you can
+            # also include multiple tarballs with comma-separated URLs
+            # - SPLUNK_APPS_URL=https://github.com/splunk/sdk-app-collection/releases/download/v1.0.0/sdk-app-collection.tgz
+        ports:
+            # FDSE Weird mapping cause of other existing container on machine
+            - 8000:8000 # for web/browser access
+            - 9088:8088 # for HTTP Event Collector access
+            - 8090:8089 # for REST API access
+        healthcheck:
+            # This tells Docker whether our Splunk container is healthy
+            test: ['CMD', 'curl', '-f', 'http://localhost:8000']
+            interval: 5s
+            timeout: 5s
+            retries: 20

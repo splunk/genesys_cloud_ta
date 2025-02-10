@@ -1,3 +1,4 @@
 splunktaucclib
 splunk-sdk
 solnlib
+PureCloudPlatformClientV2==221.0.0
