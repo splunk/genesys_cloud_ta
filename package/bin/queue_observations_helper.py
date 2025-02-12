@@ -118,7 +118,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         sourcetype=sourcetype
                     )
                 )
-                logs.events_ingested(
+                log.events_ingested(
                     logger,
                     input_name,
                     sourcetype,
