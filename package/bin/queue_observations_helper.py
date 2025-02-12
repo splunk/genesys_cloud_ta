@@ -102,7 +102,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             opt_region = input_item.get("region")
 
             results = get_data_from_api(logger, client_id, client_secret, opt_region)
-            sourcetype = "queue_observations"
+            sourcetype = "genesyscloud:analytics:queues:observations"
             for result in results.results:
                 data = result.data
                 group = result.group.get('queueId')
