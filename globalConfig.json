@@ -68,18 +68,76 @@
                             ]
                         },
                         {
-                            "type": "text",
-                            "label": "Region",
                             "field": "region",
-                            "validators": [
-                                {
-                                    "type": "string",
-                                    "errorMsg": "Length of input name should be between 1 and 8192",
-                                    "minLength": 1,
-                                    "maxLength": 8192
-                                }
-                            ],
-                            "required": true
+                            "label": "AWS Region",
+                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
+                            "required": true,
+                            "type": "singleSelect",
+                            "options": {
+                                "disableSearch": true,
+                                "autoCompleteFields": [
+                                    {
+                                        "value": "us_east_1",
+                                        "label": "US East (Virginia)"
+                                    },
+                                    {
+                                        "value": "us_west_2",
+                                        "label": "US West (Oregon)"
+                                    },
+                                    {
+                                        "value": "eu_west_1",
+                                        "label": "Europe (Ireland)"
+                                    },
+                                    {
+                                        "value": "ap_southeast_2",
+                                        "label": "Asia Pacific (Sydney)"
+                                    },
+                                    {
+                                        "value": "ap_northeast_1",
+                                        "label": "sia Pacific (Tokyo)"
+                                    },
+                                    {
+                                        "value": "eu_central_1",
+                                        "label": "Europe (Frankfurt)"
+                                    },
+                                    {
+                                        "value": "ca_central_1",
+                                        "label": "Canada (Central)"
+                                    },
+                                    {
+                                        "value": "ap_northeast_2",
+                                        "label": "Asia Pacific (Seoul)"
+                                    },
+                                    {
+                                        "value": "eu_west_2",
+                                        "label": "Europe (London)"
+                                    },
+                                    {
+                                        "value": "ap_south_1",
+                                        "label": "Asia Pacific (Mumbai)"
+                                    },
+                                    {
+                                        "value": "us_east_2",
+                                        "label": "US East 2 (Ohio)"
+                                    },
+                                    {
+                                        "value": "sa_east_1",
+                                        "label": "South America (Sao Paulo)"
+                                    },
+                                    {
+                                        "value": "me_central_1",
+                                        "label": "Middle East (UAE)"
+                                    },
+                                    {
+                                        "value": "ap_northeast_3",
+                                        "label": "Asia Pacific (Osaka)"
+                                    },
+                                    {
+                                        "value": "eu_central_2",
+                                        "label": "Europe (Zurich)"
+                                    }
+                                ]
+                            }
                         }
                     ],
                     "title": "Accounts"
@@ -320,6 +378,71 @@
                     ],
                     "inputHelperModule": "queue_lookup_helper",
                     "title": "queue_lookup"
+                },
+                {
+                    "name": "edges_trunks_metrics",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "edges_trunks_metrics_helper",
+                    "title": "edges_trunks_metrics"
                 }
             ],
             "title": "Inputs",
