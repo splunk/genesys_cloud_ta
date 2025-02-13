@@ -447,6 +447,23 @@
             ],
             "title": "Inputs",
             "description": "Manage your data inputs",
+            "groupsMenu": [
+                {
+                    "groupName": "analytics",
+                    "groupTitle": "Analytics",
+                    "groupServices": [
+                        "queue_observations",
+                        "queue_lookup"
+                    ]
+                },
+                {
+                    "groupName": "telephony_providers_edge",
+                    "groupTitle": "Telephony Providers Edge",
+                    "groupServices": [
+                        "edges_trunks_metrics"
+                    ]
+                }
+            ],
             "table": {
                 "actions": [
                     "edit",
