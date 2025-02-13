@@ -121,9 +121,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             sourcetype=sourcetype,
                         )
                     )
-            logger.debug("Updating checkpointer and leaving")
-            new_checkpoint = datetime.utcnow().timestamp()
-            kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+
+            # Updating checkpoint if data was returned to avoid losing info
+            if data:
+                logger.debug("Updating checkpointer and leaving")
+                new_checkpoint = datetime.utcnow().timestamp()
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+
             log.events_ingested(
                 logger,
                 input_name,
