@@ -152,7 +152,6 @@
         "inputs": {
             "services": [
                 {
-                    "template": "input_with_helper",
                     "name": "queue_observations",
                     "entity": [
                         {
@@ -266,7 +265,6 @@
                     "title": "queue_observations"
                 },
                 {
-                    "template": "input_with_helper",
                     "name": "queue_lookup",
                     "entity": [
                         {
