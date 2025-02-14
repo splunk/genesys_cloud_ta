@@ -565,7 +565,8 @@
                     "groupTitle": "Analytics",
                     "groupServices": [
                         "queue_observations",
-                        "queue_lookup"
+                        "queue_lookup",
+                        "chat_observations"
                     ]
                 },
                 {
