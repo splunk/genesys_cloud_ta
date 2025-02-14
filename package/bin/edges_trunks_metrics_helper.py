@@ -10,7 +10,7 @@ from splunklib import modularinput as smi
 
 from datetime import datetime
 from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import EdgeTrunkModel, to_string
+from genesyscloud_models import TrunkModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -79,40 +79,35 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 or datetime(1970, 1, 1).timestamp()
             )
 
-            et_model = EdgeTrunkModel(client.get(
+            t_model = TrunkModel(client.get(
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
             )
 
-            collection_names = ["gc_edges", "gc_trunks"]
+            collection_name = "gc_trunks"
 
             service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            for collection_name in collection_names:
-                if collection_name not in service.kvstore:
-                    # Create collection
-                    logger.debug(f"Creating lookup '{collection_name}'")
-                    service.kvstore.create(collection_name)
+            if collection_name not in service.kvstore:
+                # Create collection
+                logger.debug(f"Creating lookup '{collection_name}'")
+                service.kvstore.create(collection_name)
 
-                # Update collection
-                logger.debug(f"Saving data in lookup '{collection_name}'")
-                collection = service.kvstore[collection_name]
-                if collection_name.endswith("trunks"):
-                    collection.data.batch_save(*et_model.trunks)
-                    continue
-
-                collection.data.batch_save(*et_model.edges)
+            # Update collection
+            logger.debug(f"Saving data in lookup '{collection_name}'")
+            collection = service.kvstore[collection_name]
+            collection.data.batch_save(*t_model.trunks)
 
             logger.debug("Indexing trunks metrics")
             data = client.get(
                 "TelephonyProvidersEdgeApi",
                 "get_telephony_providers_edges_trunks_metrics",
-                ','.join(et_model.trunk_ids)
+                ','.join(t_model.trunk_ids)
             )
 
             sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
             for metric_obj in data:
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
-                metric["event_time"] = to_string(metric_obj.event_time)
+                metric["event_time"] = t_model.to_string(metric_obj.event_time)
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
