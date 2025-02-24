@@ -10,7 +10,7 @@ from splunklib import modularinput as smi
 
 from datetime import datetime
 from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import TrunkModel
+from genesyscloud_models import EdgeModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -36,7 +36,7 @@ def validate_input(definition: smi.ValidationDefinition):
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     # inputs.inputs is a Python dictionary object like:
     # {
-    #   "edges_trunks_metrics://<input_name>": {
+    #   "edges_metrics://<input_name>": {
     #     "account": "<account_name>",
     #     "disabled": "0",
     #     "host": "$decideOnStartup",
@@ -51,7 +51,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         try:
             session_key = inputs.metadata["session_key"]
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                "edges_trunks_metrics_checkpointer",
+                "edges_metrics_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
@@ -79,11 +79,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 or datetime(1970, 1, 1).timestamp()
             )
 
-            t_model = TrunkModel(client.get(
-                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
+            e_model = EdgeModel(client.get(
+                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges")
             )
 
-            collection_name = "gc_trunks"
+            collection_name = "gc_edges"
 
             service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
             if collection_name not in service.kvstore:
@@ -94,20 +94,29 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Update collection
             logger.debug(f"Saving data in lookup '{collection_name}'")
             collection = service.kvstore[collection_name]
-            collection.data.batch_save(*t_model.trunks)
+            collection.data.batch_save(*e_model.edges)
 
-            logger.debug("Indexing trunks metrics")
-            data = client.get(
-                "TelephonyProvidersEdgeApi",
-                "get_telephony_providers_edges_trunks_metrics",
-                ','.join(t_model.trunk_ids)
-            )
+            logger.debug("Indexing edges metrics")
+            # Max 100 edgeids supported according to specs
+            metrics = []
+            cnt = 0
+            has_more = True
+            while has_more:
+                edges_ids, has_more = e_model.get_edge_ids(cnt)
+                data = client.get(
+                    "TelephonyProvidersEdgeApi",
+                    "get_telephony_providers_edges_metrics",
+                    ','.join(edges_ids)
+                )
+                metrics.extend(data)
+                cnt+=1
+            logger.debug(f"Got '{len(metrics)}' metrics")
 
-            sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
-            for metric_obj in data:
+            sourcetype = "genesyscloud:telephonyprovidersedge:edges:metrics"
+            for metric_obj in metrics:
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
-                metric["event_time"] = t_model.to_string(metric_obj.event_time)
+                metric["event_time"] = e_model.to_string(metric_obj.event_time)
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
@@ -118,7 +127,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     )
 
             # Updating checkpoint if data was returned to avoid losing info
-            if data:
+            if metrics:
                 logger.debug("Updating checkpointer and leaving")
                 new_checkpoint = datetime.utcnow().timestamp()
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
