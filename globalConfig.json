@@ -378,7 +378,6 @@
                     "title": "queue_lookup"
                 },
                 {
-                    "template": "input_with_helper",
                     "name": "chat_observations",
                     "entity": [
                         {

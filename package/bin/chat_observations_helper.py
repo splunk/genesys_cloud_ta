@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import import_declare_test
 from solnlib import conf_manager, log
@@ -47,8 +47,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             logger.setLevel(log_level)
             log.modular_input_start(logger, normalized_input_name)
-            
-            # Get account credentials
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
@@ -56,62 +54,83 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
-
-            # Get checkpoint
+            logger.debug("CLIENT CREATED SUCCESSFULLY")
             checkpointer_key_name = input_name.split("/")[-1]
+            # if we don't have any checkpoint, we default it to today at 00:00:00
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
             )
+            logger.debug(f"CHECKPOINT {current_checkpoint}" )
+            start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
+    
+            now = datetime.now(timezone.utc)
 
-            # Query analytics API for chat metrics
-            logger.debug("Fetching chat metrics")
-            analytics_query = {
-                "interval": "PT5M",  # 5 minute intervals
-                "mediaTypes": ["CHAT"],
-                "metrics": ["nOffered"],
-                "groupBy": ["queueId"]
+
+            interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
+            metrics = ["nOffered"]
+            filter = {
+                "type": "and",
+                "predicates": [
+                    {
+                        "dimension": "mediaType",
+                        "operator": "matches",
+                        "value": "message"
+                    },
+                    {
+                        "dimension": "direction",
+                        "operator": "matches",
+                        "value": "inbound"
+                    }
+                ]
             }
-            
-            data = client.post(
-                "AnalyticsApi",
-                "post_analytics_conversations_aggregates_query",
-                analytics_query
-            )
+            group_by = ["queueId"]
 
-            sourcetype = "genesyscloud:analytics:chat:metrics"
-            metrics_written = 0
+
+            body = {
+                "interval": interval,
+                "metrics" : metrics,
+                "filter": filter,
+                "group_by": group_by
+            }
+
+            response = client.post("ConversationsApi", "get_analytics_conversations_aggregates_query", "ConversationAggregateQuery", body)
             
-            # Process and write events
-            for result in data.get("results", []):
-                event_time = datetime.fromisoformat(result.get("interval").get("start"))
-                event_time_epoch = event_time.timestamp()
+            logger.debug(f"WE HAVE A RESPONSE!!! {response}")
+
+            # sourcetype = "genesyscloud:analytics:chat:metrics"
+            # metrics_written = 0
+            
+            # # Process and write events
+            # for result in response.get("results", []):
+            #     event_time = datetime.fromisoformat(result.get("interval").get("start"))
+            #     event_time_epoch = event_time.timestamp()
                 
-                if event_time_epoch > current_checkpoint:
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(result, ensure_ascii=False),
-                            time=event_time_epoch,
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype,
-                        )
-                    )
-                    metrics_written += 1
+            #     if event_time_epoch > current_checkpoint:
+            #         event_writer.write_event(
+            #             smi.Event(
+            #                 data=json.dumps(result, ensure_ascii=False),
+            #                 time=event_time_epoch,
+            #                 index=input_item.get("index"),
+            #                 sourcetype=sourcetype,
+            #             )
+            #         )
+            #         metrics_written += 1
 
-            # Update checkpoint if data was processed
-            if metrics_written > 0:
-                logger.debug("Updating checkpointer")
-                new_checkpoint = datetime.utcnow().timestamp()
-                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+            # # Update checkpoint if data was processed
+            # if metrics_written > 0:
+            #     logger.debug("Updating checkpointer")
+            #     new_checkpoint = datetime.utcnow().timestamp()
+            #     kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
-            log.events_ingested(
-                logger,
-                input_name,
-                sourcetype,
-                metrics_written,
-                input_item.get("index"),
-                account=input_item.get("account"),
-            )
+            # log.events_ingested(
+            #     logger,
+            #     input_name,
+            #     sourcetype,
+            #     metrics_written,
+            #     input_item.get("index"),
+            #     account=input_item.get("account"),
+            # )
             log.modular_input_end(logger, normalized_input_name)
             
         except Exception as e:
