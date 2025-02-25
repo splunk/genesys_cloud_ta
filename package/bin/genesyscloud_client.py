@@ -87,40 +87,40 @@ class GenesysCloudClient:
 
     def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
         """
-        Envía una solicitud POST a la API de Genesys Cloud.
+        Send a POST request to the Genesys Cloud API.
 
-        :param api_instance_name: Nombre de la instancia de API, por ejemplo, 'FlowsApi'.
-        :param function_name: Nombre de la función a llamar en la instancia de API.
-        :param model_name: Nombre del modelo de datos correspondiente al cuerpo de la solicitud.
-        :param body: Diccionario que representa el cuerpo de la solicitud.
-        :param args: Argumentos posicionales adicionales para la función de la API.
-        :param kwargs: Argumentos nombrados adicionales para la función de la API.
-        :return: Respuesta de la API.
+        :param api_instance_name: Name of the API instance, for example, 'FlowsApi'.
+        :param function_name: Name of the function to call in the API instance.
+        :param model_name: Name of the data model corresponding to the request body.
+        :param body: Dictionary representing the request body.
+        :param args: Additional positional arguments for the API function.
+        :param kwargs: Additional named arguments for the API function.
+        :return: API response.
         """
-        self.logger.info(f"Enviando datos a {api_instance_name} usando {function_name}")
+        self.logger.info(f"Sending data to {api_instance_name} using {function_name}")
 
-        # Obtener la clase de la API dinámicamente
+        # Get the API class dynamically
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
 
         if api_class is None:
-            raise AttributeError(f"No se encontró la clase de API '{api_instance_name}' en PureCloudPlatformClientV2")
+            raise AttributeError(f"API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
 
-        # Instanciar la API con el cliente autenticado
+        # Instantiate the API with the authenticated client
         api_instance = api_class(self.client)
 
-        # Obtener la función de la instancia de API
+        # Get the function from the API instance
         function = getattr(api_instance, function_name, None)
         if function is None or not callable(function):
-            raise AttributeError(f"'{function_name}' no es una función válida de '{api_instance_name}'")
+            raise AttributeError(f"'{function_name}' is not a valid function of '{api_instance_name}'")
 
-        # Obtener la clase del modelo de datos dinámicamente
+        # Get the data model class dynamically
         model_class = getattr(PureCloudPlatformClientV2, model_name, None)
         if model_class is None:
-            raise AttributeError(f"No se encontró el modelo de datos '{model_name}' en PureCloudPlatformClientV2")
+            raise AttributeError(f"Data model '{model_name}' not found in PureCloudPlatformClientV2")
 
-        # Crear una instancia del modelo
+        # Create an instance of the model
         model_instance = model_class()
-        # Asignar los valores del diccionario 'body' a la instancia del modelo
+        # Assign the values from the 'body' dictionary to the model instance
         for key, value in body.items():
             if hasattr(model_instance, key):
                 try:
@@ -128,11 +128,11 @@ class GenesysCloudClient:
                 except Exception as e:
                     self.logger.info(f"Error setting attribute {key}: {e}")
             else:
-                self.logger.info(f"El modelo '{model_name}' no tiene un método '{key}'")
+                self.logger.info(f"The model '{model_name}' does not have a method '{key}'")
 
         try:
-            # Llamar a la función con el cuerpo y otros argumentos
+            # Call the function with the body and other arguments
             return function(model_instance, *args, **kwargs)
         except ApiException as e:
-            self.logger.info(f"Excepción al llamar a '{api_instance_name}.{function_name}': {e}")
+            self.logger.info(f"Exception when calling '{api_instance_name}.{function_name}': {e}")
             return None
