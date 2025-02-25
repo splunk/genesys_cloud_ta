@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import import_declare_test
 from solnlib import conf_manager, log
@@ -54,20 +54,28 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
-            logger.debug("CLIENT CREATED SUCCESSFULLY")
+            logger.debug("[-] client created")
             checkpointer_key_name = input_name.split("/")[-1]
-            # if we don't have any checkpoint, we default it to today at 00:00:00
-            current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
-            )
-            logger.debug(f"CHECKPOINT {current_checkpoint}" )
+            # if we don't have any checkpoint, we default it to one hour ago
+            # if the checkpoint is older than now, but newer than one hour ago, use it
+            # otherwise, reset to one hour ago
+            one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
+            one_hour_ago_timestamp = one_hour_ago.timestamp()
+            
+            stored_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
+            current_time = datetime.now(timezone.utc).timestamp()
+            
+            if stored_checkpoint and float(stored_checkpoint) <= current_time and float(stored_checkpoint) >= one_hour_ago_timestamp:
+                current_checkpoint = stored_checkpoint
+            else:
+                current_checkpoint = one_hour_ago_timestamp
+            logger.debug(f"[-] checkpoint: {current_checkpoint}" )
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
     
             now = datetime.now(timezone.utc)
 
-
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
+            logger.debug(f"[-] interval: {interval}")
             metrics = ["nOffered"]
             filter = {
                 "type": "and",
@@ -94,43 +102,43 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "group_by": group_by
             }
 
-            response = client.post("ConversationsApi", "get_analytics_conversations_aggregates_query", "ConversationAggregateQuery", body)
+            response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
             
-            logger.debug(f"WE HAVE A RESPONSE!!! {response}")
+            logger.debug(f"[-] response: {json.dumps(response, ensure_ascii=False, default=str)}")
 
-            # sourcetype = "genesyscloud:analytics:chat:metrics"
-            # metrics_written = 0
+            sourcetype = "genesyscloud:analytics:chat:metrics"
+            metrics_written = 0
             
-            # # Process and write events
-            # for result in response.get("results", []):
-            #     event_time = datetime.fromisoformat(result.get("interval").get("start"))
-            #     event_time_epoch = event_time.timestamp()
-                
-            #     if event_time_epoch > current_checkpoint:
-            #         event_writer.write_event(
-            #             smi.Event(
-            #                 data=json.dumps(result, ensure_ascii=False),
-            #                 time=event_time_epoch,
-            #                 index=input_item.get("index"),
-            #                 sourcetype=sourcetype,
-            #             )
-            #         )
-            #         metrics_written += 1
+            if response.results is not None:
+                # Process and write events
+                for result_obj in response.results:
+                    if now.timestamp() > current_checkpoint:
+                        result = result_obj.to_dict()
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(result, ensure_ascii=False, default=str),
+                                time=start_time.timestamp(),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                            )
+                        )
+                        logger.debug(f"[-] event written: {json.dumps(result, ensure_ascii=False, default=str)}")
+                        metrics_written += 1
 
-            # # Update checkpoint if data was processed
-            # if metrics_written > 0:
-            #     logger.debug("Updating checkpointer")
-            #     new_checkpoint = datetime.utcnow().timestamp()
-            #     kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+            # Update checkpoint if data was processed
+            if metrics_written > 0:
+                logger.debug("[-] Updating checkpointer")
+                new_checkpoint = datetime.utcnow().timestamp()
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
-            # log.events_ingested(
-            #     logger,
-            #     input_name,
-            #     sourcetype,
-            #     metrics_written,
-            #     input_item.get("index"),
-            #     account=input_item.get("account"),
-            # )
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                metrics_written,
+                input_item.get("index"),
+                account=input_item.get("account"),
+            )
             log.modular_input_end(logger, normalized_input_name)
             
         except Exception as e:
