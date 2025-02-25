@@ -6,11 +6,11 @@ from solnlib import conf_manager, log
 from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-import PureCloudPlatformClientV2
+
 
 from datetime import datetime,timezone
 from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import EdgeTrunkModel, to_string
+from genesyscloud_models import ConversationsModel, to_string
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -78,13 +78,25 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 kvstore_checkpointer.get(checkpointer_key_name)
                 or datetime(1970, 1, 1).timestamp()
             )
-            logger.info(f"CHECKPOINT {current_checkpoint}" )
+
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
     
             now = datetime.now(timezone.utc)
 
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            metrics = ["nFlow", "nFlowMilestone", "nFlowOutcome", "nFlowOutcomeFailed", "oFlowMilestone", "tFlow", "tFlowDisconnect", "tFlowExit", "tFlowOutcome"]
+            
+            metrics = ["nFlow", 
+                       "nFlowMilestone", 
+                       "nFlowOutcome", 
+                       "nFlowOutcomeFailed", 
+                       "oFlowMilestone", 
+                       "tFlow", 
+                       "tFlowDisconnect", 
+                       "tFlowExit", 
+                       "tFlowOutcome"]
+            
+            logger.info(f"METRICS ARE WORKING1: {metrics}")
+
             group_by = ["queueId"]
 
             body = {
@@ -92,63 +104,67 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "metrics" : metrics,
                 "group_by": group_by
             }
-
-            response = client.post("FlowsApi", "post_analytics_flows_aggregates_query", "FlowAggregationQuery", body)
             
-            logger.info(f"WE HAVE A RESPONSE!!! {response}")
-            #collection_name = "gc_conversations_metrics"
+            logger.info(f"BODY ARE WORKING2: {body}")
 
-            # service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            # for collection_name in collection_names:
-            #     if collection_name not in service.kvstore:
-            #         # Create collection
-            #         logger.debug(f"Creating lookup '{collection_name}'")
-            #         service.kvstore.create(collection_name)
 
-            #     # Update collection
-            #     logger.debug(f"Saving data in lookup '{collection_name}'")
-            #     collection = service.kvstore[collection_name]
-            #     if collection_name.endswith("trunks"):
-            #         collection.data.batch_save(*et_model.trunks)
-            #         continue
+            sourcetype = "genesyscloud:analytics:flows:metric"
+            
+            index = input_item.get("index")
 
-            #     collection.data.batch_save(*et_model.edges)
+            logger.info(f"BODY ARE WORKING3: {index}")
 
-            # logger.debug("Indexing trunks metrics")
-            # data = client.get(
-            #     "TelephonyProvidersEdgeApi",
-            #     "get_telephony_providers_edges_trunks_metrics",
-            #     ','.join(et_model.trunk_ids)
-            # )
+            collection_name = "gc_conversations_metrics"
 
-            # sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
-            # for metric_obj in data:
-            #     event_time_epoch = metric_obj.event_time.timestamp()
-            #     metric = metric_obj.to_dict()
-            #     metric["event_time"] = to_string(metric_obj.event_time)
-            #     if event_time_epoch > current_checkpoint:
-            #         event_writer.write_event(
-            #             smi.Event(
-            #                 data=json.dumps(metric, ensure_ascii=False, default=str),
-            #                 index=input_item.get("index"),
-            #                 sourcetype=sourcetype,
-            #             )
-            #         )
+            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
+            
+            logger.info(f"SERVICE ARE WORKING4: {service}")
 
-            # # Updating checkpoint if data was returned to avoid losing info
-            # if data:
-            #     logger.debug("Updating checkpointer and leaving")
-            #     new_checkpoint = datetime.utcnow().timestamp()
-            #     kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+            conv_model = ConversationsModel(logger,client.post( "FlowsApi", "post_analytics_flows_aggregates_query", "FlowAggregationQuery", body))
+            
+            
+            logger.info(f"CONVERSATIONS MODEL IS WORKING5: {conv_model._conversations}")
 
-            # log.events_ingested(
-            #     logger,
-            #     input_name,
-            #     sourcetype,
-            #     len(data),
-            #     input_item.get("index"),
-            #     account=input_item.get("account"),
-            # )
+            if conv_model.conversations:
+
+                logger.info(f"CONVERSATIONS MODEL PROCESSED - EVENTS COUNT WORKING9: {len(conv_model.conversations)}")
+
+                if collection_name not in service.kvstore:
+                    # Create collection
+                    logger.info(f"KVSTORE COLLECTION NOT FOUND - CREATING COLLECTION WORKING10: {collection_name}")
+                    service.kvstore.create(collection_name)
+
+
+                collection = service.kvstore[collection_name]
+                logger.info(f"KVSTORE COLLECTION READY - COLLECTION WORKING11: {collection_name}")
+
+                collection.data.batch_save(*conv_model.conversations)
+
+                logger.info(f"DATA SAVED IN KVSTORE - COLLECTION: {collection_name}, RECORDS WORKING12: {len(conv_model.conversations)}")
+
+                for event in conv_model.conversations:
+                    event_writer.write_event(
+                        smi.Event(
+                            data=json.dumps(event, ensure_ascii=False, default=str),
+                            index=index,
+                            sourcetype=sourcetype,
+                        )
+                    )
+                
+                logger.info(f" WORKING50 DATA INDEXED IN SPLUNK - INDEX: {index}, EVENTS COUNT: {len(conv_model.conversations)}")
+
+                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
+                logger.info(f"CHECKPOINT UPDATED - NEW TIMESTAMP: {now.timestamp()}")
+
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                len(conv_model.events),
+                index,
+                account=input_item.get("account"),
+            )
+
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
             log.log_exception(
