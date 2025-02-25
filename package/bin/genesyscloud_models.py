@@ -1,7 +1,7 @@
 import re
 import datetime
 from typing import List, Tuple
-from PureCloudPlatformClientV2.models import Trunk, Edge
+from PureCloudPlatformClientV2.models import Trunk, Edge, Phone
 
 
 class GCBaseModel:
@@ -103,3 +103,27 @@ class EdgeModel(GCBaseModel):
         remaining_edges = abs(len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
         return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+
+
+class PhoneModel(GCBaseModel):
+    def __init__(self, phones: List[Phone]) -> None:
+        lst_phones = []
+        for phone in phones:
+            lst_phones.append(phone.to_dict())
+        super().__init__(lst_phones)
+
+    @property
+    def phones(self) -> List[dict]:
+        phones = []
+        keys = ["id", "name", "state", "self_uri"]
+        nested_keys = ["id"]
+        for idx, phone in enumerate(self.data):
+            new_phone = {self.to_camelcase(key): phone[key] for key in keys}
+            new_phone["dateCreated"] = self.to_string(phone["date_created"])
+            new_phone["dateModified"] = self.to_string(phone["date_modified"])
+            new_phone.update(self.extract(idx, "site", nested_keys))
+            new_phone.update(self.extract(idx, "phone_base_settings", nested_keys))
+            # Adding a _key to avoid lookup duplicates
+            new_phone["_key"] = new_phone["id"]
+            phones.append(new_phone)
+        return phones
