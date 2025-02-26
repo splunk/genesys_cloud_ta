@@ -667,6 +667,7 @@
         "supportedThemes": [
             "light",
             "dark"
-        ]
+        ],
+        "_uccVersion": "5.55.0"
     }
 }

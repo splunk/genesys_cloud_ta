@@ -10,7 +10,7 @@ from splunklib import modularinput as smi
 
 from datetime import datetime,timezone
 from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import ConversationsModel, to_string
+from genesyscloud_models import ConversationsModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -62,7 +62,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 conf_name="genesys_cloud_ta_settings",
             )
             logger.setLevel(log_level)
-            logger.info("======I AM WORKING======")
             log.modular_input_start(logger, normalized_input_name)
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
@@ -71,7 +70,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
-            logger.info("CLIENT CREATED SUCCESSFULLY")
             checkpointer_key_name = input_name.split("/")[-1]
             # if we don't have any checkpoint, we default it to 1970
             current_checkpoint = (
@@ -95,8 +93,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                        "tFlowExit", 
                        "tFlowOutcome"]
             
-            logger.info(f"METRICS ARE WORKING1: {metrics}")
-
             group_by = ["queueId"]
 
             body = {
@@ -104,43 +100,27 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "metrics" : metrics,
                 "group_by": group_by
             }
-            
-            logger.info(f"BODY ARE WORKING2: {body}")
-
 
             sourcetype = "genesyscloud:analytics:flows:metric"
             
             index = input_item.get("index")
 
-            logger.info(f"BODY ARE WORKING3: {index}")
-
             collection_name = "gc_conversations_metrics"
 
             service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
             
-            logger.info(f"SERVICE ARE WORKING4: {service}")
-
             conv_model = ConversationsModel(logger,client.post( "FlowsApi", "post_analytics_flows_aggregates_query", "FlowAggregationQuery", body))
             
-            
-            logger.info(f"CONVERSATIONS MODEL IS WORKING5: {conv_model._conversations}")
-
             if conv_model.conversations:
 
-                logger.info(f"CONVERSATIONS MODEL PROCESSED - EVENTS COUNT WORKING9: {len(conv_model.conversations)}")
-
                 if collection_name not in service.kvstore:
-                    # Create collection
-                    logger.info(f"KVSTORE COLLECTION NOT FOUND - CREATING COLLECTION WORKING10: {collection_name}")
                     service.kvstore.create(collection_name)
 
 
                 collection = service.kvstore[collection_name]
-                logger.info(f"KVSTORE COLLECTION READY - COLLECTION WORKING11: {collection_name}")
 
                 collection.data.batch_save(*conv_model.conversations)
 
-                logger.info(f"DATA SAVED IN KVSTORE - COLLECTION: {collection_name}, RECORDS WORKING12: {len(conv_model.conversations)}")
 
                 for event in conv_model.conversations:
                     event_writer.write_event(
@@ -151,10 +131,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         )
                     )
                 
-                logger.info(f" WORKING50 DATA INDEXED IN SPLUNK - INDEX: {index}, EVENTS COUNT: {len(conv_model.conversations)}")
-
                 kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
-                logger.info(f"CHECKPOINT UPDATED - NEW TIMESTAMP: {now.timestamp()}")
 
             log.events_ingested(
                 logger,

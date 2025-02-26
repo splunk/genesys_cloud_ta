@@ -1,14 +1,8 @@
 import re
 import datetime
-<<<<<<< HEAD
-from typing import List
-from PureCloudPlatformClientV2.models import Trunk, FlowAggregateQueryResponse
-import logging
-=======
 from typing import List, Tuple
-from PureCloudPlatformClientV2.models import Trunk, Edge
->>>>>>> e99d6c1357a1ddceedf7ea56168f458af1148904
-
+from PureCloudPlatformClientV2.models import Trunk, Edge, FlowAggregateQueryResponse
+import logging
 
 class GCBaseModel:
     data: List[dict] = []
@@ -103,7 +97,13 @@ class EdgeModel(GCBaseModel):
             edges.append(new_edge)
         return edges
 
-<<<<<<< HEAD
+    def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+        factor = self.MAX_EDGE_IDS*batch
+        slice = self.MAX_EDGE_IDS + factor
+        remaining_edges = abs(len(self.data) - factor)
+        has_next_batch = remaining_edges > self.MAX_EDGE_IDS
+        return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+    
 
 class ConversationsModel:
     _conversations: FlowAggregateQueryResponse = {}
@@ -121,13 +121,10 @@ class ConversationsModel:
 
         for result in process_data["results"]:
 
-            self.logger.info(f"WORKING40 RESULTS = {result}")
             group = result.get("group", {})
 
             queue_id = group.get("queueId") 
             media_type = group.get("mediaType")
-
-            self.logger.info(f"WORKING41 queueId = {queue_id} media_type = {media_type}")
 
             for data_entry in result.get("data", []):
                 interval = data_entry.get("interval")
@@ -136,7 +133,6 @@ class ConversationsModel:
                     metric_name = metric_entry.get("metric")
                     stats = metric_entry.get("stats", {})
 
-                    # Construimos un objeto plano con toda la información relevante
                     conversation_data = {
                         "queueId": queue_id,
                         "mediaType": media_type,
@@ -145,8 +141,8 @@ class ConversationsModel:
                         "max": stats.get("max"),
                         "min": stats.get("min"),
                         "count": stats.get("count"),
-                        "count_negative": stats.get("count_negative"),
-                        "count_positive": stats.get("count_positive"),
+                        "countNegative": stats.get("count_negative"),
+                        "countPositive": stats.get("count_positive"),
                         "sum": stats.get("sum"),
                         "current": stats.get("current"),
                         "ratio": stats.get("ratio"),
@@ -156,17 +152,7 @@ class ConversationsModel:
                         "p95": stats.get("p95"),
                         "p99": stats.get("p99"),
                     }
-                    self.logger.info(f"WORKING42 {conversation_data}")
-                    # Agregar al listado de conversaciones
                     conversations.append(conversation_data)
 
         return conversations
 
-=======
-    def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
-        factor = self.MAX_EDGE_IDS*batch
-        slice = self.MAX_EDGE_IDS + factor
-        remaining_edges = abs(len(self.data) - factor)
-        has_next_batch = remaining_edges > self.MAX_EDGE_IDS
-        return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
->>>>>>> e99d6c1357a1ddceedf7ea56168f458af1148904
