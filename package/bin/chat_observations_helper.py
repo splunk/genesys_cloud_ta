@@ -75,7 +75,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             now = datetime.now(timezone.utc)
 
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            logger.debug(f"[-] interval: {interval}")
             metrics = ["nOffered"]
             filter = {
                 "type": "and",
@@ -101,35 +100,35 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "filter": filter,
                 "group_by": group_by
             }
+            
+            logger.debug(f"[-] request body: {json.dumps(body, ensure_ascii=False, default=str)}")
 
             response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
             
-            logger.debug(f"[-] response: {json.dumps(response, ensure_ascii=False, default=str)}")
+            logger.debug(f"[-] response: {json.dumps(response, ensure_ascii=False, default=str) if response else 'None'}")
 
             sourcetype = "genesyscloud:analytics:chat:metrics"
             metrics_written = 0
             
-            if response.results is not None:
+            if response is not None and response.results is not None:
                 # Process and write events
                 for result_obj in response.results:
-                    if now.timestamp() > current_checkpoint:
-                        result = result_obj.to_dict()
-                        event_writer.write_event(
-                            smi.Event(
-                                data=json.dumps(result, ensure_ascii=False, default=str),
-                                time=start_time.timestamp(),
-                                index=input_item.get("index"),
-                                sourcetype=sourcetype,
-                            )
+                    result = result_obj.to_dict()
+                    event_writer.write_event(
+                        smi.Event(
+                            data=json.dumps(result, ensure_ascii=False, default=str),
+                            time=start_time.timestamp(),
+                            index=input_item.get("index"),
+                            sourcetype=sourcetype,
                         )
-                        logger.debug(f"[-] event written: {json.dumps(result, ensure_ascii=False, default=str)}")
-                        metrics_written += 1
+                    )
+                    logger.debug(f"[-] event written: {json.dumps(result, ensure_ascii=False, default=str)}")
+                    metrics_written += 1
 
             # Update checkpoint if data was processed
-            if metrics_written > 0:
+            if response.results is not None and metrics_written > 0:
                 logger.debug("[-] Updating checkpointer")
-                new_checkpoint = datetime.utcnow().timestamp()
-                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
 
             log.events_ingested(
                 logger,

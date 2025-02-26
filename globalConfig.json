@@ -429,54 +429,6 @@
                             ]
                         },
                         {
-                            "field": "region",
-                            "label": "Region",
-                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
-                            "required": true,
-                            "type": "singleSelect",
-                            "options": {
-                                "disableSearch": true,
-                                "autoCompleteFields": [
-                                    {
-                                        "value": "us_east_1",
-                                        "label": "us_east_1"
-                                    },
-                                    {
-                                        "value": "us_west_2",
-                                        "label": "us_west_2"
-                                    },
-                                    {
-                                        "value": "eu_west_1",
-                                        "label": "eu_west_1"
-                                    },
-                                    {
-                                        "value": "ap_southeast_2",
-                                        "label": "ap_southeast_2"
-                                    },
-                                    {
-                                        "value": "ap_northeast_1",
-                                        "label": "ap_northeast_1"
-                                    },
-                                    {
-                                        "value": "eu_central_1",
-                                        "label": "eu_central_1"
-                                    },
-                                    {
-                                        "value": "ca_central_1",
-                                        "label": "ca_central_1"
-                                    },
-                                    {
-                                        "value": "ap_northeast_2",
-                                        "label": "ap_northeast_2"
-                                    },
-                                    {
-                                        "value": "eu_west_2",
-                                        "label": "eu_west_2"
-                                    }
-                                ]
-                            }
-                        },
-                        {
                             "type": "singleSelect",
                             "label": "Account to use",
                             "options": {

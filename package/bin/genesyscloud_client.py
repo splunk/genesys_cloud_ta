@@ -98,41 +98,47 @@ class GenesysCloudClient:
         :return: API response.
         """
         self.logger.info(f"Sending data to {api_instance_name} using {function_name}")
-
-        # Get the API class dynamically
-        api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
-
-        if api_class is None:
-            raise AttributeError(f"API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
-
-        # Instantiate the API with the authenticated client
-        api_instance = api_class(self.client)
-
-        # Get the function from the API instance
-        function = getattr(api_instance, function_name, None)
-        if function is None or not callable(function):
-            raise AttributeError(f"'{function_name}' is not a valid function of '{api_instance_name}'")
-
-        # Get the data model class dynamically
-        model_class = getattr(PureCloudPlatformClientV2, model_name, None)
-        if model_class is None:
-            raise AttributeError(f"Data model '{model_name}' not found in PureCloudPlatformClientV2")
-
-        # Create an instance of the model
-        model_instance = model_class()
-        # Assign the values from the 'body' dictionary to the model instance
-        for key, value in body.items():
-            if hasattr(model_instance, key):
-                try:
-                    setattr(model_instance, key, value)
-                except Exception as e:
-                    self.logger.info(f"Error setting attribute {key}: {e}")
-            else:
-                self.logger.info(f"The model '{model_name}' does not have a method '{key}'")
-
+        
         try:
+            # Get the API class dynamically
+            api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
+            if api_class is None:
+                self.logger.error(f"API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+                return None
+
+            # Instantiate the API with the authenticated client
+            api_instance = api_class(self.client)
+
+            # Get the function from the API instance
+            function = getattr(api_instance, function_name, None)
+            if function is None or not callable(function):
+                self.logger.error(f"'{function_name}' is not a valid function of '{api_instance_name}'")
+                return None
+
+            # Get the data model class dynamically
+            model_class = getattr(PureCloudPlatformClientV2, model_name, None)
+            if model_class is None:
+                self.logger.error(f"Data model '{model_name}' not found in PureCloudPlatformClientV2")
+                return None
+
+            # Create an instance of the model
+            model_instance = model_class()
+            # Assign the values from the 'body' dictionary to the model instance
+            for key, value in body.items():
+                if hasattr(model_instance, key):
+                    try:
+                        setattr(model_instance, key, value)
+                    except Exception as e:
+                        self.logger.error(f"Error setting attribute {key}: {e}")
+                else:
+                    self.logger.warning(f"The model '{model_name}' does not have a method '{key}'")
+
             # Call the function with the body and other arguments
             return function(model_instance, *args, **kwargs)
+
         except ApiException as e:
-            self.logger.info(f"Exception when calling '{api_instance_name}.{function_name}': {e}")
+            self.logger.error(f"Exception when calling '{api_instance_name}.{function_name}': {e}")
+            return None
+        except Exception as e:
+            self.logger.error(f"Unexpected exception in post method: {e}")
             return None
