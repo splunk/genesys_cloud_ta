@@ -103,7 +103,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             sourcetype = "genesyscloud:analytics:flows:metric"
             
-            index = input_item.get("index")
 
             collection_name = "gc_conversations_metrics"
 
