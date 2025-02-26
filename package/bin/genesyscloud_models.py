@@ -76,6 +76,12 @@ class EdgeModel(GCBaseModel):
             lst_edges.append(e.to_dict())
         super().__init__(lst_edges)
 
+    def _get_mac_addresses(self, interfaces: List[dict]) -> str:
+        ret = ""
+        for interface in interfaces:
+            ret = f"{interface['mac_address']},"
+        return ret[:-1]
+
     @property
     def edges(self) -> List[dict]:
         edges = []
@@ -92,6 +98,7 @@ class EdgeModel(GCBaseModel):
             new_edge["dateCreated"] = self.to_string(edge["date_created"])
             new_edge["dateModified"] = self.to_string(edge["date_modified"])
             new_edge.update(self.extract(idx, "site", nested_keys))
+            new_edge["macAddress"] = self._get_mac_addresses(edge["interfaces"])
             # Adding a _key to avoid lookup duplicates
             new_edge["_key"] = new_edge["id"]
             edges.append(new_edge)
@@ -115,15 +122,22 @@ class PhoneModel(GCBaseModel):
     @property
     def phones(self) -> List[dict]:
         phones = []
-        keys = ["id", "name", "state", "self_uri"]
-        nested_keys = ["id"]
+        keys = ["id", "name", "state"]
+        nested_keys = ["id", "name"]
         for idx, phone in enumerate(self.data):
             new_phone = {self.to_camelcase(key): phone[key] for key in keys}
             new_phone["dateCreated"] = self.to_string(phone["date_created"])
             new_phone["dateModified"] = self.to_string(phone["date_modified"])
             new_phone.update(self.extract(idx, "site", nested_keys))
-            new_phone.update(self.extract(idx, "phone_base_settings", nested_keys))
             # Adding a _key to avoid lookup duplicates
             new_phone["_key"] = new_phone["id"]
             phones.append(new_phone)
         return phones
+
+    @property
+    def statuses(self) -> List[dict]:
+        statuses = []
+        for phone in self.data:
+            statuses.append(phone["status"])
+            statuses.append(phone["secondary_status"])
+        return statuses

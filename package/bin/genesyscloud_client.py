@@ -61,9 +61,9 @@ class GenesysCloudClient:
                     self._refresh()
         return items
 
-    def get(self, api_instance_name: str, function_name: str, *args):
+    def get(self, api_instance_name: str, function_name: str, *args, **kwargs):
         """
-        Fetch data from Genesys Cloud
+        GET data from Genesys Cloud API
 
         :param api_instance_name: Name of the API instance e.g. TelephonyProvidersEdgeApi, RoutingApi, etc
         :param function_name: Name of the function to call in the API instance
@@ -75,7 +75,7 @@ class GenesysCloudClient:
         api_instance = api_class(self.client)
 
         try:
-            return self._fetch(api_instance, function_name, *args)
+            return self._fetch(api_instance, function_name, *args, **kwargs)
         except AttributeError as e:
             self.logger.error(f"Error: {e}")
         except ApiException as e:

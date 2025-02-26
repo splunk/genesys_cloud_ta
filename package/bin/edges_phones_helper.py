@@ -71,8 +71,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger, client_id, client_secret, account_region
             )
 
-            p_model = PhoneModel(client.get(
-                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_phones")
+            checkpointer_key_name = input_name.split("/")[-1]
+            # if we don't have any checkpoint, we default it to 1970
+            current_checkpoint = (
+                kvstore_checkpointer.get(checkpointer_key_name)
+                or datetime(1970, 1, 1).timestamp()
+            )
+
+            p_model = PhoneModel(
+                client.get(
+                    "TelephonyProvidersEdgeApi",
+                    "get_telephony_providers_edges_phones",
+                    **{"expand":"site,status"}
+                )
             )
             # Max 10k results returned when filtering the results or sorting by a field other than the ID
 
@@ -88,6 +99,37 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Saving data in lookup '{collection_name}'")
             collection = service.kvstore[collection_name]
             collection.data.batch_save(*p_model.phones)
+
+            logger.debug("Indexing phones statuses")
+            statuses = p_model.statuses
+            logger.debug(f"Got '{len(statuses)}' statuses")
+
+            sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
+            for status_obj in statuses:
+                event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
+                if event_time_epoch > current_checkpoint:
+                    event_writer.write_event(
+                        smi.Event(
+                            data=json.dumps(status_obj, ensure_ascii=False, default=str),
+                            index=input_item.get("index"),
+                            sourcetype=sourcetype,
+                        )
+                    )
+
+            # Updating checkpoint if data was returned to avoid losing info
+            if statuses:
+                logger.debug("Updating checkpointer and leaving")
+                new_checkpoint = datetime.utcnow().timestamp()
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                len(statuses),
+                input_item.get("index"),
+                account=input_item.get("account"),
+            )
 
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
