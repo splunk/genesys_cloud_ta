@@ -667,6 +667,10 @@
         "supportedThemes": [
             "light",
             "dark"
+<<<<<<< HEAD
         ]
+=======
+        ],
+>>>>>>> e7f6bf8870c178a4dff883d0ecb1084e31911f90
     }
 }

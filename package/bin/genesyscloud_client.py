@@ -129,9 +129,7 @@ class GenesysCloudClient:
 
         try:
             # Call the function with the model instance and additional arguments
-            data = function(model_instance, *args, **kwargs)
-            
-            return data
+            return function(model_instance, *args, **kwargs)
         except ApiException as e:
             self.logger.info(f"Exception calling '{api_instance_name}.{function_name}': {e}")
             return None
