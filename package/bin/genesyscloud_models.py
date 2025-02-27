@@ -76,10 +76,10 @@ class EdgeModel(GCBaseModel):
             lst_edges.append(e.to_dict())
         super().__init__(lst_edges)
 
-    def _get_mac_addresses(self, interfaces: List[dict]) -> str:
+    def _parse_interfaces(self, interfaces: List[dict], targeted_key: str) -> str:
         ret = ""
         for interface in interfaces:
-            ret = f"{interface['mac_address']},"
+            ret = f"{interface[targeted_key]},"
         return ret[:-1]
 
     @property
@@ -87,8 +87,8 @@ class EdgeModel(GCBaseModel):
         edges = []
         keys = [
             "id", "name", "version", "description", "state", "online_status",
-            "serial_number", "physical_edge", "managed", "edge_deployment_type",
-            "conversation_count", "call_draining_state", "os_name"
+            "serial_number", "physical_edge", "edge_deployment_type",
+            "conversation_count", "os_name"
         ]
         nested_keys = ["id", "name", "state"]
         # Cannot find:
@@ -98,7 +98,8 @@ class EdgeModel(GCBaseModel):
             new_edge["dateCreated"] = self.to_string(edge["date_created"])
             new_edge["dateModified"] = self.to_string(edge["date_modified"])
             new_edge.update(self.extract(idx, "site", nested_keys))
-            new_edge["macAddress"] = self._get_mac_addresses(edge["interfaces"])
+            new_edge["macAddress"] = self._parse_interfaces(edge["interfaces"], "mac_address")
+            new_edge["ipAddress"] = self._parse_interfaces(edge["interfaces"], "ip_address")
             # Adding a _key to avoid lookup duplicates
             new_edge["_key"] = new_edge["id"]
             edges.append(new_edge)
