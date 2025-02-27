@@ -117,11 +117,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             opt_interval = input_item.get("interval")
             checkpointer_key_name = input_name.split("/")[-1]
             logger.debug(f"User aggregate checkpointer: {kvstore_checkpointer.get(checkpointer_key_name)}")
-            # if we don't have any checkpoint, we default it to one month ago
+            # if we don't have any checkpoint, we default it to four years ago per API docs
             current = datetime.now()
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or (current - relativedelta(months=1)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                or (current - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
             )
             last_checkpoint = current.strftime("%Y-%m-%dT%H:%M:%SZ")
             results = get_data_from_api(logger, client_id, client_secret, opt_region, current_checkpoint, last_checkpoint)
