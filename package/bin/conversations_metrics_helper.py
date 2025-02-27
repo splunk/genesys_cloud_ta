@@ -140,14 +140,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 except Exception as e:
                     logger.error(f"Failed to update checkpoint: {str(e)}")
 
-            log.events_ingested(
-                logger,
-                input_name,
-                sourcetype,
-                len(to_process_data),
-                input_item.get("index"),
-                account=input_item.get("account"),
-            )
+                log.events_ingested(
+                    logger,
+                    input_name,
+                    sourcetype,
+                    len(to_process_data),
+                    input_item.get("index"),
+                    account=input_item.get("account"),
+                )
 
             log.modular_input_end(logger, normalized_input_name)
 
