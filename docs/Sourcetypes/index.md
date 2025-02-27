@@ -4,4 +4,5 @@
 |:---:|---|
 | `genesyscloud:telephonyprovidersedge:trunks:metrics` | All the metrics for trunks |
 | `genesyscloud:telephonyprovidersedge:edges:metrics`  | All the metrics for edges  |
+| `genesyscloud:telephonyprovidersedge:edges:phones`  | All phones statuses  |
 | `genesyscloud:analytics:queues:observations` | All the metrics for queue observations |

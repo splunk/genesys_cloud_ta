@@ -20,3 +20,41 @@ check_for_environment_variable_use_in_python:
   comment: 'Verified'
 check_for_generic_operating_system_services:
   comment: 'Verified'
+check_editing_and_proofreading:
+  comment: 'Ok'
+check_for_offensive_material:
+  comment: 'Ok'
+check_link_includes_contact_info:
+  comment: 'Ok'
+check_dependencies:
+  comment: 'Ok'
+check_for_auto_update_features:
+  comment: 'Ok'
+check_for_known_vulnerabilities_in_third_party_libraries:
+  comment: 'Ok'
+check_documented_included_open_source:
+  comment: 'Ok'
+check_for_stacktrace_returned_to_user:
+  comment: 'Ok'
+check_requires_access_to_files_outside_apps_dir:
+  comment: 'Ok'
+check_embedded_links:
+  comment: 'Ok'
+check_archived_files:
+  comment: 'Ok'
+check_authorization_credentials:
+  comment: 'Ok'
+check_hard_coded_paths:
+  comment: 'Ok'
+check_for_reverse_shells:
+  comment: 'Ok'
+check_fs_writes:
+  comment: 'Ok'
+check_user_privileges:
+  comment: 'Ok'
+check_for_insecure_http_calls_in_python:
+  comment: 'Ok'
+check_for_supported_tls:
+  comment: 'Ok'
+check_for_remote_code_execution_in_javascript:
+  comment: 'Ok'
