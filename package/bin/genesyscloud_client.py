@@ -14,9 +14,6 @@ class GenesysCloudClient:
         self.host = region.get_api_host()
         self.client_id = client_id
         self.client_secret = client_secret
-        self._refresh()
-
-    def _refresh(self):
         self.client = ApiClient(self.host).get_client_credentials_token(
                 self.client_id, self.client_secret
             )
@@ -34,31 +31,24 @@ class GenesysCloudClient:
             raise AttributeError(f"{f_name} is not a callable function of the API instance")
 
         while True:
-            try:
-                api_response = function(*args, **kwargs)
+            api_response = function(*args, **kwargs)
 
-                if isinstance(api_response, list):
-                    # A simple list (of strings) is returned as response
-                    items.extend(api_response)
-                else:
-                    # An object such as EdgeEntityListing is returned as response
-                    enable_pagination = any(key in api_response.attribute_map for key in pagination_params)
-                    for item in api_response.entities:
-                        items.append(item)
+            if isinstance(api_response, list):
+                # A simple list (of strings) is returned as response
+                items.extend(api_response)
+            else:
+                # An object such as EdgeEntityListing is returned as response
+                enable_pagination = any(key in api_response.attribute_map for key in pagination_params)
+                for item in api_response.entities:
+                    items.append(item)
 
-                if not enable_pagination:
-                    break
-                if not api_response.next_uri:
-                    break
-                else:
-                    page_number += 1
-                    kwargs["page_number"] = page_number
-
-            except ApiException as e:
-                # TO BE Confirmed! Haven't hit the limit yet!
-                if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
-                    self.logger.info("Rate limit exceeded. Refreshing token.")
-                    self._refresh()
+            if not enable_pagination:
+                break
+            if not api_response.next_uri:
+                break
+            else:
+                page_number += 1
+                kwargs["page_number"] = page_number
         return items
 
     def get(self, api_instance_name: str, function_name: str, *args, **kwargs):
@@ -79,6 +69,13 @@ class GenesysCloudClient:
         except AttributeError as e:
             self.logger.error(f"Error: {e}")
         except ApiException as e:
+            if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
+                    self.logger.warning("Rate limit exceeded. Refreshing token.")
+                    self.client.handle_expired_access_token()
+            if e.status == 401 and e.reason.contains("expir"):
+                # Haven't hit this yet. Message to be confirmed
+                self.logger.warning("Token expired. Refreshing token.")
+                self.client.handle_expired_access_token()
             self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
 
         return []
