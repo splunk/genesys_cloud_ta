@@ -52,3 +52,9 @@ check_fs_writes:
   comment: 'Ok'
 check_user_privileges:
   comment: 'Ok'
+check_for_insecure_http_calls_in_python:
+  comment: 'Ok'
+check_for_supported_tls:
+  comment: 'Ok'
+check_for_remote_code_execution_in_javascript:
+  comment: 'Ok'
