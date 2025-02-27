@@ -10,7 +10,7 @@ from splunklib import modularinput as smi
 
 from datetime import datetime
 from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import TrunkModel
+from genesyscloud_models import PhoneModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -36,7 +36,7 @@ def validate_input(definition: smi.ValidationDefinition):
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     # inputs.inputs is a Python dictionary object like:
     # {
-    #   "edges_trunks_metrics://<input_name>": {
+    #   "edges_phones://<input_name>": {
     #     "account": "<account_name>",
     #     "disabled": "0",
     #     "host": "$decideOnStartup",
@@ -51,7 +51,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         try:
             session_key = inputs.metadata["session_key"]
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                "edges_trunks_metrics_checkpointer",
+                "edges_phones_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
@@ -66,7 +66,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            # aws_region = input_item.get('region')
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
@@ -79,11 +78,16 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 or datetime(1970, 1, 1).timestamp()
             )
 
-            t_model = TrunkModel(client.get(
-                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
+            p_model = PhoneModel(
+                client.get(
+                    "TelephonyProvidersEdgeApi",
+                    "get_telephony_providers_edges_phones",
+                    **{"expand":"site,status"}
+                )
             )
+            # Max 10k results returned when filtering the results or sorting by a field other than the ID
 
-            collection_name = "gc_trunks"
+            collection_name = "gc_phones"
 
             service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
             if collection_name not in service.kvstore:
@@ -94,31 +98,27 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Update collection
             logger.debug(f"Saving data in lookup '{collection_name}'")
             collection = service.kvstore[collection_name]
-            collection.data.batch_save(*t_model.trunks)
+            collection.data.batch_save(*p_model.phones)
 
-            logger.debug("Indexing trunks metrics")
-            data = client.get(
-                "TelephonyProvidersEdgeApi",
-                "get_telephony_providers_edges_trunks_metrics",
-                ','.join(t_model.trunk_ids)
-            )
+            logger.debug("Indexing phones statuses")
+            statuses = p_model.statuses
+            logger.debug(f"Got '{len(statuses)}' statuses")
 
-            sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
-            for metric_obj in data:
-                event_time_epoch = metric_obj.event_time.timestamp()
-                metric = metric_obj.to_dict()
-                metric["event_time"] = t_model.to_string(metric_obj.event_time)
+            sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
+            for status_obj in statuses:
+                event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
-                            data=json.dumps(metric, ensure_ascii=False, default=str),
+                            data=json.dumps(status_obj, ensure_ascii=False, default=str),
+                            time=event_time_epoch,
                             index=input_item.get("index"),
                             sourcetype=sourcetype,
                         )
                     )
 
             # Updating checkpoint if data was returned to avoid losing info
-            if data:
+            if statuses:
                 logger.debug("Updating checkpointer and leaving")
                 new_checkpoint = datetime.utcnow().timestamp()
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
@@ -127,10 +127,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 input_name,
                 sourcetype,
-                len(data),
+                len(statuses),
                 input_item.get("index"),
                 account=input_item.get("account"),
             )
+
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
             log.log_exception(
