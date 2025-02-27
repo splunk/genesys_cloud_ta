@@ -807,7 +807,9 @@
                     "groupTitle": "Analytics",
                     "groupServices": [
                         "queue_observations",
-                        "queue_lookup"
+                        "queue_lookup",
+                        "user_aggregates",
+                        "user_lookup"
                     ]
                 },
                 {
