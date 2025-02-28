@@ -89,7 +89,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             
             # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
             try:
-                current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or datetime(1970, 1, 1).timestamp()
+                current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or  datetime(1970, 1, 1).timestamp()
             except Exception as e:
                 logger.warning(f"Error retrieving checkpoint: {str(e)}")
             
@@ -108,7 +108,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             }
 
             logger.info(f"Request body: {body}")
-
+    
             sourcetype = "genesyscloud:analytics:flows:metric"
             
             # Perform API request
@@ -118,17 +118,21 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             except Exception as e:
                 logger.error(f"Error retrieving conversation metrics: {str(e)}")
                 continue  # Skip processing if API call fails
-
+            
             # Ensure data exists before processing
             if to_process_data:
                 for event in to_process_data:
                     try:
+                        interval_start_time = (
+                            datetime.strptime(event["data"][0]["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+                            if event.get("data") else round(start_time.timestamp(), 3)      
+                            )
                         event_writer.write_event(
                             smi.Event(
                                 data=json.dumps(event, ensure_ascii=False, default=str),
                                 index=input_item.get("index"),
                                 sourcetype=sourcetype,
-                                time=round(start_time.timestamp(), 3)
+                                time=interval_start_time
                             )
                         )
                     except Exception as e:
