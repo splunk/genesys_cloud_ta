@@ -1,7 +1,7 @@
 import re
 import datetime
 from typing import List, Tuple
-from PureCloudPlatformClientV2.models import Trunk, Edge
+from PureCloudPlatformClientV2.models import Trunk, Edge, Phone
 
 
 class GCBaseModel:
@@ -76,13 +76,19 @@ class EdgeModel(GCBaseModel):
             lst_edges.append(e.to_dict())
         super().__init__(lst_edges)
 
+    def _parse_interfaces(self, interfaces: List[dict], targeted_key: str) -> str:
+        ret = ""
+        for interface in interfaces:
+            ret = f"{interface[targeted_key]},"
+        return ret[:-1]
+
     @property
     def edges(self) -> List[dict]:
         edges = []
         keys = [
             "id", "name", "version", "description", "state", "online_status",
-            "serial_number", "physical_edge", "managed", "edge_deployment_type",
-            "conversation_count", "call_draining_state", "os_name"
+            "serial_number", "physical_edge", "edge_deployment_type",
+            "conversation_count", "os_name"
         ]
         nested_keys = ["id", "name", "state"]
         # Cannot find:
@@ -92,6 +98,8 @@ class EdgeModel(GCBaseModel):
             new_edge["dateCreated"] = self.to_string(edge["date_created"])
             new_edge["dateModified"] = self.to_string(edge["date_modified"])
             new_edge.update(self.extract(idx, "site", nested_keys))
+            new_edge["macAddress"] = self._parse_interfaces(edge["interfaces"], "mac_address")
+            new_edge["ipAddress"] = self._parse_interfaces(edge["interfaces"], "ip_address")
             # Adding a _key to avoid lookup duplicates
             new_edge["_key"] = new_edge["id"]
             edges.append(new_edge)
@@ -103,3 +111,34 @@ class EdgeModel(GCBaseModel):
         remaining_edges = abs(len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
         return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+
+
+class PhoneModel(GCBaseModel):
+    def __init__(self, phones: List[Phone]) -> None:
+        lst_phones = []
+        for phone in phones:
+            lst_phones.append(phone.to_dict())
+        super().__init__(lst_phones)
+
+    @property
+    def phones(self) -> List[dict]:
+        phones = []
+        keys = ["id", "name", "state"]
+        nested_keys = ["id", "name"]
+        for idx, phone in enumerate(self.data):
+            new_phone = {self.to_camelcase(key): phone[key] for key in keys}
+            new_phone["dateCreated"] = self.to_string(phone["date_created"])
+            new_phone["dateModified"] = self.to_string(phone["date_modified"])
+            new_phone.update(self.extract(idx, "site", nested_keys))
+            # Adding a _key to avoid lookup duplicates
+            new_phone["_key"] = new_phone["id"]
+            phones.append(new_phone)
+        return phones
+
+    @property
+    def statuses(self) -> List[dict]:
+        statuses = []
+        for phone in self.data:
+            statuses.append(phone["status"])
+            statuses.append(phone["secondary_status"])
+        return statuses
