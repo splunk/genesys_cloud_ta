@@ -117,7 +117,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     event_writer.write_event(
                         smi.Event(
                             data=json.dumps(result, ensure_ascii=False, default=str),
-                            time=start_time.timestamp(),
+                            time=now.timestamp(),
                             index=input_item.get("index"),
                             sourcetype=sourcetype,
                         )
