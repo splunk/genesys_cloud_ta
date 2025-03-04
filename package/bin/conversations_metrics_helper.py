@@ -98,7 +98,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Define time interval for data retrieval
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            metrics = ["nOffered"]
+            
+            metrics = [
+                "nBlindTransferred", "nBotInteractions", "nCobrowseSessions", "nConnected",
+                "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
+                "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
+                "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount",
+                "oMessageCount", "oMessageSegmentCount", "oMessageTurn", "oServiceLevel",
+                "oServiceTarget", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
+                "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
+                "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
+                "tFirstDial", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
+                "tMonitoring", "tMonitoringComplete", "tNotResponding", "tPark", "tParkComplete",
+                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail",
+                "tWait", "nOffered"
+            ]
+
             group_by = ["queueId"]
 
             body = {
