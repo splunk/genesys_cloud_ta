@@ -56,26 +56,32 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             logger.debug("[-] client created")
             checkpointer_key_name = input_name.split("/")[-1]
-            # if we don't have any checkpoint, we default it to one hour ago
-            # if the checkpoint is older than now, but newer than one hour ago, use it
-            # otherwise, reset to one hour ago
-            one_hour_ago = datetime.now(timezone.utc) - timedelta(hours=1)
-            one_hour_ago_timestamp = one_hour_ago.timestamp()
+
+             # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
+            try:
+                current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or  datetime(1970, 1, 1).timestamp()
+            except Exception as e:
+                logger.warning(f"Error retrieving checkpoint: {str(e)}")
             
-            stored_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            current_time = datetime.now(timezone.utc).timestamp()
-            
-            if stored_checkpoint and float(stored_checkpoint) <= current_time and float(stored_checkpoint) >= one_hour_ago_timestamp:
-                current_checkpoint = stored_checkpoint
-            else:
-                current_checkpoint = one_hour_ago_timestamp
-            logger.debug(f"[-] checkpoint: {current_checkpoint}" )
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
-    
             now = datetime.now(timezone.utc)
 
+            # Define time interval for data retrieval
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            metrics = ["nOffered"]
+            metrics = [
+                "nBlindTransferred", "nBotInteractions", "nCobrowseSessions", "nConnected",
+                "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
+                "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
+                "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount", "oMessageTurn", "oServiceLevel",
+                "oServiceTarget", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
+                "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
+                "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
+                "tFirstDial", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
+                "tMonitoring", "tMonitoringComplete", "tNotResponding", "tPark", "tParkComplete",
+                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail",
+                "tWait", "nOffered"
+            ]
+
             filter = {
                 "type": "and",
                 "predicates": [
@@ -103,41 +109,49 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             
             logger.debug(f"[-] request body: {json.dumps(body, ensure_ascii=False, default=str)}")
 
-            response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
-            
-            logger.debug(f"[-] response: {json.dumps(response, ensure_ascii=False, default=str) if response else 'None'}")
+            # Perform API request
+            try:
+                conv_model = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
+                to_process_data = conv_model.to_dict().get("results", [])
+            except Exception as e:
+                logger.error(f"Error retrieving conversation metrics: {str(e)}")
+                continue  # Skip processing if API call fails
 
             sourcetype = "genesyscloud:analytics:chat:metrics"
             metrics_written = 0
             
-            if response is not None and response.results is not None:
-                # Process and write events
-                for result_obj in response.results:
-                    result = result_obj.to_dict()
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(result, ensure_ascii=False, default=str),
-                            time=now.timestamp(),
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype,
+            # Ensure data exists before processing
+            if to_process_data:
+                for event in to_process_data:
+                    try:
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(event, ensure_ascii=False, default=str),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                                time=now.timestamp()
+                            )
                         )
-                    )
-                    logger.debug(f"[-] event written: {json.dumps(result, ensure_ascii=False, default=str)}")
-                    metrics_written += 1
+                        metrics_written += 1
+                    except Exception as e:
+                        logger.error(f"Failed to write event: {str(e)}")
 
-            # Update checkpoint if data was processed
-            if response.results is not None and metrics_written > 0:
-                logger.debug("[-] Updating checkpointer")
-                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
+                # Only update checkpoint if data was processed
+                if metrics_written > 0:
+                    try:
+                        kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
+                    except Exception as e:
+                        logger.error(f"Failed to update checkpoint: {str(e)}")
 
-            log.events_ingested(
-                logger,
-                input_name,
-                sourcetype,
-                metrics_written,
-                input_item.get("index"),
-                account=input_item.get("account"),
-            )
+                log.events_ingested(
+                    logger,
+                    input_name,
+                    sourcetype,
+                    len(to_process_data),
+                    input_item.get("index"),
+                    account=input_item.get("account"),
+                )
+
             log.modular_input_end(logger, normalized_input_name)
             
         except Exception as e:
