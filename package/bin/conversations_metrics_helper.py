@@ -104,7 +104,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
                 "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
                 "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount",
-                "oMessageCount", "oMessageSegmentCount", "oMessageTurn", "oServiceLevel",
+                "oMessageTurn", "oServiceLevel",
                 "oServiceTarget", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
                 "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
                 "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
