@@ -1,8 +1,8 @@
 import re
 import datetime
 from typing import List, Tuple
-from PureCloudPlatformClientV2.models import Trunk, Edge, Phone
-
+from PureCloudPlatformClientV2.models import Trunk, Edge, Phone, FlowAggregateQueryResponse
+import logging
 
 class GCBaseModel:
     data: List[dict] = []
