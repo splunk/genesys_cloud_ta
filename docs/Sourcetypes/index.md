@@ -8,3 +8,4 @@
 | `genesyscloud:analytics:queues:observations` | All the metrics for queue observations |
 | `genesyscloud:analytics:chats:metrics` | All the metrics for chat conversations |
 | `genesyscloud:analytics:users:aggregates` | All the metrics for user aggregates |
+| `genesyscloud:analytics:flows:metric` | All the metrics for conversations |
