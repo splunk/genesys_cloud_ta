@@ -52,16 +52,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             # Set log level dynamically
-            try:
-                log_level = conf_manager.get_log_level(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-                logger.setLevel(log_level)
-            except Exception as e:
-                logger.error(f"Failed to set log level: {str(e)}")
+            log_level = conf_manager.get_log_level(
+                logger=logger,
+                session_key=session_key,
+                app_name=ADDON_NAME,
+                conf_name="genesys_cloud_ta_settings",
+            )
+            logger.setLevel(log_level)
 
             log.modular_input_start(logger, normalized_input_name)
 
