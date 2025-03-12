@@ -45,53 +45,39 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             session_key = inputs.metadata["session_key"]
             
             # Initialize KV store checkpointer
-            try:
-                kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                    "conversations_metrics_checkpointer",
-                    session_key,
-                    ADDON_NAME,
-                )
-            except Exception as e:
-                logger.error(f"Error initializing KVStoreCheckpointer: {str(e)}")
-                continue  # Skip this input if checkpointer fails
+            kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
+                 "conversations_metrics_checkpointer",
+                  session_key,
+                  ADDON_NAME,
+            )
 
             # Set log level dynamically
-            try:
-                log_level = conf_manager.get_log_level(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-                logger.setLevel(log_level)
-            except Exception as e:
-                logger.error(f"Failed to set log level: {str(e)}")
+            log_level = conf_manager.get_log_level(
+                logger=logger,
+                session_key=session_key,
+                app_name=ADDON_NAME,
+                conf_name="genesys_cloud_ta_settings",
+            )
+            logger.setLevel(log_level)
 
             log.modular_input_start(logger, normalized_input_name)
 
             # Retrieve account credentials with error handling
-            try:
-                account_region = get_account_property(session_key, input_item.get("account"), "region")
-                client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-                client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            except RuntimeError as e:
-                logger.error(str(e))
-                continue  # Skip processing if credentials fail
+            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
+            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+ 
 
             # Initialize Genesys Cloud client
-            try:
-                client = GenesysCloudClient(logger, client_id, client_secret, account_region)
-            except Exception as e:
-                logger.error(f"Failed to initialize GenesysCloudClient: {str(e)}")
-                continue  # Skip if client initialization fails
+            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
             
             # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
-            try:
-                current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or  datetime(1970, 1, 1).timestamp()
-            except Exception as e:
-                logger.warning(f"Error retrieving checkpoint: {str(e)}")
+            current_checkpoint = (
+                kvstore_checkpointer.get(checkpointer_key_name) 
+                or  datetime(1970, 1, 1).timestamp()
+            )
             
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             now = datetime.now(timezone.utc)
