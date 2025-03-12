@@ -5,7 +5,7 @@ import import_declare_test
 from solnlib import conf_manager, log
 from splunklib import modularinput as smi
 from solnlib.modular_input import checkpointer
-import PureCloudPlatformClientV2
+from solnlib import splunk_rest_client as rest_client
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
@@ -30,25 +30,45 @@ def get_account_property(session_key: str, account_name: str, property_name: str
 def validate_input(definition: smi.ValidationDefinition):
     return
 
-def get_data_from_api(logger: logging.Logger, current_checkpoint, last_checkpoint, client):
+def get_data_from_api(logger: logging.Logger, current_checkpoint, last_checkpoint, client, session_key):
     logger.info("Getting data from users endpoint")
     def retrieve_users(logger: logging.Logger, client):
         user_data = []
+        user_data_lookup = []
         page_number = 1
         page_size = 500
+        collection_name = "gc_users"
+        service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
+        if collection_name not in service.kvstore:
+            # Create collection
+            logger.debug(f"Creating lookup '{collection_name}'")
+            service.kvstore.create(collection_name)
+
         try:
             while True:
                 user_info_model = client.get("UsersApi", "get_users", page_number=page_number, page_size=page_size)
                 for user in user_info_model:
-                    #Need to create a dictionary to write to user data lookup
                     user_data.append(user.id)
+                    user_data_lookup.append(
+                        {
+                            "id": user.id,
+                            "name": user.name,
+                            "division_id": user.division.id,
+                            "division_name": user.division.name,
+                            "chat": json.loads(user.chat.to_json()),
+                            "email": user.email
+                        }
+                    )
                 if len(user_info_model)<page_size:
                     break 
                 else:
                     page_number += 1
         except Exception as e:
             logger.info(f"Error when calling UserApi->get_users: {e}")
-        #Write to user lookup here 
+        #Update user lookup here 
+        logger.debug(f"[-] Saving data in lookup '{collection_name}'")
+        collection = service.kvstore[collection_name]
+        collection.data.batch_save(*user_data_lookup)
         return user_data
 
     def get_user_aggregates(logger: logging.Logger, current_checkpoint, last_checkpoint, user_data, client):
@@ -126,8 +146,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             last_checkpoint = current.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-            results = get_data_from_api(logger, current_checkpoint, last_checkpoint, client)
+            results = get_data_from_api(logger, current_checkpoint, last_checkpoint, client, session_key)
             sourcetype = "genesyscloud:analytics:users:aggregates"
+            logger.debug("[-] Indexing user aggregates data")
             for item in results:
                 for result in item:
                     event_writer.write_event(
