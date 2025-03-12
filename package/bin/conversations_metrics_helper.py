@@ -45,15 +45,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             session_key = inputs.metadata["session_key"]
             
             # Initialize KV store checkpointer
-            try:
-                kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                    "conversations_metrics_checkpointer",
-                    session_key,
-                    ADDON_NAME,
-                )
-            except Exception as e:
-                logger.error(f"Error initializing KVStoreCheckpointer: {str(e)}")
-                continue  # Skip this input if checkpointer fails
+            kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
+                 "conversations_metrics_checkpointer",
+                  session_key,
+                  ADDON_NAME,
+            )
 
             # Set log level dynamically
             try:
