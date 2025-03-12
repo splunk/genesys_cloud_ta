@@ -203,54 +203,6 @@
                             ]
                         },
                         {
-                            "field": "region",
-                            "label": "Region",
-                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
-                            "required": true,
-                            "type": "singleSelect",
-                            "options": {
-                                "disableSearch": true,
-                                "autoCompleteFields": [
-                                    {
-                                        "value": "us_east_1",
-                                        "label": "us_east_1"
-                                    },
-                                    {
-                                        "value": "us_west_2",
-                                        "label": "us_west_2"
-                                    },
-                                    {
-                                        "value": "eu_west_1",
-                                        "label": "eu_west_1"
-                                    },
-                                    {
-                                        "value": "ap_southeast_2",
-                                        "label": "ap_southeast_2"
-                                    },
-                                    {
-                                        "value": "ap_northeast_1",
-                                        "label": "ap_northeast_1"
-                                    },
-                                    {
-                                        "value": "eu_central_1",
-                                        "label": "eu_central_1"
-                                    },
-                                    {
-                                        "value": "ca_central_1",
-                                        "label": "ca_central_1"
-                                    },
-                                    {
-                                        "value": "ap_northeast_2",
-                                        "label": "ap_northeast_2"
-                                    },
-                                    {
-                                        "value": "eu_west_2",
-                                        "label": "eu_west_2"
-                                    }
-                                ]
-                            }
-                        },
-                        {
                             "type": "singleSelect",
                             "label": "Account to use",
                             "options": {
@@ -263,119 +215,6 @@
                     ],
                     "inputHelperModule": "queue_observations_helper",
                     "title": "queue_observations"
-                },
-                {
-                    "name": "queue_lookup",
-                    "entity": [
-                        {
-                            "type": "text",
-                            "label": "Name",
-                            "validators": [
-                                {
-                                    "type": "regex",
-                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
-                                    "pattern": "^[a-zA-Z]\\w*$"
-                                },
-                                {
-                                    "type": "string",
-                                    "errorMsg": "Length of input name should be between 1 and 100",
-                                    "minLength": 1,
-                                    "maxLength": 100
-                                }
-                            ],
-                            "field": "name",
-                            "help": "A unique name for the data input.",
-                            "required": true
-                        },
-                        {
-                            "type": "interval",
-                            "field": "interval",
-                            "label": "Interval",
-                            "help": "Time interval of the data input, in seconds.",
-                            "required": true,
-                            "defaultValue": "300"
-                        },
-                        {
-                            "type": "singleSelect",
-                            "field": "index",
-                            "label": "Index",
-                            "defaultValue": "default",
-                            "options": {
-                                "endpointUrl": "data/indexes",
-                                "denyList": "^_.*$",
-                                "createSearchChoice": true
-                            },
-                            "required": true,
-                            "validators": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 80,
-                                    "errorMsg": "Length of index name should be between 1 and 80."
-                                }
-                            ]
-                        },
-                        {
-                            "field": "region",
-                            "label": "Region",
-                            "help": "For more information about your region, visit https://help.mypurecloud.com/articles/aws-regions-for-genesys-cloud-deployment/",
-                            "required": true,
-                            "type": "singleSelect",
-                            "options": {
-                                "disableSearch": true,
-                                "autoCompleteFields": [
-                                    {
-                                        "value": "us_east_1",
-                                        "label": "us_east_1"
-                                    },
-                                    {
-                                        "value": "us_west_2",
-                                        "label": "us_west_2"
-                                    },
-                                    {
-                                        "value": "eu_west_1",
-                                        "label": "eu_west_1"
-                                    },
-                                    {
-                                        "value": "ap_southeast_2",
-                                        "label": "ap_southeast_2"
-                                    },
-                                    {
-                                        "value": "ap_northeast_1",
-                                        "label": "ap_northeast_1"
-                                    },
-                                    {
-                                        "value": "eu_central_1",
-                                        "label": "eu_central_1"
-                                    },
-                                    {
-                                        "value": "ca_central_1",
-                                        "label": "ca_central_1"
-                                    },
-                                    {
-                                        "value": "ap_northeast_2",
-                                        "label": "ap_northeast_2"
-                                    },
-                                    {
-                                        "value": "eu_west_2",
-                                        "label": "eu_west_2"
-                                    }
-                                ]
-                            }
-                        },
-                        {
-                            "type": "singleSelect",
-                            "label": "Account to use",
-                            "options": {
-                                "referenceName": "account"
-                            },
-                            "help": "Account to use for this input.",
-                            "field": "account",
-                            "required": true
-                        }
-                    ],
-                    "inputHelperModule": "queue_lookup_helper",
-                    "title": "queue_lookup"
                 },
                 {
                     "name": "chat_observations",
@@ -776,7 +615,6 @@
                     "groupTitle": "Analytics",
                     "groupServices": [
                         "queue_observations",
-                        "queue_lookup",
                         "chat_observations",
                         "user_aggregates",
                         "conversations_metrics"
