@@ -8,51 +8,57 @@ from solnlib.modular_input import checkpointer
 import PureCloudPlatformClientV2
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
 
-def get_account_credentials(session_key: str, account_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get("client_id"), account_conf_file.get(account_name).get("client_secret")
+def get_account_property(session_key: str, account_name: str, property_name: str):
+    try:
+        cfm = conf_manager.ConfManager(
+            session_key,
+            ADDON_NAME,
+            realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
+        )
+        account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
+        return account_conf_file.get(account_name).get(property_name)
+    except Exception as e:
+        raise RuntimeError(f"Failed to retrieve {property_name} for account {account_name}: {str(e)}")
 
 def validate_input(definition: smi.ValidationDefinition):
     return
 
-def get_data_from_api(logger: logging.Logger, client_id: str, client_secret: str, opt_region: str, current_checkpoint: str, last_checkpoint: str):
+def get_data_from_api(logger: logging.Logger, current_checkpoint, last_checkpoint, client):
     logger.info("Getting data from users endpoint")
-    def retrieve_users(logger: logging.Logger, users_api):
+    def retrieve_users(logger: logging.Logger, client):
         user_data = []
         page_number = 1
+        page_size = 500
         try:
             while True:
-                user_list = users_api.get_users(page_size = 500, page_number = page_number)
-                for user in user_list.entities:
+                user_info_model = client.get("UsersApi", "get_users", page_number=page_number, page_size=page_size)
+                for user in user_info_model:
+                    #Need to create a dictionary to write to user data lookup
                     user_data.append(user.id)
-                if not user_list.next_uri:
+                if len(user_info_model)<page_size:
                     break 
                 else:
                     page_number += 1
         except Exception as e:
             logger.info(f"Error when calling UserApi->get_users: {e}")
+        #Write to user lookup here 
         return user_data
 
-    def get_user_aggregates(logger: logging.Logger, analytics_api, user_data, current_checkpoint, last_checkpoint):
+    def get_user_aggregates(logger: logging.Logger, current_checkpoint, last_checkpoint, user_data, client):
         batch_size = 100
         all_results = []
 
         interval = f"{current_checkpoint}/{last_checkpoint}"
-        logger.debug(f"finished interval: {interval}")
+        logger.debug(f"[-] finished interval: {interval}")
         user_batches = [user_data[i:i + batch_size] for i in range(0, len(user_data), batch_size)]
         for batch in user_batches:
-            # "2025-02-12T00:00:00Z/2025-02-13T00:05:00Z"
             body = {
                 "interval": interval,
                 "granularity": "P1D",
@@ -71,26 +77,17 @@ def get_data_from_api(logger: logging.Logger, client_id: str, client_secret: str
             }
 
             try:
-                response = analytics_api.post_analytics_users_aggregates_query(body)
-                all_results.append(response)
+                user_model = client.post("UsersApi", "post_analytics_users_aggregates_query", "UserAggregationQuery", body)
+                to_process_data = user_model.to_dict().get("results", [])
+                all_results.append(to_process_data)
             except Exception as e:
                 logger.info(f"Error when calling AnalyticsApi->post_analytics_users_aggregates_query: {e}")
         return all_results
 
-    region = PureCloudPlatformClientV2.PureCloudRegionHosts[opt_region]
-    PureCloudPlatformClientV2.configuration.host = region.get_api_host()
-    apiclient = (
-        PureCloudPlatformClientV2.api_client.ApiClient().get_client_credentials_token(
-            client_id, client_secret
-        )
-    )
-    users_api = PureCloudPlatformClientV2.UsersApi(apiclient)
-    user_data = retrieve_users(logger, users_api)
-    logger.debug("Retrieving user information ended")
-
-    analytics_api = PureCloudPlatformClientV2.AnalyticsApi(apiclient)
-    results = get_user_aggregates(logger, analytics_api, user_data, current_checkpoint, last_checkpoint)
-    logger.debug("Retrieving user aggregates ended")
+    user_data = retrieve_users(logger, client)
+    logger.debug("[-] Retrieving user information ended")
+    results = get_user_aggregates(logger, current_checkpoint, last_checkpoint, user_data, client)
+    logger.debug("[-] Retrieving user aggregates ended")
     return results
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
@@ -112,11 +109,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             logger.setLevel(log_level)
             log.modular_input_start(logger, normalized_input_name)
-            client_id, client_secret = get_account_credentials(session_key, input_item.get("account"))
-            opt_region = input_item.get("region")
-            opt_interval = input_item.get("interval")
+            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
+            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            # Initialize Genesys Cloud client
+            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
+
             checkpointer_key_name = input_name.split("/")[-1]
-            logger.debug(f"User aggregate checkpointer: {kvstore_checkpointer.get(checkpointer_key_name)}")
+            logger.debug(f"[-] User aggregate checkpointer: {kvstore_checkpointer.get(checkpointer_key_name)}")
             # if we don't have any checkpoint, we default it to four years ago per API docs
             current = datetime.now()
             current_checkpoint = (
@@ -124,27 +124,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 or (current - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
             )
             last_checkpoint = current.strftime("%Y-%m-%dT%H:%M:%SZ")
-            results = get_data_from_api(logger, client_id, client_secret, opt_region, current_checkpoint, last_checkpoint)
+
+
+            results = get_data_from_api(logger, current_checkpoint, last_checkpoint, client)
             sourcetype = "genesyscloud:analytics:users:aggregates"
             for item in results:
-                for result in item.results:
-                    data = result.data
-                    group = result.group.get('userId')
-                    data_dict = {}
-                    for i in range(0,len(data)):
-                        data_dict["interval"] = data[i].interval
-                        data_dict["metric"] = data[i].metrics[0].metric
-                        data_dict["qualifier"] = data[i].metrics[0].qualifier
-                        data_dict["sum"] = data[i].metrics[0].stats.sum
-                    body = {"userId": group, "data": data_dict}
+                for result in item:
                     event_writer.write_event(
                         smi.Event(
-                            data=json.dumps(body),
+                            data=json.dumps(result),
                             index=input_item.get("index"),
                             sourcetype=sourcetype
                         )
                     )
-            logger.debug("Updating checkpointer and leaving")
+            logger.debug("[-] Updating checkpointer and leaving")
             kvstore_checkpointer.update(checkpointer_key_name, last_checkpoint)
             log.events_ingested(
                 logger,
@@ -157,4 +150,4 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.modular_input_end(logger, normalized_input_name)
 
         except Exception as e:
-            log.log_exception(logger, e, "my custom error type", msg_before="Exception raised while ingesting data for demo_input: ")
+            log.log_exception(logger, e, "IngestionError", msg_before="Exception raised while ingesting data for demo_input: ")
