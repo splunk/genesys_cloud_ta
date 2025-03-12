@@ -3,18 +3,17 @@ import logging
 import requests
 from datetime import datetime, timezone
 
-import import_declare_test
 from solnlib import conf_manager, log
-from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 STATUS_PAGE_API_URL = "https://status.mypurecloud.com/api"
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
+def validate_input(definition: smi.ValidationDefinition):
+    return
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     cfm = conf_manager.ConfManager(
