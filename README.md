@@ -1,4 +1,4 @@
-# Add-on for Genesys Cloud
+# Genesys Cloud Add-on for Splunk
 
 ## Getting Started
 ### Installation
