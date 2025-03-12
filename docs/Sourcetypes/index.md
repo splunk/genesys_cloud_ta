@@ -7,3 +7,5 @@
 | `genesyscloud:telephonyprovidersedge:edges:phones`  | All phones statuses  |
 | `genesyscloud:analytics:queues:observations` | All the metrics for queue observations |
 | `genesyscloud:analytics:chats:metrics` | All the metrics for chat conversations |
+| `genesyscloud:status:components` | All the components from the Genesys Cloud Status Page |
+| `genesyscloud:status:incidents` | All the incidents from the Genesys Cloud Status Page |
