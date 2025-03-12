@@ -69,11 +69,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
  
 
             # Initialize Genesys Cloud client
-            try:
-                client = GenesysCloudClient(logger, client_id, client_secret, account_region)
-            except Exception as e:
-                logger.error(f"Failed to initialize GenesysCloudClient: {str(e)}")
-                continue  # Skip if client initialization fails
+            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
             
