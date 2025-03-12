@@ -70,13 +70,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.modular_input_start(logger, normalized_input_name)
 
             # Retrieve account credentials with error handling
-            try:
-                account_region = get_account_property(session_key, input_item.get("account"), "region")
-                client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-                client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            except RuntimeError as e:
-                logger.error(str(e))
-                continue  # Skip processing if credentials fail
+            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
+            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+ 
 
             # Initialize Genesys Cloud client
             try:
