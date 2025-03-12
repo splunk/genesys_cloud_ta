@@ -1,10 +1,10 @@
 # Contributing
-For reporting unexpected behavior, documentation gaps, entirely new features, please open an [issue](https://github.com/splunk/genesys_template_ta/issues)
+For reporting unexpected behavior, documentation gaps, entirely new features, please open an [issue](https://github.com/splunk/genesys_cloud_ta/issues)
 
 Contributions via pull requests are also welcome:
 * Create a branch for the issue / new feature
 * Make your changes on your branch
-* Open a [pull request](https://github.com/splunk/genesys_template_ta/pulls)
+* Open a [pull request](https://github.com/splunk/genesys_cloud_ta/pulls)
 * Add as reviewers [@edro15](https://www.github.com/edro15) and [@ahoang-splunk](https://www.github.com/ahoang-splunk)
 
 Thank you for your interest in this project! :heart: :rocket:
