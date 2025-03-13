@@ -1,8 +1,11 @@
 import PureCloudPlatformClientV2
 import logging
+import json
+
 from typing import List
 from PureCloudPlatformClientV2.rest import ApiException
 from PureCloudPlatformClientV2.api_client import ApiClient
+
 
 class GenesysCloudClient:
     client: ApiClient = None
@@ -75,7 +78,9 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
+            body = json.loads(e.body)
+            message = body["message"]
+            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
 
         return []
 
@@ -137,5 +142,7 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
+            body = json.loads(e.body)
+            message = body["message"]
+            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
             return None
