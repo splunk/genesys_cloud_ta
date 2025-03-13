@@ -54,7 +54,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
-            logger.debug("[-] client created")
+            logger.debug("Genesys Cloud Client initialised")
             checkpointer_key_name = input_name.split("/")[-1]
 
              # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
