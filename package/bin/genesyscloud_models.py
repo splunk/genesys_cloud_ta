@@ -1,7 +1,15 @@
 import re
 import datetime
+import json
+
 from typing import List, Tuple
-from PureCloudPlatformClientV2.models import Trunk, Edge, Phone
+from PureCloudPlatformClientV2.models import (
+    Edge,
+    Phone,
+    Queue,
+    Trunk,
+    User
+)
 
 class GCBaseModel:
     data: List[dict] = []
@@ -20,20 +28,23 @@ class GCBaseModel:
         format = "%Y-%m-%dT%H:%M:%S.%fZ"
         return datetime.datetime.strptime(dt_string, format)
 
-    def extract(self, idx: int, sub_key: str, keys_to_extract: list) -> dict:
+    def extract(self, idx: int, sub_key: str, keys_to_extract: list, enable_camelcase: bool = True) -> dict:
         """
         Extract a sub-dictionary and specific key-value pairs from it.
         :param idx: The index of the item containing the sub_key.
         :param sub_key: The key containing the sub-dictionary.
         :param keys_to_extract: List of keys to extract from the sub-dictionary.
+        :param enable_camelcase: Enable key format to camelcase.
         :return: A new dictionary containing the extracted key-value pairs.
         """
         if sub_key not in self.data[idx] or not isinstance(self.data[idx][sub_key], dict):
             raise ValueError(f"Key '{sub_key}' not found or is not a dictionary")
 
         sub_dict = self.data[idx][sub_key]
-        sub_key_cc = self.to_camelcase(sub_key)
-        return {f"{sub_key_cc}{key.capitalize()}": sub_dict[key] for key in keys_to_extract if key in sub_dict}
+        sub_key_cc = self.to_camelcase(sub_key) if enable_camelcase else sub_key
+        return {
+            f"{sub_key_cc}{key.capitalize()}" if enable_camelcase else f"{sub_key}_{key}": sub_dict[key] for key in keys_to_extract if key in sub_dict
+        }
 
 
 class TrunkModel(GCBaseModel):
@@ -141,3 +152,56 @@ class PhoneModel(GCBaseModel):
             statuses.append(phone["status"])
             statuses.append(phone["secondary_status"])
         return statuses
+
+
+class QueueModel(GCBaseModel):
+    def __init__(self, queues: List[Queue]) -> None:
+        lst_queues = []
+        for queue in queues:
+            lst_queues.append(queue.to_dict())
+        super().__init__(lst_queues)
+
+    @property
+    def queues(self) -> List[dict]:
+        queues = []
+        for queue in self.data:
+            new_queue = {
+                "id": queue["id"],
+                "name": queue["name"],
+                "_key": queue["id"]
+            }
+            queues.append(new_queue)
+        return queues
+
+    @property
+    def queue_ids(self) -> List[str]:
+        return [queue["id"] for queue in self.data]
+
+
+class UserModel(GCBaseModel):
+    MAX_USER_IDS: int = 100
+
+    def __init__(self, users: List[User]) -> None:
+        lst_users = []
+        for user in users:
+            lst_users.append(user.to_dict())
+        super().__init__(lst_users)
+
+    @property
+    def users(self) -> List[dict]:
+        users = []
+        keys = ["id", "name", "chat", "email"]
+        nested_keys = ["id", "name"]
+        for idx, user in enumerate(self.data):
+            new_user = {key: user[key] for key in keys}
+            new_user.update(self.extract(idx, "division", nested_keys, False))
+            new_user["_key"] = new_user["id"]
+            users.append(new_user)
+        return users
+
+    def get_user_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+        factor = self.MAX_USER_IDS*batch
+        slice = self.MAX_USER_IDS + factor
+        remaining_users = abs(len(self.data) - factor)
+        has_next_batch = remaining_users > self.MAX_USER_IDS
+        return [user["id"] for user in self.data[factor:slice]], has_next_batch
