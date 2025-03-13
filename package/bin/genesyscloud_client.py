@@ -109,7 +109,8 @@ class GenesysCloudClient:
         # Dynamically get the data model class
         model_class = getattr(PureCloudPlatformClientV2, model_name, None)
         if model_class is None:
-            raise AttributeError(f"Data model '{model_name}' not found in PureCloudPlatformClientV2")
+            self.logger.error(f"AttributeError - Data model '{model_name}' not found in PureCloudPlatformClientV2")
+            return None
 
         # Create an instance of the model
         model_instance = model_class()
