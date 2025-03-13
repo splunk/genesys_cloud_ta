@@ -78,7 +78,7 @@ class GenesysCloudClient:
             self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
 
         return []
-    
+
     def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
         """
         Sends a POST request to the Genesys Cloud API.
@@ -121,9 +121,10 @@ class GenesysCloudClient:
                 try:
                     setattr(model_instance, key, value)
                 except Exception as e:
-                    self.logger.info(f"Exception setting attribute '{key}' in '{model_name}': {e}")
+                    self.logger.warning(f"Exception setting attribute '{key}' in '{model_name}': {e}")
+                    # NOTE: The API call will be executed even if this exception is thrown.
             else:
-                self.logger.info(f"The model '{model_name}' does not have a method '{key}'")
+                self.logger.debug(f"The model '{model_name}' does not have a method '{key}'")
 
         try:
             # Call the function with the model instance and additional arguments
