@@ -137,10 +137,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         logger.error(f"Failed to write event: {str(e)}")
 
                 # Only update checkpoint if data was processed
-                try:
-                    kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
-                except Exception as e:
-                    logger.error(f"Failed to update checkpoint: {str(e)}")
+                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
 
                 log.events_ingested(
                     logger,
