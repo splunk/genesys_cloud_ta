@@ -134,10 +134,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
                 # Only update checkpoint if data was processed
                 if metrics_written > 0:
-                    try:
-                        kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
-                    except Exception as e:
-                        logger.error(f"Failed to update checkpoint: {str(e)}")
+                    kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
 
                 log.events_ingested(
                     logger,
