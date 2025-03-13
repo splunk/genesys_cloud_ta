@@ -58,10 +58,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = input_name.split("/")[-1]
 
              # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
-            try:
-                current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or  datetime(1970, 1, 1).timestamp()
-            except Exception as e:
-                logger.warning(f"Error retrieving checkpoint: {str(e)}")
+            current_checkpoint = (
+                kvstore_checkpointer.get(checkpointer_key_name)
+                or datetime(1970, 1, 1).timestamp()
+            )
             
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             now = datetime.now(timezone.utc)
