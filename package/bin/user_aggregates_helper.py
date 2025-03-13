@@ -3,12 +3,15 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from splunklib import modularinput as smi
-from solnlib.modular_input import checkpointer
 from solnlib import splunk_rest_client as rest_client
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+
 from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import UserModel
+
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -16,99 +19,17 @@ def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
-    try:
-        cfm = conf_manager.ConfManager(
-            session_key,
-            ADDON_NAME,
-            realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-        )
-        account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-        return account_conf_file.get(account_name).get(property_name)
-    except Exception as e:
-        raise RuntimeError(f"Failed to retrieve {property_name} for account {account_name}: {str(e)}")
+
+    cfm = conf_manager.ConfManager(
+        session_key,
+        ADDON_NAME,
+        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
+    )
+    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
+    return account_conf_file.get(account_name).get(property_name)
 
 def validate_input(definition: smi.ValidationDefinition):
     return
-
-def get_data_from_api(logger: logging.Logger, current_checkpoint, last_checkpoint, client, session_key):
-    logger.info("Getting data from users endpoint")
-    def retrieve_users(logger: logging.Logger, client):
-        user_data = []
-        user_data_lookup = []
-        page_number = 1
-        page_size = 500
-        collection_name = "gc_users"
-        service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-        if collection_name not in service.kvstore:
-            # Create collection
-            logger.debug(f"Creating lookup '{collection_name}'")
-            service.kvstore.create(collection_name)
-
-        try:
-            while True:
-                user_info_model = client.get("UsersApi", "get_users", page_number=page_number, page_size=page_size)
-                for user in user_info_model:
-                    user_data.append(user.id)
-                    user_data_lookup.append(
-                        {
-                            "id": user.id,
-                            "name": user.name,
-                            "division_id": user.division.id,
-                            "division_name": user.division.name,
-                            "chat": json.loads(user.chat.to_json()),
-                            "email": user.email
-                        }
-                    )
-                if len(user_info_model)<page_size:
-                    break 
-                else:
-                    page_number += 1
-        except Exception as e:
-            logger.info(f"Error when calling UserApi->get_users: {e}")
-        #Update user lookup here 
-        logger.debug(f"[-] Saving data in lookup '{collection_name}'")
-        collection = service.kvstore[collection_name]
-        collection.data.batch_save(*user_data_lookup)
-        return user_data
-
-    def get_user_aggregates(logger: logging.Logger, current_checkpoint, last_checkpoint, user_data, client):
-        batch_size = 100
-        all_results = []
-
-        interval = f"{current_checkpoint}/{last_checkpoint}"
-        logger.debug(f"[-] finished interval: {interval}")
-        user_batches = [user_data[i:i + batch_size] for i in range(0, len(user_data), batch_size)]
-        for batch in user_batches:
-            body = {
-                "interval": interval,
-                "granularity": "P1D",
-                "groupBy": ["userId"],
-                "metrics": ["tAgentRoutingStatus", "tOrganizationPresence", "tSystemPresence"],
-                "filter": {
-                    "type": "or",
-                    "predicates": [
-                        {
-                            "dimension": "userId",
-                            "operator": "matches",
-                            "value": user_id
-                        } for user_id in batch
-                    ]
-                }
-            }
-
-            try:
-                user_model = client.post("UsersApi", "post_analytics_users_aggregates_query", "UserAggregationQuery", body)
-                to_process_data = user_model.to_dict().get("results", [])
-                all_results.append(to_process_data)
-            except Exception as e:
-                logger.info(f"Error when calling AnalyticsApi->post_analytics_users_aggregates_query: {e}")
-        return all_results
-
-    user_data = retrieve_users(logger, client)
-    logger.debug("[-] Retrieving user information ended")
-    results = get_user_aggregates(logger, current_checkpoint, last_checkpoint, user_data, client)
-    logger.debug("[-] Retrieving user aggregates ended")
-    return results
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -129,46 +50,113 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             logger.setLevel(log_level)
             log.modular_input_start(logger, normalized_input_name)
+
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             account_region = get_account_property(session_key, input_item.get("account"), "region")
+
             # Initialize Genesys Cloud client
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
-
-            checkpointer_key_name = input_name.split("/")[-1]
-            logger.debug(f"[-] User aggregate checkpointer: {kvstore_checkpointer.get(checkpointer_key_name)}")
-            # if we don't have any checkpoint, we default it to four years ago per API docs
-            current = datetime.now()
-            current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or (current - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region
             )
-            last_checkpoint = current.strftime("%Y-%m-%dT%H:%M:%SZ")
 
+            # Initialize checkpointing
+            checkpointer_key_name = input_name.split("/")[-1]
+            now = datetime.now()
+            # No checkpoint? Default it to four years ago per API docs
+            last_checkpoint = (
+                kvstore_checkpointer.get(checkpointer_key_name)
+                or (now - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+            new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            results = get_data_from_api(logger, current_checkpoint, last_checkpoint, client, session_key)
+            # Initialize lookup
+            collection_name = "gc_users"
+            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
+            if collection_name not in service.kvstore:
+                # Create collection
+                logger.debug(f"Creating lookup '{collection_name}'")
+                service.kvstore.create(collection_name)
+
+            # Getting data from API
+            logger.info("Getting data from users endpoint")
+            user_model = UserModel(
+                client.get("UsersApi", "get_users")
+            )
+
+            # Updating lookup
+            logger.debug(f"Saving users in lookup '{collection_name}'")
+            collection = service.kvstore[collection_name]
+            collection.data.batch_save(*user_model.users)
+
+            # Getting metrics
+            interval = f"{last_checkpoint}/{new_checkpoint}"
+            logger.debug(f"Range interval: {interval}")
+
+            # Max 100 userids supported according to specs (??)
+            results = []
+            cnt = 0
+            has_more = True
+            while has_more:
+                user_ids, has_more = user_model.get_user_ids(cnt)
+                body = {
+                    "interval": interval,
+                    "granularity": "P1D",
+                    "groupBy": ["userId"],
+                    "metrics": [
+                        "tAgentRoutingStatus",
+                        "tOrganizationPresence",
+                        "tSystemPresence"
+                    ],
+                    "filter": {
+                        "type": "or",
+                        "predicates": [
+                            {
+                                "dimension": "userId",
+                                "operator": "matches",
+                                "value": uid
+                            } for uid in user_ids
+                        ]
+                    }
+                }
+                data = client.post(
+                    "UsersApi",
+                    "post_analytics_users_aggregates_query",
+                    "UserAggregationQuery",
+                    body
+                )
+                results.extend(data.to_dict().get("results", []))
+                cnt+=1
+            logger.debug(f"Got '{len(results)}' aggregates")
+
             sourcetype = "genesyscloud:analytics:users:aggregates"
-            logger.debug("[-] Indexing user aggregates data")
+            logger.debug("Indexing user aggregates data")
             for item in results:
-                for result in item:
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(result),
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype
-                        )
+                event_writer.write_event(
+                    smi.Event(
+                        data=json.dumps(item, ensure_ascii=False, default=str),
+                        index=input_item.get("index"),
+                        sourcetype=sourcetype
                     )
-            logger.debug("[-] Updating checkpointer and leaving")
-            kvstore_checkpointer.update(checkpointer_key_name, last_checkpoint)
+                )
+            # Updating checkpoint if data was returned to avoid losing info
+            if results:
+                logger.debug("Updating checkpointer and leaving")
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(results), 
+                len(results),
                 input_item.get("index"),
                 account = input_item.get("account")
             )
             log.modular_input_end(logger, normalized_input_name)
-
         except Exception as e:
-            log.log_exception(logger, e, "IngestionError", msg_before="Exception raised while ingesting data for demo_input: ")
+            log.log_exception(
+                logger,
+                e,
+                "IngestionError",
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+            )
