@@ -1,5 +1,7 @@
 import PureCloudPlatformClientV2
 import logging
+import json
+
 from typing import List
 from PureCloudPlatformClientV2.rest import ApiException
 from PureCloudPlatformClientV2.api_client import ApiClient
@@ -76,6 +78,71 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
+            body = json.loads(e.body)
+            message = body["message"]
+            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
 
         return []
+
+    def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
+        """
+        Sends a POST request to the Genesys Cloud API.
+
+        :param api_instance_name: Name of the API instance, e.g., 'FlowsApi'.
+        :param function_name: Name of the function to call in the API instance.
+        :param model_name: Name of the data model corresponding to the request body.
+        :param body: Dictionary representing the request body.
+        """
+        self.logger.info(f"Sending data to {api_instance_name} using {function_name}")
+
+        # Dynamically get the API class
+        api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
+
+        if api_class is None:
+            self.logger.error(f"AttributeError - API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+            return None
+
+        # Instantiate the API with the authenticated client
+        api_instance = api_class(self.client)
+
+        # Get the function from the API instance
+        function = getattr(api_instance, function_name, None)
+        if function is None or not callable(function):
+            self.logger.error(f"AttributeError - '{function_name}' is not a valid function of '{api_instance_name}'")
+            return None
+
+        # Dynamically get the data model class
+        model_class = getattr(PureCloudPlatformClientV2, model_name, None)
+        if model_class is None:
+            self.logger.error(f"AttributeError - Data model '{model_name}' not found in PureCloudPlatformClientV2")
+            return None
+
+        # Create an instance of the model
+        model_instance = model_class()
+
+        # Assign the values from the 'body' dictionary to the model instance
+        for key, value in body.items():
+            if hasattr(model_instance, key):
+                try:
+                    setattr(model_instance, key, value)
+                except Exception as e:
+                    self.logger.warning(f"Exception setting attribute '{key}' in '{model_name}': {e}")
+                    # NOTE: The API call will be executed even if this exception is thrown.
+            else:
+                self.logger.debug(f"The model '{model_name}' does not have a method '{key}'")
+
+        try:
+            # Call the function with the model instance and additional arguments
+            return function(model_instance, *args, **kwargs)
+        except ApiException as e:
+            if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
+                    self.logger.warning("Rate limit exceeded. Refreshing token.")
+                    self.client.handle_expired_access_token()
+            if e.status == 401 and e.reason.contains("expir"):
+                # Haven't hit this yet. Message to be confirmed
+                self.logger.warning("Token expired. Refreshing token.")
+                self.client.handle_expired_access_token()
+            body = json.loads(e.body)
+            message = body["message"]
+            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
+            return None
