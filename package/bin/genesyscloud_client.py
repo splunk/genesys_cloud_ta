@@ -103,7 +103,8 @@ class GenesysCloudClient:
         # Get the function from the API instance
         function = getattr(api_instance, function_name, None)
         if function is None or not callable(function):
-            raise AttributeError(f"'{function_name}' is not a valid function of '{api_instance_name}'")
+            self.logger.error(f"AttributeError - '{function_name}' is not a valid function of '{api_instance_name}'")
+            return None
 
         # Dynamically get the data model class
         model_class = getattr(PureCloudPlatformClientV2, model_name, None)
