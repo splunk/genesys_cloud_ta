@@ -105,7 +105,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "group_by": group_by
             }
 
-            logger.info(f"Request body: {body}")
+            logger.debug(f"Request body: {body}")
     
             sourcetype = "genesyscloud:analytics:flows:metric"
             
