@@ -112,7 +112,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Perform API request
             try:
                 response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
-                to_process_data = conv_model.to_dict().get("results", [])
+                to_process_data = response.to_dict().get("results", [])
             except Exception as e:
                 logger.error(f"Error retrieving conversation metrics: {str(e)}")
                 continue  # Skip processing if API call fails
