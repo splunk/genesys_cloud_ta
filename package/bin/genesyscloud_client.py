@@ -94,7 +94,8 @@ class GenesysCloudClient:
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
 
         if api_class is None:
-            raise AttributeError(f"API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+            self.logger.error(f"AttributeError - API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+            return None
 
         # Instantiate the API with the authenticated client
         api_instance = api_class(self.client)
