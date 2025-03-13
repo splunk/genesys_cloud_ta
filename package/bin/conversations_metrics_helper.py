@@ -18,16 +18,13 @@ def logger_for_input(input_name: str) -> logging.Logger:
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     """Retrieve a specific property for a given Genesys Cloud account."""
-    try:
-        cfm = conf_manager.ConfManager(
-            session_key,
-            ADDON_NAME,
-            realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-        )
-        account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-        return account_conf_file.get(account_name).get(property_name)
-    except Exception as e:
-        raise RuntimeError(f"Failed to retrieve {property_name} for account {account_name}: {str(e)}")
+    cfm = conf_manager.ConfManager(
+        session_key,
+        ADDON_NAME,
+        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
+    )
+    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
+    return account_conf_file.get(account_name).get(property_name)
 
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
