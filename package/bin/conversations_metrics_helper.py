@@ -40,7 +40,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
-            
+
             # Initialize KV store checkpointer
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                  "conversations_metrics_checkpointer",
@@ -63,25 +63,23 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
- 
 
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
-            
             # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name) 
                 or  datetime(1970, 1, 1).timestamp()
             )
-            
+
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             now = datetime.now(timezone.utc)
 
             # Define time interval for data retrieval
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            
+            # Define metrics for data retrieval
             metrics = [
                 "nBlindTransferred", "nBotInteractions", "nCobrowseSessions", "nConnected",
                 "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
@@ -104,27 +102,27 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "metrics": metrics,
                 "group_by": group_by
             }
-
             logger.debug(f"Request body: {body}")
-    
+
             sourcetype = "genesyscloud:analytics:flows:metric"
-            
+
             # Perform API request
-            try:
-                response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
-                to_process_data = response.to_dict().get("results", [])
-            except Exception as e:
-                logger.error(f"Error retrieving conversation metrics: {str(e)}")
-                continue  # Skip processing if API call fails
-            
+            response = client.post(
+                "ConversationsApi",
+                "post_analytics_conversations_aggregates_query",
+                "ConversationAggregationQuery",
+                body
+            )
+            to_process_data = response.to_dict().get("results", [])
+
             # Ensure data exists before processing
             if to_process_data:
                 for event in to_process_data:
                     try:
                         interval_start_time = (
                             datetime.strptime(event["data"][0]["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
-                            if event.get("data") else round(start_time.timestamp(), 3)      
-                            )
+                            if event.get("data") else round(start_time.timestamp(), 3)
+                        )
                         event_writer.write_event(
                             smi.Event(
                                 data=json.dumps(event, ensure_ascii=False, default=str),
