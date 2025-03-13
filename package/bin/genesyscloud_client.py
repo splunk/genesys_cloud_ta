@@ -129,5 +129,12 @@ class GenesysCloudClient:
             # Call the function with the model instance and additional arguments
             return function(model_instance, *args, **kwargs)
         except ApiException as e:
-            self.logger.info(f"Exception calling '{api_instance_name}.{function_name}': {e}")
+            if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
+                    self.logger.warning("Rate limit exceeded. Refreshing token.")
+                    self.client.handle_expired_access_token()
+            if e.status == 401 and e.reason.contains("expir"):
+                # Haven't hit this yet. Message to be confirmed
+                self.logger.warning("Token expired. Refreshing token.")
+                self.client.handle_expired_access_token()
+            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: {e}")
             return None
