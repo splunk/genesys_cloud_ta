@@ -107,7 +107,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "group_by": group_by
             }
             
-            logger.debug(f"[-] request body: {json.dumps(body, ensure_ascii=False, default=str)}")
+            logger.debug(f"Request body: {json.dumps(body, ensure_ascii=False, default=str)}")
 
             # Perform API request
             try:
