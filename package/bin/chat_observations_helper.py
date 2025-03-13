@@ -110,12 +110,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Request body: {json.dumps(body, ensure_ascii=False, default=str)}")
 
             # Perform API request
-            try:
-                conv_model = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
-                to_process_data = conv_model.to_dict().get("results", [])
-            except Exception as e:
-                logger.error(f"Error retrieving conversation metrics: {str(e)}")
-                continue  # Skip processing if API call fails
+            response = client.post("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", body)
+            to_process_data = response.to_dict().get("results", [])
 
             sourcetype = "genesyscloud:analytics:chat:metrics"
             metrics_written = 0
