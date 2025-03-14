@@ -9,3 +9,4 @@
 | `genesyscloud:analytics:chats:metrics` | All the metrics for chat conversations |
 | `genesyscloud:analytics:users:aggregates` | All the metrics for user aggregates |
 | `genesyscloud:analytics:flows:metric` | All the metrics for conversations |
+| `genesyscloud:analytics:conversations:details` | All the score metrics for conversations, ex: MOS scores |

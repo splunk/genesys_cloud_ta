@@ -1,0 +1,112 @@
+import json
+import logging
+
+import import_declare_test
+from solnlib import conf_manager, log
+from solnlib import splunk_rest_client as rest_client
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
+
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+from genesyscloud_client import GenesysCloudClient
+
+ADDON_NAME = "genesys_cloud_ta"
+
+def logger_for_input(input_name: str) -> logging.Logger:
+    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
+
+def get_account_property(session_key: str, account_name: str, property_name: str):
+    cfm = conf_manager.ConfManager(
+        session_key,
+        ADDON_NAME,
+        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
+    )
+    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
+    return account_conf_file.get(account_name).get(property_name)
+
+
+def validate_input(definition: smi.ValidationDefinition):
+    return
+
+
+def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
+
+    for input_name, input_item in inputs.inputs.items():
+        normalized_input_name = input_name.split("/")[-1]
+        logger = logger_for_input(normalized_input_name)
+        try: 
+            session_key = inputs.metadata["session_key"]
+            kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
+                "conversations_details_checkpointer",
+                session_key,
+                ADDON_NAME,
+            )
+            log_level = conf_manager.get_log_level(
+                logger=logger,
+                session_key=session_key,
+                app_name=ADDON_NAME,
+                conf_name="genesys_cloud_ta_settings",
+            )
+            logger.setLevel(log_level)
+            log.modular_input_start(logger, normalized_input_name)
+            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
+            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region
+            )
+            checkpointer_key_name = input_name.split("/")[-1]
+
+            # Retrieve the last checkpoint or set it to 7 days before today. Interval can be no greater than 7 dats
+            current = datetime.now()
+            try:
+                start_time = (
+                    kvstore_checkpointer.get(checkpointer_key_name)
+                    or (current - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                )
+            except Exception as e:
+                logger.warning(f"Error retrieving checkpoint: {str(e)}")
+            # start_time = current_checkpoint.strftime("%Y-%m-%dT%H:%M:%SZ")
+            end_time = current.strftime("%Y-%m-%dT%H:%M:%SZ")
+            interval = f"{start_time}/{end_time}"
+            
+            body = {
+                "interval": interval
+            }
+            logger.debug(f"[-] Request body: {body}")
+
+            conv_model = client.post("ConversationsApi", "post_analytics_conversations_details_query", "ConversationQuery", body)
+            to_process_data = conv_model.to_dict().get("conversations", [])
+            sourcetype = "genesyscloud:analytics:conversations:details"
+            logger.debug(f"conv_model: {conv_model}")
+
+            if to_process_data:
+                for event in to_process_data:
+                    event_writer.write_event(
+                        smi.Event(
+                            data=json.dumps(event, ensure_ascii=False, default=str),
+                            index=input_item.get("index"),
+                            sourcetype=sourcetype
+                        )
+                    )
+                # Update checkpoint
+                kvstore_checkpointer.update(checkpointer_key_name, end_time)
+                log.events_ingested(
+                    logger,
+                    input_name,
+                    sourcetype,
+                    len(to_process_data),
+                    input_item.get("index"),
+                    account=input_item.get("account"),
+                )
+
+        except Exception as e:
+            log.log_exception(
+                logger,
+                e,
+                "IngestionError",
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+            )
