@@ -146,6 +146,12 @@ class GenesysCloudClient:
             }
             enable_pagination = True
 
+        if "page_size" in model_instance.attribute_map:
+            self.logger.debug(f"Enabling pagination for {function_name} - {model_name}")
+            body["page_size"] = page_size
+            body["page_number"] = page_number
+            enable_pagination = True
+
         # Assign the values from the 'body' dictionary to the model instance
         for key, value in body.items():
             if hasattr(model_instance, key):
@@ -159,19 +165,25 @@ class GenesysCloudClient:
 
         try:
             # Call the function with the model instance and additional arguments
-            # return function(model_instance, *args, **kwargs)
             while True:
                 api_response = function(model_instance, *args, **kwargs)
                 api_responses.append(api_response)
 
                 if enable_pagination:
                     if "total_hits" not in api_response.attribute_map:
-                        self.logger.error(f"Pagination is enabled but 'total_hits' is not returned: {api_response.attribute_map}")
-                        return None
+                        try:
+                            total_hits = api_response.total
+                        except Exception as e:
+                            self.logger.error(f"Pagination enabled but neither 'total_hits' nor 'total' is returned: {api_response.attribute_map}")
+                            return None
                     total_hits = api_response.total_hits
 
                     if total_hits - (page_size * page_number) > 0:
                         page_number += 1
+                        if "paging" in model_instance.attribute_map:
+                            model_instance.paging["pageNumber"] = page_number
+                        else:
+                            model_instance.page_number = page_number
                         continue
                     break
                 return api_response
