@@ -84,6 +84,18 @@ class GenesysCloudClient:
 
         return []
 
+    def convert_response(self, response: list, key: str) -> list:
+        """
+        Convert data returned from paginating POST API.
+        :param response: list of objects returned by the API.
+        :param key: key of the list of items to be returned (e.g. results, conversations).
+        :return: List of items to be ingested.
+        """
+        total_items = []
+        for obj in response:
+            total_items.extend(obj.to_dict().get(key, []))
+        return total_items
+
     def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
         """
         Sends a POST request to the Genesys Cloud API.
@@ -93,7 +105,12 @@ class GenesysCloudClient:
         :param model_name: Name of the data model corresponding to the request body.
         :param body: Dictionary representing the request body.
         """
-        self.logger.info(f"Sending data to {api_instance_name} using {function_name}")
+        enable_pagination = False
+        api_responses = []
+        # Tipically 100 items per page is the max accepted
+        page_size = 100
+        page_number = 1
+        total_hits = 0
 
         # Dynamically get the API class
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
@@ -120,6 +137,15 @@ class GenesysCloudClient:
         # Create an instance of the model
         model_instance = model_class()
 
+        # Add paging information to body
+        if "paging" in model_instance.attribute_map:
+            self.logger.debug(f"Enabling pagination for {function_name} - {model_name}")
+            body["paging"] = {
+                "pageSize": page_size,
+                "pageNumber": page_number
+            }
+            enable_pagination = True
+
         # Assign the values from the 'body' dictionary to the model instance
         for key, value in body.items():
             if hasattr(model_instance, key):
@@ -133,7 +159,24 @@ class GenesysCloudClient:
 
         try:
             # Call the function with the model instance and additional arguments
-            return function(model_instance, *args, **kwargs)
+            # return function(model_instance, *args, **kwargs)
+            while True:
+                api_response = function(model_instance, *args, **kwargs)
+                api_responses.append(api_response)
+
+                if enable_pagination:
+                    if "total_hits" not in api_response.attribute_map:
+                        self.logger.error(f"Pagination is enabled but 'total_hits' is not returned: {api_response.attribute_map}")
+                        return None
+                    total_hits = api_response.total_hits
+
+                    if total_hits - (page_size * page_number) > 0:
+                        page_number += 1
+                        continue
+                    break
+                return api_response
+            return api_responses
+
         except ApiException as e:
             if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
                     self.logger.warning("Rate limit exceeded. Refreshing token.")
