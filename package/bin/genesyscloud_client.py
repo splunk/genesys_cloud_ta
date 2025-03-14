@@ -38,6 +38,8 @@ class GenesysCloudClient:
             if isinstance(api_response, list):
                 # A simple list (of strings) is returned as response
                 items.extend(api_response)
+            elif isinstance(api_response, PureCloudPlatformClientV2.models.routing_status.RoutingStatus):
+                items.append(api_response)
             else:
                 # An object such as EdgeEntityListing is returned as response
                 enable_pagination = any(key in api_response.attribute_map for key in pagination_params)

@@ -6,9 +6,8 @@ from solnlib import conf_manager, log
 from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
 
+from datetime import datetime
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
@@ -38,7 +37,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         try:
             session_key = inputs.metadata["session_key"]
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                "users_aggregates_checkpointer",
+                "users_routing_status_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
@@ -62,96 +61,63 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Initialize checkpointing
             checkpointer_key_name = input_name.split("/")[-1]
-            now = datetime.now()
-            # No checkpoint? Default it to four years ago per API docs
-            last_checkpoint = (
+
+            current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or (now - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                or datetime(1970, 1, 1).timestamp()
             )
-            new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            # Initialize lookup
-            collection_name = "gc_users"
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
-            # Getting data from API
+            # Getting user ids from API
             logger.info("Getting data from users endpoint")
             user_model = UserModel(
                 client.get("UsersApi", "get_users")
             )
 
-            # Updating lookup
-            logger.debug(f"Saving users in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*user_model.users)
-
-            # Getting metrics
-            interval = f"{last_checkpoint}/{new_checkpoint}"
-            logger.debug(f"Range interval: {interval}")
-
-            # Max 100 userids supported according to specs (??)
-            results = []
+            uid_results = []
             cnt = 0
             has_more = True
             while has_more:
                 user_ids, has_more = user_model.get_user_ids(cnt)
-                body = {
-                    "interval": interval,
-                    "granularity": "P1D",
-                    "groupBy": ["userId"],
-                    "metrics": [
-                        "tAgentRoutingStatus",
-                        "tOrganizationPresence",
-                        "tSystemPresence"
-                    ],
-                    "filter": {
-                        "type": "or",
-                        "predicates": [
-                            {
-                                "dimension": "userId",
-                                "operator": "matches",
-                                "value": uid
-                            } for uid in user_ids
-                        ]
-                    }
-                }
-                data = client.post(
-                    "UsersApi",
-                    "post_analytics_users_aggregates_query",
-                    "UserAggregationQuery",
-                    body
-                )
-                results.extend(data.to_dict().get("results", []))
-                cnt+=1
-            logger.debug(f"Got '{len(results)}' aggregates")
+                uid_results.extend(user_ids)
+                cnt+=1 
+            
+            #Getting user routing status
+            sourcetype = "genesyscloud:users:users:routingstatus"
+            rcounter = 0
+            for user in uid_results:
+                rstatus_model = client.get("UsersApi", "get_user_routingstatus", user)
 
-            sourcetype = "genesyscloud:users:users:aggregates"
-            logger.debug("Indexing user aggregates data")
-            for item in results:
-                event_writer.write_event(
-                    smi.Event(
-                        data=json.dumps(item, ensure_ascii=False, default=str),
-                        index=input_item.get("index"),
-                        sourcetype=sourcetype
-                    )
-                )
+                if (rstatus_model[0].start_time):
+                    event_time_epoch = rstatus_model[0].start_time.timestamp()
+
+                    if event_time_epoch > current_checkpoint:
+                        routing = rstatus_model[0].to_dict()
+                        routing["start_time"] = event_time_epoch
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(routing, ensure_ascii=False, default=str),
+                                time=event_time_epoch,
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                            )
+                        )
+                        rcounter += 1
+
             # Updating checkpoint if data was returned to avoid losing info
-            if results:
+            if rcounter > 0:
                 logger.debug("Updating checkpointer and leaving")
+                new_checkpoint = datetime.utcnow().timestamp()
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(results),
+                rcounter,
                 input_item.get("index"),
-                account = input_item.get("account")
+                account=input_item.get("account"),
             )
+
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
             log.log_exception(
@@ -160,3 +126,4 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "IngestionError",
                 msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
             )
+            
