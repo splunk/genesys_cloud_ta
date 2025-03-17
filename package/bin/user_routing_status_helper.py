@@ -73,25 +73,17 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 client.get("UsersApi", "get_users")
             )
 
-            uid_results = []
-            cnt = 0
-            has_more = True
-            while has_more:
-                user_ids, has_more = user_model.get_user_ids(cnt)
-                uid_results.extend(user_ids)
-                cnt+=1 
-            
             #Getting user routing status
             sourcetype = "genesyscloud:users:users:routingstatus"
             rcounter = 0
-            for user in uid_results:
-                rstatus_model = client.get("UsersApi", "get_user_routingstatus", user)
+            for uid in user_model.user_ids:
+                response = client.get("UsersApi", "get_user_routingstatus", uid)
 
-                if (rstatus_model[0].start_time):
-                    event_time_epoch = rstatus_model[0].start_time.timestamp()
+                if (response[0].start_time):
+                    event_time_epoch = response[0].start_time.timestamp()
 
                     if event_time_epoch > current_checkpoint:
-                        routing = rstatus_model[0].to_dict()
+                        routing = response[0].to_dict()
                         routing["start_time"] = event_time_epoch
                         event_writer.write_event(
                             smi.Event(
@@ -126,4 +118,3 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "IngestionError",
                 msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
             )
-            
