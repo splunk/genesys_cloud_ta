@@ -1,5 +1,7 @@
 # Source types for the Genesys Cloud Add-On
 
+The Genesys Cloud Add-on for Splunk provides the index-time and search-time knowledge for metrics, service status, and service message events in the following formats.
+
 | Sourcetype | Description |
 |:---:|---|
 | `genesyscloud:telephonyprovidersedge:trunks:metrics` | All the metrics for trunks |

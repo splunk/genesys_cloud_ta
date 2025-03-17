@@ -53,7 +53,9 @@ nav:
   - Configuration:
     - Configure an integration application in Genesys Cloud: 'ConfigureGenesysCloud/index.md'
     - Configure an Account: 'ConfigureAccount/index.md'
-  # - Troubleshoot:
-  #   - Troubleshoot: 'Troubleshooting/index.md'
+    - Configure Analytics Inputs: 'ConfigureAnalyticsInputs/index.md'
+    - Configure Telephony Providers Edge Inputs: 'ConfigureTelephonyProvidersEdgeInputs/index.md'
+  - Troubleshoot:
+    - Troubleshoot: 'Troubleshooting/index.md'
   # - Reference:
   #   - Performance reference: 'Reference/index.md'
