@@ -85,7 +85,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     if event_time_epoch > current_checkpoint:
                         routing = response[0].to_dict()
                         routing["start_time"] = event_time_epoch
-                        routing['user_id'] = user
+                        routing['user_id'] = uid
                         event_writer.write_event(
                             smi.Event(
                                 data=json.dumps(routing, ensure_ascii=False, default=str),
