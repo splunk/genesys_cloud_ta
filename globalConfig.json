@@ -214,7 +214,7 @@
                         }
                     ],
                     "inputHelperModule": "queue_observations_helper",
-                    "title": "queue_observations"
+                    "title": "Queue Observations"
                 },
                 {
                     "name": "chat_observations",
@@ -279,7 +279,7 @@
                         }
                     ],
                     "inputHelperModule": "chat_observations_helper",
-                    "title": "chat_observations"
+                    "title": "Chat Observations"
                 },
                 {
                     "name": "edges_trunks_metrics",
@@ -344,7 +344,7 @@
                         }
                     ],
                     "inputHelperModule": "edges_trunks_metrics_helper",
-                    "title": "edges_trunks_metrics"
+                    "title": "Trunks Metrics"
                 },
                 {
                     "name": "edges_metrics",
@@ -409,7 +409,7 @@
                         }
                     ],
                     "inputHelperModule": "edges_metrics_helper",
-                    "title": "edges_metrics"
+                    "title": "Edges Metrics"
                 },
                 {
                     "name": "edges_phones",
@@ -474,7 +474,7 @@
                         }
                     ],
                     "inputHelperModule": "edges_phones_helper",
-                    "title": "edges_phones"
+                    "title": "Phones Statuses"
                 },
                 {
                     "name": "user_aggregates",
@@ -539,7 +539,7 @@
                         }
                     ],
                     "inputHelperModule": "user_aggregates_helper",
-                    "title": "user_aggregates"
+                    "title": "User Aggregates"
                 },
                 {
                     "name": "conversations_metrics",
@@ -604,7 +604,7 @@
                         }
                     ],
                     "inputHelperModule": "conversations_metrics_helper",
-                    "title": "conversations_metrics"
+                    "title": "Conversations Metrics"
                 },
                 {
                     "name": "conversations_details",
@@ -669,7 +669,7 @@
                         }
                     ],
                     "inputHelperModule": "conversations_details_helper",
-                    "title": "conversations_details"
+                    "title": "Conversations Details"
                 }
             ],
             "title": "Inputs",
