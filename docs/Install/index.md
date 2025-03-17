@@ -3,12 +3,17 @@
 You can install the Genesys Cloud Add-on for Splunk with Splunk Web or from the command line. You can install the add-on onto any type
 of Splunk Enterprise or Splunk Cloud instance (indexer, search head, or forwarder).
 
-1. Download the [Genesys Cloud Add-on for Splunk]() from Splunkbase.
+1. Download the [Genesys Cloud Add-on for Splunk](https://github.com/splunk/genesys_cloud_ta/releases) from GitHub.
 2. Determine where and how to install this add-on in your deployment.
 3. Perform any prerequisite steps before installing.
 4. Complete your installation.
 
 If you need step-by-step instructions on how to install an add-on in your specific deployment environment, see the [installation walkthrough](#installation-walkthrough) section at the bottom of this page for links to installation instructions specific to a single-instance deployment, distributed deployment, or Splunk Cloud.
+
+
+## Splunk admin requirements
+To install and configure the Genesys Cloud Add-on for Splunk, you must be a member of the `admin` role.
+
 
 ## Distributed installation of this add-on
 
@@ -23,15 +28,6 @@ may need to install the add-on in multiple places.
 | Heavy Forwarders | Yes | No | If installed on heavy forwarders, does not need to be installed on indexers. Select one node, either a search head or a heavy forwarder, to serve as the configuration server for this add-on, and disable visibility of the add-on in all other locations. |
 | Universal Forwarders | No | No | Universal forwarders are not supported for data collection, because the modular inputs require Python and the Splunk REST handler. |
 
-## Distributed deployment compatibility
-
-This table provides a quick reference for the compatibility of this add-on with Splunk distributed deployment features.
-
-| Distributed deployment feature | Supported | Comments |
-|----|----|----|
-| Search Head Clusters | Yes | Disable add-on visibility on search heads. |
-| Indexer Clusters | Yes |  |
-| Deployment Server | Yes | Supported for deploying the unconfigured add-on only. Configure this add-on using the add-on's configuration UI from one node only. |
 
 ## Installation walkthrough
 
