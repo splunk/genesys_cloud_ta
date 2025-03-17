@@ -55,6 +55,7 @@ nav:
     - Configure an Account: 'ConfigureAccount/index.md'
     - Configure Analytics Inputs: 'ConfigureAnalyticsInputs/index.md'
     - Configure Telephony Providers Edge Inputs: 'ConfigureTelephonyProvidersEdgeInputs/index.md'
+    - Configure Users Inputs: 'ConfigureUsersInputs/index.md'
   - Troubleshoot:
     - Troubleshoot: 'Troubleshooting/index.md'
   # - Reference:

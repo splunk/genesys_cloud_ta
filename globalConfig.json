@@ -670,6 +670,71 @@
                     ],
                     "inputHelperModule": "conversations_details_helper",
                     "title": "Conversations Details"
+                },
+                {
+                    "name": "user_routing_status",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "user_routing_status_helper",
+                    "title": "User Routing Statuses"
                 }
             ],
             "title": "Inputs",
@@ -681,7 +746,6 @@
                     "groupServices": [
                         "queue_observations",
                         "chat_observations",
-                        "user_aggregates",
                         "conversations_metrics",
                         "conversations_details"
                     ]
@@ -693,6 +757,14 @@
                         "edges_trunks_metrics",
                         "edges_metrics",
                         "edges_phones"
+                    ]
+                },
+                {
+                    "groupName": "users",
+                    "groupTitle": "Users",
+                    "groupServices": [
+                        "user_aggregates",
+                        "user_routing_status"
                     ]
                 }
             ],
