@@ -734,7 +734,7 @@
                         }
                     ],
                     "inputHelperModule": "user_routing_status_helper",
-                    "title": "User Routing Status"
+                    "title": "User Routing Statuses"
                 }
             ],
             "title": "Inputs",
