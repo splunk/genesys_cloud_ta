@@ -21,7 +21,7 @@ package: build
 
 install-docs: venv
 	source .venv/bin/activate;
-	pip install mkdocs==1.6.0 mkdocs-material==9.5.32
+	pip install mkdocs==1.6.0 mkdocs-material==9.5.32 mkdocs-print-site-plugin==2.6.0
 
 run-docs: install-docs
 	mkdocs serve

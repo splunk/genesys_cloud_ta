@@ -16,6 +16,7 @@ markdown_extensions:
 
 theme:
   name: material
+  custom_dir: docs/theme_overrides
   logo: "static/splunk-logo-corporate.png"
   favicon: "static/splunk.png"
   palette:
