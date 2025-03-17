@@ -474,7 +474,7 @@
                         }
                     ],
                     "inputHelperModule": "edges_phones_helper",
-                    "title": "Phones"
+                    "title": "Phones Statuses"
                 },
                 {
                     "name": "user_aggregates",
