@@ -199,6 +199,10 @@ class UserModel(GCBaseModel):
             users.append(new_user)
         return users
 
+    @property
+    def user_ids(self) -> List[str]:
+        return [user["id"] for user in self.data]
+
     def get_user_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_USER_IDS*batch
         slice = self.MAX_USER_IDS + factor
