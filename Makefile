@@ -1,9 +1,13 @@
-.PHONY : build run package
+.PHONY : venv build run package install-docs run-docs
 
-APP_VERSION = $$(cat globalConfig.json | jq -r '.meta.version')
-APP_NAME=genesys_cloud_ta
+APP_VERSION := $$(cat globalConfig.json | jq -r '.meta.version')
+APP_NAME := $$(cat globalConfig.json | jq -r '.meta.name')
 
-build:
+venv:
+	python3 -m venv .venv
+
+build: venv
+	source .venv/bin/activate;
 	ucc-gen build --ta-version=$(APP_VERSION)
 
 run:
@@ -14,3 +18,10 @@ package: build
 	cp README.md output/$(APP_NAME)/
 	mkdir -p dist
 	ucc-gen package --path output/$(APP_NAME) -o dist
+
+install-docs: venv
+	source .venv/bin/activate;
+	pip install mkdocs==1.6.0 mkdocs-material==9.5.32 mkdocs-print-site-plugin==2.6.0
+
+run-docs: install-docs
+	mkdocs serve

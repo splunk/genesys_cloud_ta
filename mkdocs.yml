@@ -1,0 +1,62 @@
+site_name: Genesys Cloud Add-on for Splunk
+site_author: Splunk Community
+
+markdown_extensions:
+  - toc:
+      permalink: True
+  - smarty
+  - fenced_code
+  - sane_lists
+  - codehilite
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+
+theme:
+  name: material
+  custom_dir: docs/theme_overrides
+  logo: "static/splunk-logo-corporate.png"
+  favicon: "static/splunk.png"
+  palette:
+    primary: "black"
+    accent: "orange"
+
+extra_css:
+  - stylesheets/styles.css
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
+strict: true
+
+plugins:
+  - search
+  - print-site
+
+copyright: 'Splunk Documentation covered by: <a href="https://www.splunk.com/en_us/legal.html">Legal</a> | <a href="https://www.splunk.com/en_us/legal/terms/terms-of-use.html">Terms</a> | <a href="https://www.splunk.com/en_us/legal/privacy/privacy-policy.html">Privacy</a></br>© Copyright 2024 Splunk Inc. All rights reserved. <br/>Webpages built on GitHub Pages | <a href="https://docs.github.com/en/site-policy/github-terms/github-terms-of-service">GitHub Terms</a> | <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement">GitHub Privacy</a>'
+
+nav:
+  - Overview:
+    - Introduction: 'index.md'
+    - Source types: 'Sourcetypes/index.md'
+    - Lookups: 'Lookups/index.md'
+    # - Release notes: 'Releasenotes/index.md'
+    # - Release history: 'Releasehistory/index.md'
+    # - Hardware and software requirements: 'Hardwareandsoftwarerequirements/index.md'
+    - Installation and configuration overview: 'InstallationOverview/index.md'
+  - Installation:
+    - Install: 'Install/index.md'
+    # - Upgrade: 'Upgrade/index.md'
+  - Configuration:
+    - Configure an integration application in Genesys Cloud: 'ConfigureGenesysCloud/index.md'
+    - Configure an Account: 'ConfigureAccount/index.md'
+    - Configure Analytics Inputs: 'ConfigureAnalyticsInputs/index.md'
+    - Configure Telephony Providers Edge Inputs: 'ConfigureTelephonyProvidersEdgeInputs/index.md'
+    - Configure Users Inputs: 'ConfigureUsersInputs/index.md'
+  - Troubleshoot:
+    - Troubleshoot: 'Troubleshooting/index.md'
+  # - Reference:
+  #   - Performance reference: 'Reference/index.md'
