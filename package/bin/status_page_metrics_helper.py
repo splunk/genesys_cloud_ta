@@ -81,41 +81,33 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             events_count = 0
             
             summary = status_data["summary"]
+            page = summary.get("page", {})
             logger.debug(f"Summary data: {summary}")
-            if summary:
-                try:
-                    # Get the page updated_at timestamp for checkpoint comparison
-                    page_updated_at_str = summary.get("page", {}).get("updated_at")
-                    if page_updated_at_str:
-                        page_updated_at_dt = datetime.fromisoformat(page_updated_at_str.replace("Z", "+00:00"))
-                        page_updated_at_timestamp = page_updated_at_dt.timestamp()
-                        logger.debug(f"Page updated at timestamp: {page_updated_at_timestamp}")
-                        
-                        # Only process if newer than our checkpoint
-                        if page_updated_at_timestamp > status_page_checkpoint: 
 
-                            event_data = {
-                                "page": summary.get("page", {}),
-                                "status": summary.get("status", {}),
-                                "components": summary.get("components", []),
-                                "incidents": summary.get("incidents", []),
-                                "scheduled_maintenances": summary.get("scheduled_maintenances", [])
-                            }
+            for component in summary.get("components", []):
+                component_updated_at = datetime.fromisoformat(component.get("updated_at").replace("Z", "+00:00")).timestamp()
+                logger.debug(f"Component updated at timestamp: {component_updated_at}")
+                
+                # Only process if newer than our checkpoint
+                if component_updated_at > status_page_checkpoint: 
 
-                            logger.debug(f"Event data: {event_data}")
-                            
-                            event_writer.write_event(
-                                smi.Event(
-                                    data=json.dumps(event_data, ensure_ascii=False, default=str),
-                                    index=input_item.get("index"),
-                                    sourcetype=sourcetype,
-                                    time=page_updated_at_timestamp
-                                )
-                            )
-                            logger.debug(f"Status summary event written")
-                            events_count += 1
-                except Exception as e:
-                    logger.error(f"Failed to write status summary event: {str(e)}")
+                    component["page"] = page
+                    # Delete page_id field if it exists
+                    if "page_id" in component:
+                        logger.debug(f"Removing page_id field from component")
+                        del component["page_id"]
+                    logger.debug(f"Event data: {component}")
+                    
+                    event_writer.write_event(
+                        smi.Event(
+                            data=json.dumps(component, ensure_ascii=False, default=str),
+                            index=input_item.get("index"),
+                            sourcetype=sourcetype,
+                            time=component_updated_at
+                        )
+                    )
+                    logger.debug(f"Status summary event written")
+                    events_count += 1
             
             # Update checkpoint if data was processed
             current_time = datetime.now(timezone.utc).timestamp()
