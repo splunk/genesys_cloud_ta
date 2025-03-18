@@ -28,7 +28,7 @@ class GCBaseModel:
         format = "%Y-%m-%dT%H:%M:%S.%fZ"
         return datetime.datetime.strptime(dt_string, format)
 
-    def extract(self, idx: int, sub_key: str, keys_to_extract: list, enable_camelcase: bool = True) -> dict:
+    def extract(self, idx: int, sub_key: str, keys_to_extract: list, enable_camelcase: bool = False) -> dict:
         """
         Extract a sub-dictionary and specific key-value pairs from it.
         :param idx: The index of the item containing the sub_key.
@@ -60,13 +60,14 @@ class TrunkModel(GCBaseModel):
         keys = ["id", "name", "state", "trunk_type", "in_service", "enabled"]
         nested_keys = ["id", "name"]
         for idx, trunk in enumerate(self.data):
-            new_trunk = {self.to_camelcase(key): trunk[key] for key in keys}
-            new_trunk["dateCreated"] = self.to_string(trunk["date_created"])
-            new_trunk["dateModified"] = self.to_string(trunk["date_modified"])
+            # new_trunk = {self.to_camelcase(key): trunk[key] for key in keys}
+            new_trunk = {key: trunk[key] for key in keys}
+            new_trunk["date_created"] = self.to_string(trunk["date_created"])
+            new_trunk["date_modified"] = self.to_string(trunk["date_modified"])
             new_trunk.update(self.extract(idx, "trunk_base", nested_keys))
             new_trunk.update(self.extract(idx, "edge", nested_keys))
             if trunk["connected_status"]:
-                new_trunk["connectedStatus"] = trunk["connected_status"]["connected"]
+                new_trunk["connected_status"] = trunk["connected_status"]["connected"]
             # Adding a _key to avoid lookup duplicates
             new_trunk["_key"] = new_trunk["id"]
             trunks.append(new_trunk)
@@ -104,12 +105,13 @@ class EdgeModel(GCBaseModel):
         # Cannot find:
         # - status as per ACTIVE, DISCONNECTED, media, lastConnectionTime, osVersion
         for idx, edge in enumerate(self.data):
-            new_edge = {self.to_camelcase(key): edge[key] for key in keys}
-            new_edge["dateCreated"] = self.to_string(edge["date_created"])
-            new_edge["dateModified"] = self.to_string(edge["date_modified"])
+            # new_edge = {self.to_camelcase(key): edge[key] for key in keys}
+            new_edge = {key: edge[key] for key in keys}
+            new_edge["date_created"] = self.to_string(edge["date_created"])
+            new_edge["date_modified"] = self.to_string(edge["date_modified"])
             new_edge.update(self.extract(idx, "site", nested_keys))
-            new_edge["macAddress"] = self._parse_interfaces(edge["interfaces"], "mac_address")
-            new_edge["ipAddress"] = self._parse_interfaces(edge["interfaces"], "ip_address")
+            new_edge["mac_address"] = self._parse_interfaces(edge["interfaces"], "mac_address")
+            new_edge["ip_address"] = self._parse_interfaces(edge["interfaces"], "ip_address")
             # Adding a _key to avoid lookup duplicates
             new_edge["_key"] = new_edge["id"]
             edges.append(new_edge)
@@ -136,9 +138,10 @@ class PhoneModel(GCBaseModel):
         keys = ["id", "name", "state"]
         nested_keys = ["id", "name"]
         for idx, phone in enumerate(self.data):
-            new_phone = {self.to_camelcase(key): phone[key] for key in keys}
-            new_phone["dateCreated"] = self.to_string(phone["date_created"])
-            new_phone["dateModified"] = self.to_string(phone["date_modified"])
+            # new_phone = {self.to_camelcase(key): phone[key] for key in keys}
+            new_phone = {key: phone[key] for key in keys}
+            new_phone["date_created"] = self.to_string(phone["date_created"])
+            new_phone["date_modified"] = self.to_string(phone["date_modified"])
             new_phone.update(self.extract(idx, "site", nested_keys))
             # Adding a _key to avoid lookup duplicates
             new_phone["_key"] = new_phone["id"]
@@ -194,7 +197,7 @@ class UserModel(GCBaseModel):
         nested_keys = ["id", "name"]
         for idx, user in enumerate(self.data):
             new_user = {key: user[key] for key in keys}
-            new_user.update(self.extract(idx, "division", nested_keys, False))
+            new_user.update(self.extract(idx, "division", nested_keys))
             new_user["_key"] = new_user["id"]
             users.append(new_user)
         return users

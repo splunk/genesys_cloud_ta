@@ -49,3 +49,14 @@ $~ make build
 ```
 Copy / sync the `output/genesys_cloud_ta` folder with the remote splunk instance
 > In the current environment this symlink is configured: `$SPLUNK_HOME/etc/apps/genesys_cloud_ta -> /home/splunker/genesys_cloud_ta/output/genesys_cloud_ta/`
+
+### Documentation
+Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
+
+[MkDocs](https://www.mkdocs.org/getting-started/) comes with a built-in dev-server that lets you preview your documentation as you work on it.
+
+```bash
+# Preview your docs
+$~ cd genesys_cloud_ta
+$~ make run-docs
+```
