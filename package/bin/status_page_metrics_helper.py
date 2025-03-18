@@ -29,23 +29,17 @@ def get_account_property(session_key: str, account_name: str, property_name: str
 def fetch_status_page_data(logger: logging.Logger):
     """Fetch status data from the Genesys Cloud Status Page API"""
     try:
-        # Get current incidents
-        incidents_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/incidents.json")
-        incidents_response.raise_for_status()
-        incidents_data = incidents_response.json()
-        
-        # Get component statuses
-        components_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/components.json")
-        components_response.raise_for_status()
-        components_data = components_response.json()
+        # Get status summary instead of incidents
+        summary_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/summary.json")
+        summary_response.raise_for_status()
+        summary_data = summary_response.json()
         
         return {
-            "incidents": incidents_data.get("incidents", []),
-            "components": components_data.get("components", [])
+            "summary": summary_data
         }
     except Exception as e:
         logger.error(f"Error fetching status page data: {str(e)}")
-        return {"incidents": [], "components": []}
+        return {"summary": {}}
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -53,13 +47,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
-            components_checkpointer = checkpointer.KVStoreCheckpointer(
-                "components_metrics_checkpointer",
-                session_key,
-                ADDON_NAME,
-            )
-            incidents_checkpointer = checkpointer.KVStoreCheckpointer(
-                "incidents_metrics_checkpointer",
+            status_page_checkpointer = checkpointer.KVStoreCheckpointer(
+                "status_page_metrics_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
@@ -74,133 +63,72 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.setLevel(log_level)
             log.modular_input_start(logger, normalized_input_name)
             
-            # Get checkpoints for components and incidents
+            # Get checkpoints for incidents
             checkpointer_key_name = input_name.split("/")[-1]
             # If we don't have any checkpoint, we default it to 1970
-            components_checkpoint = (
-                components_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
-            )
-            incidents_checkpoint = (
-                incidents_checkpointer.get(checkpointer_key_name)
+            status_page_checkpoint = (
+                status_page_checkpointer.get(checkpointer_key_name)
                 or datetime(1970, 1, 1).timestamp()
             )
             
-            logger.debug(f"Current components checkpoint: {components_checkpoint}")
-            logger.debug(f"Current incidents checkpoint: {incidents_checkpoint}")
+            logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
             
             # Fetch data from Status Page API
             status_data = fetch_status_page_data(logger)
             
-            # Process component status data
-            sourcetype = "genesyscloud:status:components"
-            components_count = 0
+            # Process summary data
+            sourcetype = "genesyscloud:statuspage"
+            events_count = 0
             
-            for component in status_data["components"]:
+            summary = status_data["summary"]
+            logger.debug(f"Summary data: {summary}")
+            if summary:
                 try:
-                    # Create event with component status
-                    event_data = {
-                        "id": component.get("id"),
-                        "name": component.get("name"),
-                        "status": component.get("status"),
-                        "description": component.get("description", ""),
-                        "group_id": component.get("group_id"),
-                        "updated_at": component.get("updated_at"),
-                        "position": component.get("position"),
-                        "status_indicator": {
-                            "up": component.get("status") == "operational",
-                            "down": component.get("status") == "major_outage",
-                            "warning": component.get("status") in ["partial_outage", "degraded_performance"]
-                        }
-                    }
+                    # Get the page updated_at timestamp for checkpoint comparison
+                    page_updated_at_str = summary.get("page", {}).get("updated_at")
+                    if page_updated_at_str:
+                        page_updated_at_dt = datetime.fromisoformat(page_updated_at_str.replace("Z", "+00:00"))
+                        page_updated_at_timestamp = page_updated_at_dt.timestamp()
+                        logger.debug(f"Page updated at timestamp: {page_updated_at_timestamp}")
+                        
+                        # Only process if newer than our checkpoint
+                        if page_updated_at_timestamp > status_page_checkpoint: 
 
-                    updated_at_str = component.get("updated_at")
-                    updated_at_dt = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00"))
-                    updated_at_timestamp = updated_at_dt.timestamp()
-                    
-                    # Only process if newer than our checkpoint
-                    if updated_at_timestamp > components_checkpoint:
-                        logger.debug(f"Component event data: {event_data}")
-                        
-                        event_writer.write_event(
-                            smi.Event(
-                                data=json.dumps(event_data, ensure_ascii=False),
-                                index=input_item.get("index"),
-                                sourcetype=sourcetype,
-                                time=updated_at_timestamp
+                            event_data = {
+                                "page": summary.get("page", {}),
+                                "status": summary.get("status", {}),
+                                "components": summary.get("components", []),
+                                "incidents": summary.get("incidents", []),
+                                "scheduled_maintenances": summary.get("scheduled_maintenances", [])
+                            }
+
+                            logger.debug(f"Event data: {event_data}")
+                            
+                            event_writer.write_event(
+                                smi.Event(
+                                    data=json.dumps(event_data, ensure_ascii=False, default=str),
+                                    index=input_item.get("index"),
+                                    sourcetype=sourcetype,
+                                    time=page_updated_at_timestamp
+                                )
                             )
-                        )
-                        logger.debug(f"Component event written: {event_data}")
-                        components_count += 1
+                            logger.debug(f"Status summary event written")
+                            events_count += 1
                 except Exception as e:
-                    logger.error(f"Failed to write component event: {str(e)}")
+                    logger.error(f"Failed to write status summary event: {str(e)}")
             
-            # Process incident data
-            sourcetype = "genesyscloud:status:incidents"
-            incidents_count = 0
-            
-            for incident in status_data["incidents"]:
-                try:
-                    # Create event with incident details
-                    event_data = {
-                        "id": incident.get("id"),
-                        "name": incident.get("name"),
-                        "status": incident.get("status"),
-                        "impact": incident.get("impact"),
-                        "shortlink": incident.get("shortlink"),
-                        "created_at": incident.get("created_at"),
-                        "updated_at": incident.get("updated_at"),
-                        "resolved_at": incident.get("resolved_at"),
-                        "incident_updates": incident.get("incident_updates", []),
-                        "components": incident.get("components", [])
-                    }
-                    
-                    updated_at_str = incident.get("updated_at")
-                    updated_at_dt = datetime.fromisoformat(updated_at_str.replace("Z", "+00:00"))
-                    updated_at_timestamp = updated_at_dt.timestamp()
-                    
-                    # Only process if newer than our checkpoint
-                    if updated_at_timestamp > incidents_checkpoint:
-                        logger.debug(f"Incident event data: {event_data}")
-                        
-                        event_writer.write_event(
-                            smi.Event(
-                                data=json.dumps(event_data, ensure_ascii=False),
-                                index=input_item.get("index"),
-                                sourcetype=sourcetype,
-                                time=updated_at_timestamp
-                            )
-                        )
-                        logger.debug(f"Incident event written: {event_data}")
-                        incidents_count += 1
-                except Exception as e:
-                    logger.error(f"Failed to write incident event: {str(e)}")
-            
-            # Update checkpoints if data was processed
+            # Update checkpoint if data was processed
             current_time = datetime.now(timezone.utc).timestamp()
             
-            if status_data["components"]:
-                logger.debug(f"Updating components checkpoint to {current_time}")
-                components_checkpointer.update(checkpointer_key_name, current_time)
-                
-            if status_data["incidents"]:
-                logger.debug(f"Updating incidents checkpoint to {current_time}")
-                incidents_checkpointer.update(checkpointer_key_name, current_time)
+            if events_count > 0:
+                logger.debug(f"Updating status page checkpoint to {current_time}")
+                status_page_checkpointer.update(checkpointer_key_name, current_time)
             
             log.events_ingested(
                 logger,
                 input_name,
-                "genesyscloud:status:components",
-                components_count,
-                input_item.get("index"),
-                account=input_item.get("account")
-            )
-            
-            log.events_ingested(
-                logger,
-                input_name,
-                "genesyscloud:status:incidents",
-                incidents_count,
+                sourcetype,
+                events_count,
                 input_item.get("index"),
                 account=input_item.get("account")
             )
