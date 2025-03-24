@@ -9,3 +9,5 @@ local.meta
 .pypirc
 *.so
 *.log
+*.pdf
+dist/
