@@ -11,3 +11,4 @@ local.meta
 *.log
 *.pdf
 dist/
+.pytest_cache
