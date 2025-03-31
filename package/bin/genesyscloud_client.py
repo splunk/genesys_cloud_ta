@@ -12,13 +12,14 @@ class GenesysCloudClient:
 
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str):
         self.logger = logger
-        region = PureCloudPlatformClientV2.PureCloudRegionHosts[aws_region]
-        self.host = region.get_api_host()
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.client = ApiClient(self.host).get_client_credentials_token(
-                self.client_id, self.client_secret
-            )
+        if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
+            region = PureCloudPlatformClientV2.PureCloudRegionHosts[aws_region]
+            self.host = region.get_api_host()
+            self.client = ApiClient(self.host).get_client_credentials_token(
+                    client_id, client_secret
+                )
+        else:
+            self.logger.warning(f"Region {aws_region} not found.")
 
     def _fetch(self, api_instance, f_name: str, *args, **kwargs):
         items = []
@@ -66,6 +67,9 @@ class GenesysCloudClient:
         self.logger.info(f"Getting data from {api_instance_name}")
         # Get the API class dynamically
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name)
+        if self.client is None:
+            self.logger.error(f"Client not initialised - {self.client}")
+            return []
         # Instantiate the API with the client
         api_instance = api_class(self.client)
 
@@ -120,6 +124,10 @@ class GenesysCloudClient:
 
         if api_class is None:
             self.logger.error(f"AttributeError - API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+            return None
+
+        if self.client is None:
+            self.logger.error(f"Client not initialised - {self.client}")
             return None
 
         # Instantiate the API with the authenticated client
