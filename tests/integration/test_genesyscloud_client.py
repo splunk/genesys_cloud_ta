@@ -7,8 +7,6 @@ from .GenesysCloudTATest import GenesysCloudTATest
 class TestGenesysCloudClient(GenesysCloudTATest):
     """Test Class for Genesys Cloud Client Component"""
 
-    # Test pagination for GET and POST
-    # Test error cases
 
     @pytest.mark.parametrize("api_name, func_name, expected_result",
         [
@@ -92,16 +90,16 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         )
         assert len(response) == 0
 
-    # POST
-    # @pytest.mark.usefixtures("body_conversations")
-    @pytest.mark.parametrize("api_name, func_name, model_name, has_filter, expected_result",
+
+    @pytest.mark.parametrize("api_name, func_name, model_name, expected_result, has_filter",
         [
-            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", False, 4),
-            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", True, 10),
+            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 4, False),
+            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 10, True),
+            ("ConversationsApi", "post_analytics_conversations_details_query", "ConversationQuery", 114, None),
         ],
     )
-    def test_POST(self, body_conversations, api_name, func_name, model_name, has_filter, expected_result):
-        """Test regular POST calls"""
+    def test_POST_conversations(self, body_conversations, api_name, func_name, model_name, expected_result, has_filter):
+        """Test POST calls to query conversations data"""
         _filter = None
 
         if has_filter:
@@ -116,11 +114,64 @@ class TestGenesysCloudClient(GenesysCloudTATest):
                 ]
             }
 
+        basic = "aggregates" in func_name
+
         response = self.gc_client.post(
             api_name,
             func_name,
             model_name,
-            body_conversations(_filter)
+            body_conversations(basic, _filter)
         )
-        results = response.to_dict().get("results", [])
-        assert len(results) == expected_result
+        if isinstance(response, list):
+            lst_response = self.gc_client.convert_response(response, "conversations")
+            assert len(lst_response) == expected_result
+        else:
+            results = response.to_dict().get("results", [])
+            assert len(results) == expected_result
+
+
+    @pytest.mark.parametrize("api_name, func_name, model_name",
+        [
+            ("RoutingApi", "post_analytics_queues_observations_query", "QueueObservationQuery"),
+            ("UsersApi", "post_analytics_users_aggregates_query", "UserAggregationQuery"),
+        ],
+    )
+    def test_POST_others(self, body_routing_queues, body_users, api_name, func_name, model_name):
+        """Test POST calls to query routing and users data"""
+        ids = [str(uuid.uuid4()), str(uuid.uuid4())]
+        if "Routing" in api_name:
+            body = body_routing_queues(ids)
+            expected_result = 7*len(ids)
+        else:
+            body = body_users(ids)
+            expected_result = len(ids)
+
+        response = self.gc_client.post(
+            api_name,
+            func_name,
+            model_name,
+            body
+        )
+        assert len(response.to_dict().get("results", [])) == expected_result
+
+
+    @pytest.mark.parametrize("api_name, func_name, model_name",
+        [
+            ("RoutingApi", "post_analytics_queues_observations_query", "QueueObservationQuery"),
+            ("UsersApi", "post_analytics_users_aggregates_query", "UserAggregationQuery"),
+        ],
+    )
+    def test_POST_wrong_body(self, body_routing_queues, body_users, api_name, func_name, model_name):
+        """Test POST calls throwing error for unexpected body"""
+        if "Routing" in api_name:
+            body = body_routing_queues(None)
+        else:
+            body = body_users(None)
+
+        response = self.gc_client.post(
+            api_name,
+            func_name,
+            model_name,
+            body
+        )
+        assert response == None
