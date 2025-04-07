@@ -833,8 +833,8 @@
                     ]
                 },
                 {
-                    "groupName": "platform_status",
-                    "groupTitle": "Platform Status",
+                    "groupName": "operational_info",
+                    "groupTitle": "Operational Info",
                     "groupServices": [
                         "status_page_metrics"
                     ]
