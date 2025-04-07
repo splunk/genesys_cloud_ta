@@ -37,7 +37,7 @@ def fetch_status_page_data(logger: logging.Logger):
         return summary_data
     except Exception as e:
         logger.error(f"Error fetching status page data: {str(e)}")
-        return {"summary": {}}
+        return {}
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
