@@ -799,7 +799,7 @@
                         }
                     ],
                     "inputHelperModule": "status_page_metrics_helper",
-                    "title": "status_page_metrics"
+                    "title": "System Status"
                 }
             ],
             "title": "Inputs",
