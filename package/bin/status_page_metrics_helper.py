@@ -34,9 +34,7 @@ def fetch_status_page_data(logger: logging.Logger):
         summary_response.raise_for_status()
         summary_data = summary_response.json()
 
-        return {
-            "summary": summary_data
-        }
+        return summary_data
     except Exception as e:
         logger.error(f"Error fetching status page data: {str(e)}")
         return {"summary": {}}
