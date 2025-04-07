@@ -77,7 +77,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             status_data = fetch_status_page_data(logger)
 
             # Process summary data
-            sourcetype = "genesyscloud:statuspage"
+            sourcetype = "genesyscloud:status:system"
             events_count = 0
 
             summary = status_data["summary"]
