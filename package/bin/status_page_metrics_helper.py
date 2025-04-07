@@ -72,7 +72,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
 
             # Fetch data from Status Page API
-            status_data = fetch_status_page_data(logger)
+            summary = fetch_status_page_data(logger)
 
             # Process summary data
             sourcetype = "genesyscloud:status:system"
