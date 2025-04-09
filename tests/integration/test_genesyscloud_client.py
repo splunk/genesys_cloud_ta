@@ -30,6 +30,7 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         [
             ("TelephonyProvidersEdgeApi", "get_telephony_providers_edges_phones", dict(expand="site,status")),
             ("TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks_metrics", [str(uuid.uuid4()), str(uuid.uuid4())]),
+            ("TelephonyProvidersEdgeApi", "get_telephony_providers_edges_metrics", [str(uuid.uuid4()), str(uuid.uuid4())]),
             ("UsersApi", "get_user_routingstatus", [str(uuid.uuid4())]),
         ],
     )

@@ -1,12 +1,5 @@
 import os
 import sys
-# import json
-# import base64
-# import random
-# import pytest
-# import umsgpack
-# import requests
-# import datetime
 import pytest
 import logging
 
@@ -40,22 +33,18 @@ class GenesysCloudTATest():
 
     @classmethod
     def setup_class(cls):
-        # super(GenesysCloudTATest, cls).setup_class()
         cls.logger.info("Starting setup methods...")
         cls.logger.info("Test Begins.")
         cls.create_genesyscloud_client()
 
     @classmethod
     def teardown_class(cls):
-        # super(GenesysCloudTATest, cls).teardown_class()
         cls.delete_genesyscloud_accounts()
 
     def setup_method(cls, method):
-        # super(GenesysCloudTATest, self).setup_method(method)
         cls.logger.info(f"Setup method {method}")
 
     def teardown_method(cls, method):
-        # super(GenesysCloudTATest, self).teardown_method(method)
         cls.logger.info(f"Tearing down method {method}")
 
     @classmethod
@@ -67,7 +56,6 @@ class GenesysCloudTATest():
         cls.logger.info("Create client with config %s", configs)
         # Create client
         cls.gc_client = GenesysCloudClient(cls.logger, **configs)
-        cls.gc_client.client = ApiClient(f"http://{configs['aws_region']}").get_client_credentials_token(configs["client_id"], configs["client_secret"])
 
     @classmethod
     def delete_genesyscloud_accounts(cls):

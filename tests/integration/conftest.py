@@ -10,33 +10,8 @@ from .GenesysCloudTATest import GenesysCloudTATest
 logging.basicConfig(filename="conftest.log", level=logging.DEBUG)
 LOGGER = logging.getLogger()
 
-LOGGER.info("IN CONFTEST")
+LOGGER.info("Conftest [integration] - Entering")
 
-
-def pytest_addoption(parser):
-    """
-    Adds extra command line arguments to py.test
-    """
-    """
-    This is a pytest hook to add options from the command line so that
-    we can use it later.
-    """
-    gc_group = parser.getgroup("Genesys Cloud Options")
-    gc_group.addoption(
-        "--client_id",
-        dest="client_id",
-        help="the client id to access Genesys Cloud",
-    )
-    gc_group.addoption(
-        "--client_secret",
-        dest="client_secret",
-        help="the password for client_id",
-    )
-    gc_group.addoption(
-        "--aws_region",
-        dest="aws_region",
-        help="The AWS Region Genesys Cloud runs in",
-    )
 
 @pytest.fixture(scope="class")
 def body_basic():
