@@ -7,4 +7,4 @@ Please check [Github Pages](https://expert-fortnight-4jpe3ro.pages.github.io/) f
 See contributing [guidelines](CONTRIBUTING.md).
 
 ## License
-This project is licensed under [Splunk Pre-Release Software License Agreement](package/LICENSES/LICENSE.txt).
+This project is licensed under [Apache 2.0](LICENSE).
