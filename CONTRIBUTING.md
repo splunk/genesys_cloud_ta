@@ -41,7 +41,7 @@ $~ make build
 $~ cp -R output/genesys_cloud_ta/ $SPLUNK_HOME/etc/apps/
 ```
 
-### Splunk running on a remote instance (e.g. NOVA)
+### Splunk running on a remote instance
 ```bash
 # Build the TA
 $~ cd genesys_cloud_ta
@@ -92,6 +92,8 @@ Additional requirements to run these tests on your local environment:
 $~ cd genesys_cloud_ta
 $~ make run-functional-tests
 ```
+
+:point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
 
 ## Documentation
 Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
