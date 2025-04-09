@@ -50,7 +50,50 @@ $~ make build
 Copy / sync the `output/genesys_cloud_ta` folder with the remote splunk instance
 > In the current environment this symlink is configured: `$SPLUNK_HOME/etc/apps/genesys_cloud_ta -> /home/splunker/genesys_cloud_ta/output/genesys_cloud_ta/`
 
-### Documentation
+## Tests
+A CI/CD workflow will automatically perform tests when a PR is opened. The Genesys Cloud server is mocked using [Mockoon](https://mockoon.com/).
+
+To execute tests on your local environment:
+* Install Mockoon and import `tests/genesyscloud_mock.json`
+* Run the server
+    > By default it will listen on `localhost:3004`
+
+### Integration
+Scope is avoid introducing regressions in the `package/bin/genesyscloud_client.py`
+
+```bash
+$~ cd genesys_cloud_ta
+$~ make run-tests
+```
+
+### Functional
+Scope is testing the correct behaviour of the TA when executed in Splunk.
+
+Additional requirements to run these tests on your local environment:
+* Configure `tests/pytest.ini` to connect to your Splunk instance
+    ```bash
+        $~ cd tests
+        $~ python -m pytest --help
+            [...]
+            Splunk Options:
+                --splunk-url=SPLUNK_URL
+                    The url of splunk instance, defaults to localhost
+                --username=USERNAME   Splunk username, defaults to admin
+                --password=PASSWORD   Splunk password, defaults to password
+                --splunkd-port=SPLUNKD_PORT
+                    Splunk Management port, defaults to 8089
+    ```
+* Install the TA in your Splunk instance
+* Copy `etc/cicd/inputs.conf` in `$SPLUNK_HOME/etc/apps/genesys_cloud_ta/local`
+    > Create `local` dir if it does not exist
+
+
+```bash
+$~ cd genesys_cloud_ta
+$~ make run-functional-tests
+```
+
+## Documentation
 Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
 
 [MkDocs](https://www.mkdocs.org/getting-started/) comes with a built-in dev-server that lets you preview your documentation as you work on it.
