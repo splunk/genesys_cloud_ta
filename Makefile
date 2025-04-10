@@ -25,3 +25,15 @@ install-docs: venv
 
 run-docs: install-docs
 	mkdocs serve
+
+install-tests: venv
+	source .venv/bin/activate;
+	pip install pytest==6.2.4 splunk-sdk
+
+run-tests: install-tests
+	cd tests && \
+	export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
+
+run-functional-tests: install-tests
+	cd tests;
+	python -m pytest tests/modinput_functional/*
