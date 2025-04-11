@@ -55,6 +55,7 @@ nav:
     - Configure an integration application in Genesys Cloud: 'ConfigureGenesysCloud/index.md'
     - Configure an Account: 'ConfigureAccount/index.md'
     - Configure Analytics Inputs: 'ConfigureAnalyticsInputs/index.md'
+    - Configure Operational Inputs: 'ConfigureOperationalInputs/index.md'
     - Configure Telephony Providers Edge Inputs: 'ConfigureTelephonyProvidersEdgeInputs/index.md'
     - Configure Users Inputs: 'ConfigureUsersInputs/index.md'
   - Troubleshoot:

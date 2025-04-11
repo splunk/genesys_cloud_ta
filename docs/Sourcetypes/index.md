@@ -13,4 +13,4 @@ The Genesys Cloud Add-on for Splunk provides the index-time and search-time know
 | `genesyscloud:analytics:conversations:details` | All the score metrics for conversations, ex: MOS scores |
 | `genesyscloud:users:users:aggregates` | All the metrics for user aggregates |
 | `genesyscloud:users:users:routingstatus` | All the user routing status |
-| `genesyscloud:status:system` | All system services status retrieved via Status Page API |
+| `genesyscloud:operational:system` | All Genesys Cloud system services status retrieved via [Status Page API](https://metastatuspage.com/api#summary) |
