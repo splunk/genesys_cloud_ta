@@ -786,20 +786,10 @@
                                     "errorMsg": "Length of index name should be between 1 and 80."
                                 }
                             ]
-                        },
-                        {
-                            "type": "singleSelect",
-                            "label": "Account to use",
-                            "options": {
-                                "referenceName": "account"
-                            },
-                            "help": "Account to use for this input.",
-                            "field": "account",
-                            "required": true
                         }
                     ],
                     "inputHelperModule": "status_page_metrics_helper",
-                    "title": "System Status"
+                    "title": "System Services Status"
                 }
             ],
             "title": "Inputs",
@@ -813,6 +803,13 @@
                         "chat_observations",
                         "conversations_metrics",
                         "conversations_details"
+                    ]
+                },
+                {
+                    "groupName": "operational",
+                    "groupTitle": "Operational",
+                    "groupServices": [
+                        "status_page_metrics"
                     ]
                 },
                 {
@@ -830,13 +827,6 @@
                     "groupServices": [
                         "user_aggregates",
                         "user_routing_status"
-                    ]
-                },
-                {
-                    "groupName": "operational_info",
-                    "groupTitle": "Operational Info",
-                    "groupServices": [
-                        "status_page_metrics"
                     ]
                 }
             ],
