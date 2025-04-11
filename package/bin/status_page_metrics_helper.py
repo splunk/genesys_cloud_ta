@@ -75,7 +75,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             summary = fetch_status_page_data(logger)
 
             # Process summary data
-            sourcetype = "genesyscloud:status:system"
+            sourcetype = "genesyscloud:operational:system"
             events_count = 0
 
             page = summary.get("page", {})
@@ -86,7 +86,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger.debug(f"Component updated at timestamp: {component_updated_at}")
 
                 # Only process if newer than our checkpoint
-                if component_updated_at > status_page_checkpoint: 
+                if component_updated_at > status_page_checkpoint:
 
                     component["page"] = page
                     # Delete page_id field if it exists
@@ -128,6 +128,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.log_exception(
                 logger,
                 e,
-                "IngestionError", 
+                "IngestionError",
                 msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
             )
