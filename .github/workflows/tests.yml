@@ -1,0 +1,107 @@
+name: tests
+
+on:
+  # Temporary for testing
+  push
+  # pull_request:
+  #   branches:
+  #     - main
+  #   types: [opened, reopened, synchronize]
+  #   paths:
+  #     - package/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  splunk-test:
+    name: Deploy and test the TA
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [9.3.3]
+        # version: [9.4.1, 9.3.3, 9.2.5]
+    services:
+      mockoon:
+        image: mockoon/cli:latest
+        env:
+          MOCKOON_DATA: /data/mockoon.json
+        options: >-
+          --health-cmd "curl --silent --fail http://localhost:3004/health || exit 1"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+        ports:
+          - 3004:3004
+      splunk:
+        image: splunk/splunk:${{ matrix.version }}
+        env:
+          SPLUNK_START_ARGS: --answer-yes --no-prompt --accept-license
+          SPLUNK_PASSWORD: password
+          GENESYSCLOUD_HOST: http://mockoon:3004
+        options: >-
+          --health-interval 30s
+          --health-timeout 5s
+          --health-retries 5
+          --name splunk
+        ports:
+          - 8000:8000
+          - 8089:8089
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.7
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework pytest splunk-sdk
+
+      - name: Build TA
+        run: |
+          app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
+          ucc-gen build --ta-version ${app_version}
+        shell: bash
+
+      - name: Copy app to service container and validate
+        # NOTE using volume mapping to add the app to the container will NOT work since checkout hasn't happened yet
+        run: |
+          app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          docker cp output/${app_id} ${{ job.services.splunk.id }}:/opt/splunk/etc/apps/${app_id}
+          docker exec ${{ job.services.splunk.id }} mkdir -p /opt/splunk/etc/apps/${app_id}/local
+          docker cp etc/cicd/inputs.conf ${{ job.services.splunk.id }}:/opt/splunk/etc/apps/${app_id}/local
+          docker exec -i ${{ job.services.splunk.id }} ls -a /opt/splunk/etc/apps
+          docker exec -i ${{ job.services.splunk.id }} ls -a /opt/splunk/etc/apps/${app_id}
+
+      - name: Copy mockoon environment in service container and restart
+        run: |
+          docker cp tests/genesyscloud_mock.json ${{ job.services.mockoon.id }}:/data/mockoon.json
+          docker exec ${{ jobs.services.mockoon.id }} sh -c 'pkill -f mockoon || true'
+          docker exec -d ${{ jobs.services.mockoon.id }} mockoon-cli start --data /data/mockoon.json --port 3004
+
+      - name: Test mockoon is alive
+        run: |
+          for i in {1..30}; do
+            if curl --silent --fail http://localhost:3004/health; then
+              echo "Mockoon is up!"
+              exit 0
+            fi
+            echo "Waiting for Mockoon..."
+            sleep 2
+          done
+          echo "Mockoon failed to start"
+          exit 1
+
+      - name: Test connectivity
+        run: |
+          docker exec -i ${{ job.services.splunk.id }} sh -c "curl -v http://mockoon:3004/health || echo 'Connection failed'"
+
+      # TODO check this
+      # Shall the integration tests be executed into a different pipeline?
+      # Or just run them all the time independently from any changes to client lib?
+      - name: Run tests
+        run: |
+          python -m pytest tests/modinput_functional/*
+        working_directory: tests
