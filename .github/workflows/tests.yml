@@ -28,6 +28,7 @@ jobs:
         image: mockoon/cli:latest
         env:
           MOCKOON_DATA: /data/mockoon.json
+        command: ["--data", "/data/mockoon.json", "--port", "3004"]
         options: >-
           --health-cmd "curl --silent --fail http://localhost:3004/health || exit 1"
           --health-interval 5s
