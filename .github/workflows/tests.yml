@@ -104,4 +104,4 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest tests/modinput_functional/*
-        working_directory: tests
+        working_directory: ./tests
