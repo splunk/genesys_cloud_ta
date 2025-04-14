@@ -65,8 +65,8 @@ jobs:
           ucc-gen build --ta-version ${app_version}
         shell: bash
 
-      - name: Copy app to service container and validate
         # NOTE using volume mapping to add the app to the container will NOT work since checkout hasn't happened yet
+      - name: Copy app to service container and validate
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           docker cp output/${app_id} ${{ job.services.splunk.id }}:/opt/splunk/etc/apps/${app_id}
@@ -78,8 +78,8 @@ jobs:
       - name: Copy mockoon environment in service container and restart
         run: |
           docker cp tests/genesyscloud_mock.json ${{ job.services.mockoon.id }}:/data/mockoon.json
-          docker exec ${{ jobs.services.mockoon.id }} sh -c 'pkill -f mockoon || true'
-          docker exec -d ${{ jobs.services.mockoon.id }} mockoon-cli start --data /data/mockoon.json --port 3004
+          docker exec ${{ job.services.mockoon.id }} sh -c 'pkill -f mockoon || true'
+          docker exec -d ${{ job.services.mockoon.id }} mockoon-cli start --data /data/mockoon.json --port 3004
 
       - name: Test mockoon is alive
         run: |
@@ -104,4 +104,4 @@ jobs:
       - name: Run tests
         run: |
           python -m pytest tests/modinput_functional/*
-        working_directory: ./tests
+        working-directory: ./tests
