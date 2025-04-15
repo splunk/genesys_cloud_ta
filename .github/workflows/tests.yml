@@ -95,7 +95,9 @@ jobs:
           # python -m pytest
           make run-tests
         # working-directory: ./tests
+        shell: bash
 
       - name: Run functional tests
         run: |
           make run-functional-tests
+        shell: bash
