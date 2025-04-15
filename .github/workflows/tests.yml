@@ -91,13 +91,15 @@ jobs:
       # Or just run them all the time independently from any changes to client lib?
       - name: Run integration tests
         run: |
-          pip install --upgrade PureCloudPlatformClientV2==221.0.0
+          pip install -r tests/test-requirements.txt
           # python -m pytest
-          make run-tests
-        # working-directory: ./tests
-        shell: bash
+          make run-tests-cicd
+        working-directory: ./tests
+        # shell: bash
 
       - name: Run functional tests
+        if: success()
         run: |
-          make run-functional-tests
-        shell: bash
+          make run-functional-tests-cicd
+        # shell: bash
+        working-directory: ./tests
