@@ -25,8 +25,8 @@ def pytest_addoption(parser):
     gc_group.addoption(
         "--client-secret",
         dest="client_secret",
-        help="the password for client_id",
-        default="myclientsecret, defaults to myclientsecret"
+        help="the password for client_id, defaults to myclientsecret",
+        default="myclientsecret"
     )
     gc_group.addoption(
         "--aws-region",
