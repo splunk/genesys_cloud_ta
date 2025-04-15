@@ -34,12 +34,6 @@ run-tests: install-tests
 	cd tests && \
 	export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
 
-run-tests-cicd:
-	export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
-
 run-functional-tests: install-tests
 	cd tests;
 	python -m pytest tests/modinput_functional/*
-
-run-functional-tests-cicd:
-	python -m pytest modinput_functional/*
