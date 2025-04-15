@@ -49,7 +49,7 @@ jobs:
             -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
             -p 3004:3004 \
             mockoon/cli:latest \
-            --data /data/mockoon.json --port 3004
+            --data /data/mockoon.json --port 3004 --log-transaction
 
       - name: Start Splunk container
         env:
