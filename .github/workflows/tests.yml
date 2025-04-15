@@ -71,6 +71,8 @@ jobs:
       - name: Test mockoon is alive
         run: |
           docker logs mockoon
+          curl -v http://localhost:3004/ || echo "Request failed"
+          curl -v http://mockoon:3004/ || echo "Request failed"
           for i in {1..30}; do
             if curl --silent --fail http://mockoon:3004/; then
               echo "Mockoon is up!"
