@@ -44,7 +44,6 @@ jobs:
 
       - name: Start Mockoon container
         run: |
-          ls -la ${{ github.workspace }}
           docker run -d --name mockoon \
             --network shared-net \
             -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
@@ -71,10 +70,8 @@ jobs:
       - name: Test mockoon is alive
         run: |
           docker logs mockoon
-          curl -v http://localhost:3004/ || echo "Request failed"
-          curl -v http://mockoon:3004/ || echo "Request failed"
           for i in {1..30}; do
-            if curl --silent --fail http://mockoon:3004/; then
+            if curl --silent --fail http://localhost:3004/; then
               echo "Mockoon is up!"
               exit 0
             fi
