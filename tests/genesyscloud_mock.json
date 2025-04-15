@@ -1,1 +1,1232 @@
-{"openapi":"3.0.0","info":{"title":"Genesyscloud","version":"1.0.0"},"servers":[{"url":"http://localhost:3004/"}],"paths":{"/":{"get":{"description":"","responses":{"200":{"description":"","content":{"application/json":{"example":"{}"}},"headers":{}}}}},"/oauth/token":{"post":{"description":"Authenticate","responses":{"200":{"description":"","content":{"application/json":{"example":"{\n    \"access_token\": \"uVX5OvBW7DK-neu--i8vuoiVzwBINKlm9r44B_QNoBVOqkIpUQTnxdzt1ULMfwpMpUxxLbvoBesExFcvKRTJ_w\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 86399\n}"}},"headers":{}},"404":{"description":"","content":{"application/json":{"example":"{\n  \"message\": \"HTTP 404 Not Found\",\n  \"code\": \"not found\",\n  \"status\": 404,\n  \"contextId\": \"e49cd26d-348c-4e6f-b955-7586f5bf2069\",\n  \"details\": [],\n  \"errors\": []\n}"}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/analytics/conversations/details/query":{"post":{"description":"Query for conversation details w/ pagination","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/analytics/conversations/aggregates/query":{"post":{"description":"Query for conversation aggregates","responses":{"200":{"description":"Query without filter","content":{"application/json":{"example":"{\n  \"results\": [\n    {\n      \"group\": {\n        \"mediaType\": \"callback\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nConnected\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tActiveCallback\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tActiveCallbackComplete\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 9945,\n                \"min\": 5921,\n                \"count\": 3,\n                \"sum\": 23838\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2097,\n                \"count\": 11,\n                \"sum\": 130823\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 73346230,\n                \"min\": 416207,\n                \"count\": 4,\n                \"sum\": 110962827\n              }\n            },\n            {\n              \"metric\": \"tFirstConnect\",\n              \"stats\": {\n                \"max\": 290718,\n                \"min\": 290718,\n                \"count\": 1,\n                \"sum\": 290718\n              }\n            },\n            {\n              \"metric\": \"tFirstDial\",\n              \"stats\": {\n                \"max\": 285696,\n                \"min\": 285696,\n                \"count\": 1,\n                \"sum\": 285696\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 8132,\n                \"count\": 4,\n                \"sum\": 318215\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2883,\n                \"count\": 7,\n                \"sum\": 118383\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 206596,\n                \"min\": 2211,\n                \"count\": 5,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 2211,\n                \"count\": 4,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0,\n                \"numerator\": 0,\n                \"denominator\": 4,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"cobrowse\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nCobrowseSessions\",\n              \"stats\": {\n                \"count\": 39\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"message\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nBotInteractions\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 10\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 2\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"oMessageTurn\",\n              \"stats\": {\n                \"max\": 3,\n                \"min\": 1,\n                \"count\": 9,\n                \"sum\": 15\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 4334459,\n                \"min\": 3928,\n                \"count\": 10,\n                \"sum\": 20253985\n              }\n            },\n            {\n              \"metric\": \"tAgentResponseTime\",\n              \"stats\": {\n                \"max\": 575147358,\n                \"min\": 34802,\n                \"count\": 10,\n                \"sum\": 667880782\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 15487,\n                \"min\": 2765,\n                \"count\": 9,\n                \"sum\": 58605\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 9,\n                \"sum\": 92049245\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 575453681,\n                \"min\": 41487,\n                \"count\": 11,\n                \"sum\": 668683945\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 575150181,\n                \"min\": 21268,\n                \"count\": 10,\n                \"sum\": 596026384\n              }\n            },\n            {\n              \"metric\": \"tHeld\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tHeldComplete\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 572971290,\n                \"min\": 2630,\n                \"count\": 12,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 572993822,\n                \"min\": 6805,\n                \"count\": 10,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0.7777777777777778,\n                \"numerator\": 7,\n                \"denominator\": 9,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"voice\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nError\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOutbound\",\n              \"stats\": {\n                \"count\": 5\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 20592,\n                \"min\": 2067,\n                \"count\": 5,\n                \"sum\": 29509\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tContacting\",\n              \"stats\": {\n                \"max\": 939,\n                \"min\": 28,\n                \"count\": 5,\n                \"sum\": 1896\n              }\n            },\n            {\n              \"metric\": \"tDialing\",\n              \"stats\": {\n                \"max\": 12071,\n                \"min\": 9714,\n                \"count\": 5,\n                \"sum\": 57910\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 39949,\n                \"min\": 11814,\n                \"count\": 5,\n                \"sum\": 110878\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tVoicemail\",\n              \"stats\": {\n                \"max\": 120159,\n                \"min\": 53848,\n                \"count\": 4,\n                \"sum\": 321634\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}"}},"headers":{}}}}},"/api/v2/analytics/queues/observations/query":{"post":{"description":"Query for queue observations","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}},"400":{"description":"","content":{"application/json":{"example":"{\n    \"message\": \"Value [] is not valid for field type [QueryFilterType]. Allowable values are: and, or\",\n    \"code\": \"invalid.value\",\n    \"status\": 400,\n    \"contextId\": \"7dafa55d-d99c-4c98-991f-6ed70459b64a\",\n    \"details\": [],\n    \"errors\": []\n}"}},"headers":{}}}}},"/api/v2/analytics/users/aggregates/query":{"post":{"description":"Query for user aggregates","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{}},"400":{"description":"","content":{"application/json":{"example":"{\n  \"message\": \"Value [] is not valid for field type [UserAggregateDimension]. Allowable values are: userId\",\n  \"code\": \"invalid.value\",\n  \"status\": 400,\n  \"contextId\": \"2bed01b9-f066-49ca-9a62-e39178b26b5b\",\n  \"details\": [],\n  \"errors\": []\n}"}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/telephony/providers/edges/trunks":{"get":{"description":"Get list of available trunks w/ pagination","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/telephony/providers/edges/trunks/metrics":{"get":{"description":"Get metrics for a list of trunks","responses":{"200":{"description":"","content":{"application/json":{"example":"[]"}},"headers":{}},"401":{"description":"","content":{"application/json":{"example":"{\n  \"message\": \"Invalid login credentials.\",\n  \"code\": \"bad.credentials\",\n  \"status\": 401,\n  \"contextId\": \"c40a4237-f434-4e2a-90c2-94716ef88582\",\n  \"details\": [],\n  \"errors\": []\n}"}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"},"date":{"schema":{"type":"string"},"example":"Fri, 21 Mar 2025 13:13:33 GMT"},"inin-correlation-id":{"schema":{"type":"string"},"example":"875f9c3f-0738-46ba-bd32-6c5afdcd0ddc"},"strict-transport-security":{"schema":{"type":"string"},"example":"max-age=31536000; includeSubDomains"},"via":{"schema":{"type":"string"},"example":"1.1 5c79308f72e53cdf81a950b478a7e144.cloudfront.net (CloudFront)"},"x-amz-cf-id":{"schema":{"type":"string"},"example":"f4dY_ZsouAmmZWoBcIAJEX7qQdX9o3iZu142BJUiIhTTaD1qWjmMjg=="},"x-amz-cf-pop":{"schema":{"type":"string"},"example":"FRA56-P3"},"x-cache":{"schema":{"type":"string"},"example":"Miss from cloudfront"},"content-length":{"schema":{"type":"string"},"example":"1092"}}},"500":{"description":"","content":{"application/json":{"example":"{\n    \"message\": \"The server encountered an unexpected condition which prevented it from fulfilling the request.\",\n    \"code\": \"internal.server.error\",\n    \"status\": 500,\n    \"contextId\": \"71131a23-0585-4650-b71c-983a8b0942f9\",\n    \"details\": [],\n    \"errors\": []\n}"}},"headers":{}}}}},"/api/v2/telephony/providers/edges/metrics":{"get":{"description":"Get metrics for a list of edges","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}},"400":{"description":" ","content":{"application/json":{"example":"{\n  \"message\": \"Referenced key  on 'edgeId' does not exist.\",\n  \"code\": \"general.bad.request\",\n  \"status\": 400,\n  \"messageWithParams\": \"Referenced key {refEntityId} on '{fieldName}' does not exist.\",\n  \"messageParams\": {\n    \"refEntityId\": \"\",\n    \"fieldName\": \"edgeId\"\n  },\n  \"contextId\": \"23523726-431d-49d6-94e4-ddff2e5f3ac1\",\n  \"details\": [\n    {\n      \"errorCode\": \"REFERENCED_KEY_DOES_NOT_EXIST\",\n      \"fieldName\": \"edgeId\"\n    }\n  ],\n  \"errors\": []\n}"}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/telephony/providers/edges":{"get":{"description":"Get list of edges w/ pagination","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/telephony/providers/edges/phones":{"get":{"description":"Get list of phones","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/routing/queues":{"get":{"description":"Get list of queues w/ pagination","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/users":{"get":{"description":"Get list of available users w/ pagination","responses":{"200":{"description":"","content":{"application/json":{"example":{}}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}}}}},"/api/v2/users/{userId}/routingstatus":{"get":{"description":"Get routing status of a user","responses":{"200":{"description":"","content":{"application/json":{"example":"{\n  \"status\": \"{{oneOf (array 'OFF_QUEUE' 'IDLE' 'INTERACTING' 'NOT_RESPONDING' 'COMMUNICATING')}}\",\n  \"startTime\": \"2025-03-24T09:21:08.772Z\"\n}"}},"headers":{"cache-control":{"schema":{"type":"string"},"example":"no-cache, no-store, must-revalidate"},"connection":{"schema":{"type":"string"},"example":"close"}}},"400":{"description":"","content":{"application/json":{"example":"{\n    \"message\": \"agentId {{urlParam 'userId'}} is not a valid UUID.\",\n    \"code\": \"bad.request\",\n    \"status\": 400,\n    \"contextId\": \"ff94d8f0-3774-407a-a5e0-cf812681e902\",\n    \"details\": [],\n    \"errors\": []\n}"}},"headers":{}}},"parameters":[{"name":"userId","in":"path","schema":{"type":"string"},"required":true}]}}}}
+{
+  "uuid": "986d5069-6b9f-487c-841e-736f848cc23b",
+  "lastMigration": 32,
+  "name": "Genesyscloud",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3004,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "ca49b4c0-2abc-49b6-b460-08e8bac15ecf",
+      "type": "http",
+      "documentation": "",
+      "method": "get",
+      "endpoint": "",
+      "responses": [
+        {
+          "uuid": "3153ff23-0330-41d0-9549-d2e7e8f90c33",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "dc7f1464-7138-4d63-96ec-f2deb5134304",
+      "type": "http",
+      "documentation": "Get metrics for a list of trunks",
+      "method": "get",
+      "endpoint": "api/v2/telephony/providers/edges/trunks/metrics",
+      "responses": [
+        {
+          "uuid": "37e2c721-c7b7-4eda-b75b-2f48d18259f5",
+          "body": "{{setVar 'trunk_ids' (queryParam 'trunkIds')}}\n\n[\n  {{#each (split @trunk_ids \",\")}}\n  {\n    \"eventTime\": \"2025-03-21T12:44:26.259Z\",\n    \"logicalInterface\": {\n      \"id\": \"eth0\",\n      \"name\": \"Port 1 (WAN)\",\n      \"selfUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0/logicalinterfaces/eth0\"\n    },\n    \"trunk\": {\n      \"id\": \"{{this}}\",\n      \"selfUri\": \"/api/v2/telephony/providers/edges/trunks/{{this}}\"\n    },\n    \"calls\": {\n      \"inboundCallCount\": 0,\n      \"outboundCallCount\": 0\n    },\n    \"qos\": {\n      \"mismatchCount\": 0\n    }\n  }{{#unless @last}},{{/unless}}\n  {{/each}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "query",
+              "modifier": "trunkIds",
+              "value": "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(,)?)+",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "dc0264be-73ee-45a6-bfc8-16a2b65d0e1f",
+          "body": "{\n  \"message\": \"Invalid login credentials.\",\n  \"code\": \"bad.credentials\",\n  \"status\": 401,\n  \"contextId\": \"c40a4237-f434-4e2a-90c2-94716ef88582\",\n  \"details\": [],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            },
+            {
+              "key": "date",
+              "value": "Fri, 21 Mar 2025 13:13:33 GMT"
+            },
+            {
+              "key": "inin-correlation-id",
+              "value": "875f9c3f-0738-46ba-bd32-6c5afdcd0ddc"
+            },
+            {
+              "key": "strict-transport-security",
+              "value": "max-age=31536000; includeSubDomains"
+            },
+            {
+              "key": "via",
+              "value": "1.1 5c79308f72e53cdf81a950b478a7e144.cloudfront.net (CloudFront)"
+            },
+            {
+              "key": "x-amz-cf-id",
+              "value": "f4dY_ZsouAmmZWoBcIAJEX7qQdX9o3iZu142BJUiIhTTaD1qWjmMjg=="
+            },
+            {
+              "key": "x-amz-cf-pop",
+              "value": "FRA56-P3"
+            },
+            {
+              "key": "x-cache",
+              "value": "Miss from cloudfront"
+            },
+            {
+              "key": "content-length",
+              "value": "1092"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "",
+              "invert": false,
+              "operator": "null"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "0a97e069-e04a-4086-9dab-662cc997bae8",
+          "body": "{\n    \"message\": \"The server encountered an unexpected condition which prevented it from fulfilling the request.\",\n    \"code\": \"internal.server.error\",\n    \"status\": 500,\n    \"contextId\": \"71131a23-0585-4650-b71c-983a8b0942f9\",\n    \"details\": [],\n    \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 500,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "trunkIds",
+              "value": "",
+              "invert": false,
+              "operator": "null"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "7317dcff-dadf-4f72-bc10-abafc4d84c93",
+          "body": "[]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "trunkIds",
+              "value": "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(,)?)+",
+              "invert": true,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "130f6862-082e-44ea-8baa-661f4f29dc42",
+      "type": "http",
+      "documentation": "Get metrics for a list of edges",
+      "method": "get",
+      "endpoint": "api/v2/telephony/providers/edges/metrics",
+      "responses": [
+        {
+          "uuid": "5c2c724a-2b03-41d1-abf1-6b252faaf9c8",
+          "body": "{{setVar 'edge_ids' (queryParam 'edgeIds')}}\n\n[\n  {{#each (split @edge_ids \",\")}}\n  {\n    \"edge\": {\n      \"id\": \"{{this}}\",\n      \"name\": \"cloud-media-i-09206d9c8a9373a79\",\n      \"selfUri\": \"/api/v2/telephony/providers/edges/{{this}}\"\n    },\n    \"eventTime\": \"2025-03-21T13:36:51.829Z\",\n    \"upTimeMsec\": 2627768000,\n    \"processors\": [\n      {\n        \"activeTimePct\": 22,\n        \"cpuId\": \"cpu0\",\n        \"idleTimePct\": 77,\n        \"privilegedTimePct\": 7,\n        \"userTimePct\": 2\n      },\n      {\n        \"activeTimePct\": 23,\n        \"cpuId\": \"cpu1\",\n        \"idleTimePct\": 76,\n        \"privilegedTimePct\": 8,\n        \"userTimePct\": 1\n      },\n      {\n        \"activeTimePct\": 22,\n        \"cpuId\": \"total\",\n        \"idleTimePct\": 77,\n        \"privilegedTimePct\": 7,\n        \"userTimePct\": 2\n      }\n    ],\n    \"memory\": [\n      {\n        \"availableBytes\": 2797363200,\n        \"type\": \"physical\",\n        \"totalBytes\": 4059807744\n      },\n      {\n        \"availableBytes\": 0,\n        \"type\": \"virtual\",\n        \"totalBytes\": 0\n      }\n    ],\n    \"disks\": [\n      {\n        \"availableBytes\": 4590825472,\n        \"partitionName\": \"/dev/nvme0n1p1\",\n        \"totalBytes\": 12872298496\n      },\n      {\n        \"availableBytes\": 7836819456,\n        \"partitionName\": \"/dev/nvme1n1\",\n        \"totalBytes\": 8283189248\n      },\n      {\n        \"availableBytes\": 7656452096,\n        \"partitionName\": \"/dev/nvme2n1\",\n        \"totalBytes\": 8283189248\n      },\n      {\n        \"availableBytes\": 44636504064,\n        \"partitionName\": \"/dev/nvme3n1\",\n        \"totalBytes\": 52655783936\n      }\n    ],\n    \"subsystems\": [\n      {\n        \"delayMs\": 0,\n        \"processName\": \"ininedgeservices\"\n      },\n      {\n        \"delayMs\": 0,\n        \"processName\": \"ininedgecontrol\"\n      },\n      {\n        \"delayMs\": 0,\n        \"processName\": \"ininupdate\"\n      }\n    ],\n    \"networks\": [\n      {\n        \"ifname\": \"eth0\",\n        \"sentBytesPerSec\": 66,\n        \"receivedBytesPerSec\": 52,\n        \"bandwidthBitsPerSec\": 500000000,\n        \"utilizationPct\": 0.00018879999697674066\n      }\n    ]\n  }{{#unless @last}},{{/unless}}\n  {{/each}}\n]\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "query",
+              "modifier": "edgeIds",
+              "value": "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(,)?)+",
+              "invert": false,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "ebbf7549-3dd9-47e2-8f43-b98936c32bed",
+          "body": "{\n  \"message\": \"Referenced key  on 'edgeId' does not exist.\",\n  \"code\": \"general.bad.request\",\n  \"status\": 400,\n  \"messageWithParams\": \"Referenced key {refEntityId} on '{fieldName}' does not exist.\",\n  \"messageParams\": {\n    \"refEntityId\": \"\",\n    \"fieldName\": \"edgeId\"\n  },\n  \"contextId\": \"23523726-431d-49d6-94e4-ddff2e5f3ac1\",\n  \"details\": [\n    {\n      \"errorCode\": \"REFERENCED_KEY_DOES_NOT_EXIST\",\n      \"fieldName\": \"edgeId\"\n    }\n  ],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": " ",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "query",
+              "modifier": "edgesIds",
+              "value": "([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(,)?)+",
+              "invert": true,
+              "operator": "regex"
+            },
+            {
+              "target": "query",
+              "modifier": "edgesIds",
+              "value": "",
+              "invert": false,
+              "operator": "null"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "a975e5cd-052c-4edf-894f-4e15e8486b0d",
+      "type": "http",
+      "documentation": "Authenticate",
+      "method": "post",
+      "endpoint": "oauth/token",
+      "responses": [
+        {
+          "uuid": "f636b02f-0f67-4cb9-9cf0-74c293ccffb2",
+          "body": "{\n  \"message\": \"HTTP 404 Not Found\",\n  \"code\": \"not found\",\n  \"status\": 404,\n  \"contextId\": \"e49cd26d-348c-4e6f-b955-7586f5bf2069\",\n  \"details\": [],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 404,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "35e63908-070a-47e2-8873-41f9091c0af8",
+          "body": "{\n    \"access_token\": \"uVX5OvBW7DK-neu--i8vuoiVzwBINKlm9r44B_QNoBVOqkIpUQTnxdzt1ULMfwpMpUxxLbvoBesExFcvKRTJ_w\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 86399\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "grant_type",
+              "value": "client_credentials",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "Basic .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/x-www-form-urlencoded",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "f766e6af-4990-485c-bbac-ab65c62255fe",
+      "type": "http",
+      "documentation": "Get list of phones",
+      "method": "get",
+      "endpoint": "api/v2/telephony/providers/edges/phones",
+      "responses": [
+        {
+          "uuid": "c2c62e54-c751-48c3-9ec8-081987e16eff",
+          "body": "{\n  \"entities\": [ {{#repeat 25}}\n    {{setVar 'phone_id' (faker 'string.uuid')}}\n    {\n      \"id\": \"{{@phone_id}}\",\n      \"name\": \"{{firstName}}.{{lastName}}_WebRTC\",\n      \"dateCreated\": \"2025-01-20T09:03:58.941Z\",\n      \"dateModified\": \"2025-01-20T09:03:58.941Z\",\n      \"state\": \"active\",\n      \"site\": {\n        \"id\": \"{{faker 'string.uuid'}}\",\n        \"name\": \"EMEA_Region\",\n        \"selfUri\": \"/api/v2/telephony/providers/edges/sites/f1128b9e-13fc-4c4d-9001-06a197f68a31\"\n      },\n      \"phoneBaseSettings\": {\n        \"id\": \"b01d490d-dd06-414a-94ef-14e9096c5f1f\",\n        \"selfUri\": \"/api/v2/telephony/providers/edges/phonebasesettings/b01d490d-dd06-414a-94ef-14e9096c5f1f\"\n      },\n      \"lines\": [\n        {\n          \"id\": \"de91e019-22cd-4ec5-a414-85a72a15ef49\",\n          \"state\": \"active\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/lines/de91e019-22cd-4ec5-a414-85a72a15ef49\"\n        }\n      ],\n      \"status\": {\n        \"id\": \"{{@phone_id}}\",\n        \"operationalStatus\": \"OPERATIONAL\",\n        \"eventCreationTime\": \"2025-02-19T03:45:18.299927Z\",\n        \"provision\": {},\n        \"lineStatuses\": [\n          {\n            \"id\": \"de91e019-22cd-4ec5-a414-85a72a15ef49\",\n            \"reachable\": true,\n            \"contactAddresses\": [],\n            \"reachableStateTime\": \"2025-02-19T03:45:18.299Z\"\n          }\n        ],\n        \"phoneAssignmentToEdgeType\": \"PRIMARY\",\n        \"edge\": {\n          \"id\": \"581724f4-5ae5-4bff-98cd-6398cc7187e0\",\n          \"name\": \"cloud-media-i-07f738baf80f104a8\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0\"\n        },\n        \"selfUri\": \"/api/v2/telephony/providers/edges/phones/{{@phone_id}}/status\"\n      },\n      \"secondaryStatus\": {\n        \"id\": \"{{@phone_id}}\",\n        \"operationalStatus\": \"OPERATIONAL\",\n        \"eventCreationTime\": \"2025-02-19T03:45:18.285454Z\",\n        \"provision\": {},\n        \"lineStatuses\": [\n          {\n            \"id\": \"de91e019-22cd-4ec5-a414-85a72a15ef49\",\n            \"reachable\": true,\n            \"contactAddresses\": [],\n            \"reachableStateTime\": \"2025-02-19T03:45:18.285Z\"\n          }\n        ],\n        \"phoneAssignmentToEdgeType\": \"SECONDARY\",\n        \"edge\": {\n          \"id\": \"a3727ac5-2c35-4b1e-9b5c-eb29fc74a5f9\",\n          \"name\": \"cloud-media-i-09206d9c8a9373a79\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/a3727ac5-2c35-4b1e-9b5c-eb29fc74a5f9\"\n        },\n        \"selfUri\": \"/api/v2/telephony/providers/edges/phones/{{@phone_id}}/status\"\n      },\n      \"userAgentInfo\": {},\n      \"properties\": {},\n      \"selfUri\": \"/api/v2/telephony/providers/edges/phones/{{@phone_id}}\"\n    }\n    {{/repeat}}\n  ],\n  \"pageSize\": 25,\n  \"pageNumber\": 1,\n  \"total\": 25,\n  \"totalNumberOfEntities\": 25,\n  \"lastUri\": \"/api/v2/telephony/providers/edges/phones?pageSize=25&pageNumber=1\",\n  \"firstUri\": \"/api/v2/telephony/providers/edges/phones?pageSize=25&pageNumber=1\",\n  \"selfUri\": \"/api/v2/telephony/providers/edges/phones?pageSize=25&pageNumber=1\",\n  \"pageCount\": 1\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "header",
+              "modifier": "Accept",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "51cfe0b5-16d9-4d44-9bfb-8f7d1ac4e756",
+      "type": "http",
+      "documentation": "Get routing status of a user",
+      "method": "get",
+      "endpoint": "api/v2/users/:userId/routingstatus",
+      "responses": [
+        {
+          "uuid": "79c3aaa9-78d1-4ef0-bbc3-4d40d3b9b7da",
+          "body": "{\n  \"status\": \"{{oneOf (array 'OFF_QUEUE' 'IDLE' 'INTERACTING' 'NOT_RESPONDING' 'COMMUNICATING')}}\",\n  \"startTime\": \"2025-03-24T09:21:08.772Z\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "userId",
+              "value": "[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "da762e24-f8db-41ea-b36c-4f7f636e75d6",
+          "body": "{\n    \"message\": \"agentId {{urlParam 'userId'}} is not a valid UUID.\",\n    \"code\": \"bad.request\",\n    \"status\": 400,\n    \"contextId\": \"ff94d8f0-3774-407a-a5e0-cf812681e902\",\n    \"details\": [],\n    \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "userId",
+              "value": "[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}",
+              "invert": true,
+              "operator": "regex"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "a4c3ef01-1ea8-40b3-bbba-dbd40b7e6885",
+      "type": "http",
+      "documentation": "Get list of edges w/ pagination",
+      "method": "get",
+      "endpoint": "api/v2/telephony/providers/edges",
+      "responses": [
+        {
+          "uuid": "62de00ea-ca8a-412a-9b5d-f22237782dd6",
+          "body": "{{setVar 'page_number' (queryParam 'pageNumber' 1)}}\n{{setVar 'total' 157}}\n{{setVar 'per_page' 25}}\n{{setVar 'total_pages' (ceil (divide @total @per_page))}}\n\n\n{{#if (eq (multiply @page_number 1) @total_pages)}}\n  {{setVar 'previous_page_no' (subtract @page_number 1)}}\n  {{setVar 'num_entities' (subtract @total (multiply @previous_page_no @per_page))}}\n{{else}}\n  {{setVar 'num_entities' @per_page}}\n{{/if}}\n\n{\n  \"entities\": {{#if (gt @page_number @total_pages)}} [], {{else}} [\n    {{#repeat @num_entities}}\n      {\n        \"id\": \"{{faker 'string.uuid'}}\",\n        \"name\": \"cloud-media-i-07f738baf80f104a8\",\n        \"description\": \"ASG-VERSION:023\",\n        \"version\": 8,\n        \"dateCreated\": \"2025-02-19T03:41:04.264Z\",\n        \"dateModified\": \"2025-02-19T03:45:12.444Z\",\n        \"state\": \"active\",\n        \"modifiedByApp\": \"edge-adapter/4307 (i-0c802033b893be0e3)\",\n        \"createdByApp\": \"edge-provisioning/-unknown- (i-053f43cf5453b6cb1)\",\n        \"interfaces\": [\n          {\n            \"type\": \"ip\",\n            \"ipAddress\": \"{{ipv4}}\",\n            \"name\": \"Port 1 (WAN)\",\n            \"macAddress\": \"{{faker 'internet.mac'}}\",\n            \"ifName\": \"eth0\",\n            \"endpoints\": [],\n            \"addressFamilyId\": \"2\"\n          }\n        ],\n        \"model\": \"\",\n        \"softwareVersion\": \"1.0.0.22180\",\n        \"softwareVersionTimestamp\": \"2501230433\",\n        \"softwareVersionPlatform\": \"N/A\",\n        \"softwareVersionConfiguration\": \"N/A\",\n        \"fullSoftwareVersion\": \"edgebin-1.0.0.22180.2501230433-l64f\",\n        \"pairingId\": \"M6FQ6-9KGX7-JP2DD-FRH3N-YPQ8H\",\n        \"edgeGroup\": {\n          \"id\": \"a7e9b7f3-334c-4d29-9665-55c42b28eb08\",\n          \"name\": \"Genesys Cloud Hybrid Media Group\",\n          \"version\": 1,\n          \"dateCreated\": \"2023-07-13T10:16:57.012Z\",\n          \"dateModified\": \"2023-07-13T10:16:57.012Z\",\n          \"modifiedBy\": \"\",\n          \"createdBy\": \"\",\n          \"state\": \"active\",\n          \"modifiedByApp\": \"edge-provisioning/3418 (i-072ee09043475b392)\",\n          \"createdByApp\": \"edge-provisioning/3418 (i-072ee09043475b392)\",\n          \"managed\": false,\n          \"hybrid\": true,\n          \"edgeTrunkBaseAssignment\": {\n            \"family\": 2,\n            \"trunkBase\": {\n              \"id\": \"5834e418-8599-4d2b-8baa-96c513160727\",\n              \"name\": \"Tie TrunkBase for EdgeGroup a7e9b7f3-334c-4d29-9665-55c42b28eb08\",\n              \"state\": \"active\",\n              \"trunkType\": \"EDGE\",\n              \"managed\": false,\n              \"selfUri\": \"/api/v2/telephony/providers/edges/trunkbasesettings/5834e418-8599-4d2b-8baa-96c513160727\"\n            }\n          },\n          \"phoneTrunkBases\": [\n            {\n              \"id\": \"238d11de-a0c4-4043-9dd6-d74b0be2e2ee\",\n              \"name\": \"Genesys Cloud - CDM WebRTC Phone Trunk\",\n              \"state\": \"active\",\n              \"trunkType\": \"PHONE\",\n              \"managed\": false,\n              \"selfUri\": \"/api/v2/telephony/providers/edges/trunkbasesettings/238d11de-a0c4-4043-9dd6-d74b0be2e2ee\"\n            },\n            {\n              \"id\": \"b96bedb6-a38c-483c-971e-d9099f2ce6c6\",\n              \"name\": \"Genesys Cloud - CDM SIP Phone Trunk\",\n              \"state\": \"active\",\n              \"trunkType\": \"PHONE\",\n              \"managed\": false,\n              \"selfUri\": \"/api/v2/telephony/providers/edges/trunkbasesettings/b96bedb6-a38c-483c-971e-d9099f2ce6c6\"\n            }\n          ],\n          \"selfUri\": \"/api/v2/telephony/providers/edges/edgegroups/a7e9b7f3-334c-4d29-9665-55c42b28eb08\"\n        },\n        \"site\": {\n          \"id\": \"05a809a0-77db-4cf5-b02a-d8116ccb821f\",\n          \"name\": \"PureCloud Voice - AWS\",\n          \"state\": \"active\",\n          \"mediaRegionsUseLatencyBased\": false,\n          \"managed\": false,\n          \"selfUri\": \"/api/v2/telephony/providers/edges/sites/05a809a0-77db-4cf5-b02a-d8116ccb821f\"\n        },\n        \"softwareStatus\": {\n          \"version\": {\n            \"edgeVersion\": \"1.0.0.22180\",\n            \"publishDate\": \"1970-01-01T00:00:00.000Z\",\n            \"edgeUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0\",\n            \"latestRelease\": false,\n            \"current\": true\n          },\n          \"maxDownloadRate\": 0,\n          \"executeOnIdle\": false,\n          \"status\": \"NONE\",\n          \"edgeUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0\",\n          \"current\": false\n        },\n        \"onlineStatus\": \"ONLINE\",\n        \"serialNumber\": \"Amazon EC2\",\n        \"physicalEdge\": false,\n        \"managed\": true,\n        \"edgeDeploymentType\": \"CDM\",\n        \"certType\": \"PureCloud\",\n        \"callDrainingState\": \"NONE\",\n        \"conversationCount\": 0,\n        \"proxy\": \"\",\n        \"offlineConfigCalled\": false,\n        \"osName\": \"Linux\",\n        \"selfUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0\"\n      }\n    {{/repeat}}\n  ],{{/if}}\n  \"pageSize\": {{@per_page}},\n  \"pageNumber\": {{@page_number}},\n  \"total\": {{@total}},\n  \"totalNumberOfEntities\": {{#if (gt @page_number @total_pages)}} 0,{{else}}{{@num_entities}},{{/if}}\n  {{#if (lt @page_number @total_pages)}}\n    \"nextUri\": \"/api/v2/telephony/providers/edges?pageSize=25&pageNumber={{add 1 @page_number}}\",\n  {{/if}}\n  \"lastUri\": \"/api/v2/telephony/providers/edges?pageSize=25&pageNumber={{@total_pages}}\",\n  \"firstUri\": \"/api/v2/telephony/providers/edges?pageSize=25&pageNumber=1\",\n  \"selfUri\": \"/api/v2/telephony/providers/edges?pageSize=25&pageNumber={{@page_number}}\",\n  \"pageCount\": {{@total_pages}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "cba3d48e-f6e9-49e0-93d6-1c3fbd214f86",
+      "type": "http",
+      "documentation": "Get list of available trunks w/ pagination",
+      "method": "get",
+      "endpoint": "api/v2/telephony/providers/edges/trunks",
+      "responses": [
+        {
+          "uuid": "be1f741c-6acd-4c5b-8738-eb0dbe7e28b9",
+          "body": "{{setVar 'page_number' (queryParam 'pageNumber' 1)}}\n{{setVar 'total' 14}}\n{{setVar 'per_page' 25}}\n{{setVar 'total_pages' (ceil (divide @total @per_page))}}\n\n\n{{#if (eq (multiply @page_number 1) @total_pages)}}\n  {{setVar 'previous_page_no' (subtract @page_number 1)}}\n  {{setVar 'num_entities' (subtract @total (multiply @previous_page_no @per_page))}}\n{{else}}\n  {{setVar 'num_entities' @per_page}}\n{{/if}}\n\n{\n  \"entities\": {{#if (gt @page_number @total_pages)}} [], {{else}} [\n    {{#repeat @num_entities}}\n    {{setVar 'trunk_id' (faker 'string.uuid')}}\n      {\n        \"id\": \"{{@trunk_id}}\",\n        \"name\": \"EMEA WD UAT Audiocodes Trunk Trunk {{@trunk_id}}\",\n        \"version\": 1,\n        \"dateCreated\": \"2025-02-19T03:44:27.661Z\",\n        \"dateModified\": \"2025-02-19T03:44:27.661Z\",\n        \"state\": \"active\",\n        \"modifiedByApp\": \"edge-provisioning/-unknown- (i-04952281fa5956032)\",\n        \"createdByApp\": \"edge-provisioning/-unknown- (i-04952281fa5956032)\",\n        \"trunkType\": \"EXTERNAL\",\n        \"edge\": {\n          \"id\": \"581724f4-5ae5-4bff-98cd-6398cc7187e0\",\n          \"name\": \"cloud-media-i-07f738baf80f104a8\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0\"\n        },\n        \"trunkBase\": {\n          \"id\": \"13bffeed-ba5a-437c-bd6b-f4b3eb5d013e\",\n          \"name\": \"EMEA WD UAT Audiocodes Trunk\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/trunkbasesettings/13bffeed-ba5a-437c-bd6b-f4b3eb5d013e\"\n        },\n        \"trunkMetabase\": {\n          \"id\": \"external_sip_pcv_byoc_carrier.json\",\n          \"name\": \"Generic BYOC Carrier\"\n        },\n        \"edgeGroup\": {\n          \"id\": \"a7e9b7f3-334c-4d29-9665-55c42b28eb08\",\n          \"name\": \"Genesys Cloud Hybrid Media Group\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/edgegroups/a7e9b7f3-334c-4d29-9665-55c42b28eb08\"\n        },\n        \"inService\": true,\n        \"enabled\": true,\n        \"logicalInterface\": {\n          \"id\": \"eth0\",\n          \"name\": \"Port 1 (WAN)\",\n          \"selfUri\": \"/api/v2/telephony/providers/edges/581724f4-5ae5-4bff-98cd-6398cc7187e0/logicalinterfaces/eth0\"\n        },\n        \"connectedStatus\": {\n          \"connected\": true,\n          \"connectedStateTime\": \"2025-02-19T03:44:32.225Z\"\n        },\n        \"optionsStatus\": [],\n        \"registersStatus\": [],\n        \"ipStatus\": {\n          \"address\": \"{{ipv4}}\"\n        },\n        \"optionsEnabledStatus\": \"{{oneOf (array 'NOT_SUPPORTED' 'ENABLED' 'DISABLED')}}\",\n        \"registersEnabledStatus\": \"{{oneOf (array 'NOT_SUPPORTED' 'ENABLED' 'DISABLED')}}\",\n        \"family\": 2,\n        \"proxyAddressList\": [\n          \"{{ipv4}}:{{faker 'internet.port'}}\",\n          \"{{ipv4}}:{{faker 'internet.port'}}\"\n        ],\n        \"selfUri\": \"/api/v2/telephony/providers/edges/trunks/{{@trunk_id}}\"\n      }\n    {{/repeat}}\n  ],{{/if}}\n  \"pageSize\": {{@per_page}},\n  \"pageNumber\": {{@page_number}},\n  \"total\": {{@total}},\n  \"totalNumberOfEntities\": {{#if (gt @page_number @total_pages)}} 0,{{else}}{{@num_entities}},{{/if}}\n  {{#if (lt @page_number @total_pages)}}\n    \"nextUri\": \"/api/v2/telephony/providers/edges/trunks?pageSize=25&pageNumber={{add 1 @page_number}}\",\n  {{/if}}\n  \"lastUri\": \"/api/v2/telephony/providers/edges/trunks?pageSize=25&pageNumber={{@total_pages}}\",\n  \"firstUri\": \"/api/v2/telephony/providers/edges/trunks?pageSize=25&pageNumber=1\",\n  \"selfUri\": \"/api/v2/telephony/providers/edges/trunks?pageSize=25&pageNumber={{@page_number}}\",\n  \"pageCount\": {{@total_pages}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "f1f040f6-2095-4181-aa42-ceabcfa43b39",
+      "type": "http",
+      "documentation": "Get list of queues w/ pagination",
+      "method": "get",
+      "endpoint": "api/v2/routing/queues",
+      "responses": [
+        {
+          "uuid": "97ada75a-a838-48a1-be51-89a7886558fb",
+          "body": "{{setVar 'page_number' (queryParam 'pageNumber' 1)}}\n{{setVar 'total' 157}}\n{{setVar 'per_page' 25}}\n{{setVar 'total_pages' (ceil (divide @total @per_page))}}\n\n\n{{#if (eq (multiply @page_number 1) @total_pages)}}\n  {{setVar 'previous_page_no' (subtract @page_number 1)}}\n  {{setVar 'num_entities' (subtract @total (multiply @previous_page_no @per_page))}}\n{{else}}\n  {{setVar 'num_entities' @per_page}}\n{{/if}}\n\n{\n  \"entities\": {{#if (gt @page_number @total_pages)}} [], {{else}} [\n    {{#repeat @num_entities}}\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"name\": \"{{oneOf (array 'DesktopTestingQueue' 'Mobile_POC_Q' 'Wholesale_ASHN_EN_Australia_Q')}}\",\n      \"division\": {\n        \"id\": \"083286ea-a25a-4d65-b21c-91e1702bf962\",\n        \"name\": \"Wholesale_Global\",\n        \"selfUri\": \"/api/v2/authorization/divisions/083286ea-a25a-4d65-b21c-91e1702bf962\"\n      },\n      \"dateCreated\": \"2024-11-11T14:46:26.238Z\",\n      \"dateModified\": \"2025-03-19T16:35:11.559Z\",\n      \"modifiedBy\": \"7cfb14fd-3f1d-4fe1-a0c0-499d2ddb40af\",\n      \"createdBy\": \"7cfb14fd-3f1d-4fe1-a0c0-499d2ddb40af\",\n      \"memberCount\": 16,\n      \"userMemberCount\": 16,\n      \"joinedMemberCount\": 16,\n      \"mediaSettings\": {\n        \"call\": {\n          \"alertingTimeoutSeconds\": 8,\n          \"serviceLevel\": {\n            \"percentage\": 0.8,\n            \"durationMs\": 20000\n          }\n        },\n        \"callback\": {\n          \"alertingTimeoutSeconds\": 30,\n          \"serviceLevel\": {\n            \"percentage\": 0.8,\n            \"durationMs\": 20000\n          },\n          \"mode\": \"AgentFirst\",\n          \"enableAutoDialAndEnd\": false,\n          \"autoDialDelaySeconds\": 300,\n          \"autoEndDelaySeconds\": 300\n        },\n        \"chat\": {\n          \"alertingTimeoutSeconds\": 30,\n          \"serviceLevel\": {\n            \"percentage\": 0.8,\n            \"durationMs\": 20000\n          }\n        },\n        \"email\": {\n          \"alertingTimeoutSeconds\": 300,\n          \"serviceLevel\": {\n            \"percentage\": 0.8,\n            \"durationMs\": 86400000\n          }\n        },\n        \"message\": {\n          \"alertingTimeoutSeconds\": 30,\n          \"serviceLevel\": {\n            \"percentage\": 0.8,\n            \"durationMs\": 20000\n          },\n          \"subTypeSettings\": {\n            \"whatsapp\": {\n              \"enableAutoAnswer\": false\n            },\n            \"twitter\": {\n              \"enableAutoAnswer\": false\n            },\n            \"webmessaging\": {\n              \"enableAutoAnswer\": false\n            },\n            \"facebook\": {\n              \"enableAutoAnswer\": false\n            },\n            \"sms\": {\n              \"enableAutoAnswer\": false\n            },\n            \"instagram\": {\n              \"enableAutoAnswer\": false\n            },\n            \"open\": {\n              \"enableAutoAnswer\": false\n            }\n          }\n        }\n      },\n      \"routingRules\": [\n        {\n          \"operator\": \"ANY\",\n          \"waitSeconds\": 10.0\n        }\n      ],\n      \"scoringMethod\": \"TimestampAndPriority\",\n      \"acwSettings\": {\n        \"wrapupPrompt\": \"{{oneOf (array 'OPTIONAL' 'MANDATORY' 'MANDATORY_TIMEOUT')}}\"\n      },\n      \"skillEvaluationMethod\": \"{{oneOf (array 'ALL' 'BEST')}}\",\n      \"whisperPrompt\": {\n        \"id\": \"0972f508-d8ad-4de8-8b85-c495e5098427\",\n        \"name\": \"TestPrompt\",\n        \"selfUri\": \"/api/v2/architect/prompts/0972f508-d8ad-4de8-8b85-c495e5098427\"\n      },\n      \"autoAnswerOnly\": {{boolean}},\n      \"enableManualAssignment\": {{boolean}},\n      \"defaultScripts\": {\n        \"CALL\": {\n          \"id\": \"62f1d9c8-ed0f-4ede-ad19-35b776b63e7a\",\n          \"selfUri\": \"/api/v2/scripts/62f1d9c8-ed0f-4ede-ad19-35b776b63e7a\"\n        }\n      },\n      \"suppressInQueueCallRecording\": {{boolean}},\n      \"selfUri\": \"/api/v2/routing/queues/ec348d15-eb70-4374-957a-303361224b13\"\n    },\n    {{/repeat}}\n  ],{{/if}}\n  \"pageSize\": {{@per_page}},\n  \"pageNumber\": {{@page_number}},\n  \"total\": {{@total}},\n  {{#if (lt @page_number @total_pages)}}\n    \"nextUri\": \"/api/v2/routing/queues?pageSize=25&pageNumber={{add 1 @page_number}}\",\n  {{/if}}\n  \"lastUri\": \"/api/v2/routing/queues?pageSize=25&pageNumber={{@total_pages}}\",\n  \"firstUri\": \"/api/v2/routing/queues?pageSize=25&pageNumber=1\",\n  \"selfUri\": \"/api/v2/routing/queues?pageSize=25&pageNumber={{@page_number}}\",\n  \"pageCount\": {{@total_pages}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "header",
+              "modifier": "Accept",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "89639542-53f3-4110-abac-285874ce26dd",
+      "type": "http",
+      "documentation": "Get list of available users w/ pagination",
+      "method": "get",
+      "endpoint": "api/v2/users",
+      "responses": [
+        {
+          "uuid": "919f4d1a-5b4c-449e-a562-a465f2e0858a",
+          "body": "{{setVar 'page_number' (queryParam 'pageNumber' 1)}}\n{{setVar 'total' 358}}\n{{setVar 'per_page' 25}}\n{{setVar 'total_pages' (ceil (divide @total @per_page))}}\n\n\n{{#if (eq (multiply @page_number 1) @total_pages)}}\n  {{setVar 'previous_page_no' (subtract @page_number 1)}}\n  {{setVar 'num_entities' (subtract @total (multiply @previous_page_no @per_page))}}\n{{else}}\n  {{setVar 'num_entities' @per_page}}\n{{/if}}\n\n\n{\n  \"entities\": {{#if (gt @page_number @total_pages)}} [], {{else}} [\n    {{#repeat @num_entities}}\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"name\": \"{{firstName}} {{lastName}}\",\n      \"division\": {\n        \"id\": \"835de023-dc83-4ce3-ae4e-9196f0e8f774\",\n        \"name\": \"Wholesale_Global\",\n        \"selfUri\": \"/api/v2/authorization/divisions/835de023-dc83-4ce3-ae4e-9196f0e8f774\"\n      },\n      \"chat\": {\n        \"jabberId\": \"678e112bdb9d512ed16fc0fc@{{domain}}\"\n      },\n      \"email\": \"{{email}}\",\n      \"primaryContactInfo\": [\n        {\n          \"address\": \"{{email}}\",\n          \"mediaType\": \"EMAIL\",\n          \"type\": \"PRIMARY\"\n        }\n      ],\n      \"addresses\": [],\n      \"state\": \"active\",\n      \"title\": \"{{faker 'person.jobTitle'}}\",\n      \"username\": \"{{email}}\",\n      \"version\": 26,\n      \"acdAutoAnswer\": false,\n      \"selfUri\": \"/api/v2/users/9eacb49d-9c6b-4a87-8043-590d15f07902\"\n    },\n    {{/repeat}}\n  ],{{/if}}\n  \"pageSize\": {{@per_page}},\n  \"pageNumber\": {{@page_number}},\n  \"total\": {{@total}},\n  {{#if (lt @page_number @total_pages)}}\n    \"nextUri\": \"/api/v2/users?pageSize=25&pageNumber={{add 1 @page_number}}\",\n  {{/if}}\n  \"lastUri\": \"/api/v2/users?pageSize=25&pageNumber={{@total_pages}}\",\n  \"firstUri\": \"/api/v2/users?pageSize=25&pageNumber=1\",\n  \"selfUri\": \"/api/v2/users?pageSize=25&pageNumber={{@page_number}}\",\n  \"pageCount\": {{@total_pages}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authentication",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            },
+            {
+              "target": "header",
+              "modifier": "Accept",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "e0e77558-9b1d-46ca-bda5-5a19ebcae46d",
+      "type": "http",
+      "documentation": "Query for conversation aggregates",
+      "method": "post",
+      "endpoint": "api/v2/analytics/conversations/aggregates/query",
+      "responses": [
+        {
+          "uuid": "ad8a2893-0147-4c55-aac3-4e1f92d81de2",
+          "body": "{\n    \"results\": [\n      {{#repeat 10}}\n      {\n        \"group\": { \n          \"mediaType\": \"message\",\n          \"queueId\": \"{{faker 'string.uuid'}}\"\n        },\n        \"data\": [\n          {\n            \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n            \"metrics\": [\n              {\n                \"metric\": \"nConnected\",\n                \"stats\": {\n                  \"count\": 171\n                }\n              },\n              {\n                \"metric\": \"nError\",\n                \"stats\": {\n                  \"count\": 1\n                }\n              },\n              {\n                \"metric\": \"tAgentResponseTime\",\n                \"stats\": {\n                  \"max\": 594742,\n                  \"min\": 594742,\n                  \"count\": 1,\n                  \"sum\": 594742\n                }\n              },\n              {\n                \"metric\": \"tConnected\",\n                \"stats\": {\n                  \"max\": 4032,\n                  \"min\": 2306,\n                  \"count\": 10,\n                  \"sum\": 34246\n                }\n              },\n              {\n                \"metric\": \"tMonitoring\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              },\n              {\n                \"metric\": \"tMonitoringComplete\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              }\n            ]\n          }\n        ]\n      }{{/repeat}}\n    ]\n  }",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Query with filter",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "filter.type",
+              "value": "and",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "34122628-ab7e-470e-8494-3b985fc21e88",
+          "body": "{\n  \"results\": [\n    {\n      \"group\": {\n        \"mediaType\": \"callback\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nConnected\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tActiveCallback\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tActiveCallbackComplete\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 9945,\n                \"min\": 5921,\n                \"count\": 3,\n                \"sum\": 23838\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2097,\n                \"count\": 11,\n                \"sum\": 130823\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 73346230,\n                \"min\": 416207,\n                \"count\": 4,\n                \"sum\": 110962827\n              }\n            },\n            {\n              \"metric\": \"tFirstConnect\",\n              \"stats\": {\n                \"max\": 290718,\n                \"min\": 290718,\n                \"count\": 1,\n                \"sum\": 290718\n              }\n            },\n            {\n              \"metric\": \"tFirstDial\",\n              \"stats\": {\n                \"max\": 285696,\n                \"min\": 285696,\n                \"count\": 1,\n                \"sum\": 285696\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 8132,\n                \"count\": 4,\n                \"sum\": 318215\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2883,\n                \"count\": 7,\n                \"sum\": 118383\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 206596,\n                \"min\": 2211,\n                \"count\": 5,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 2211,\n                \"count\": 4,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0,\n                \"numerator\": 0,\n                \"denominator\": 4,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"cobrowse\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nCobrowseSessions\",\n              \"stats\": {\n                \"count\": 39\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"message\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nBotInteractions\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 10\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 2\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"oMessageTurn\",\n              \"stats\": {\n                \"max\": 3,\n                \"min\": 1,\n                \"count\": 9,\n                \"sum\": 15\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 4334459,\n                \"min\": 3928,\n                \"count\": 10,\n                \"sum\": 20253985\n              }\n            },\n            {\n              \"metric\": \"tAgentResponseTime\",\n              \"stats\": {\n                \"max\": 575147358,\n                \"min\": 34802,\n                \"count\": 10,\n                \"sum\": 667880782\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 15487,\n                \"min\": 2765,\n                \"count\": 9,\n                \"sum\": 58605\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 9,\n                \"sum\": 92049245\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 575453681,\n                \"min\": 41487,\n                \"count\": 11,\n                \"sum\": 668683945\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 575150181,\n                \"min\": 21268,\n                \"count\": 10,\n                \"sum\": 596026384\n              }\n            },\n            {\n              \"metric\": \"tHeld\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tHeldComplete\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 572971290,\n                \"min\": 2630,\n                \"count\": 12,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 572993822,\n                \"min\": 6805,\n                \"count\": 10,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0.7777777777777778,\n                \"numerator\": 7,\n                \"denominator\": 9,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"voice\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nError\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOutbound\",\n              \"stats\": {\n                \"count\": 5\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 20592,\n                \"min\": 2067,\n                \"count\": 5,\n                \"sum\": 29509\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tContacting\",\n              \"stats\": {\n                \"max\": 939,\n                \"min\": 28,\n                \"count\": 5,\n                \"sum\": 1896\n              }\n            },\n            {\n              \"metric\": \"tDialing\",\n              \"stats\": {\n                \"max\": 12071,\n                \"min\": 9714,\n                \"count\": 5,\n                \"sum\": 57910\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 39949,\n                \"min\": 11814,\n                \"count\": 5,\n                \"sum\": 110878\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tVoicemail\",\n              \"stats\": {\n                \"max\": 120159,\n                \"min\": 53848,\n                \"count\": 4,\n                \"sum\": 321634\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Query without filter",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "filter.type",
+              "value": "and",
+              "invert": true,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "e6d084d7-866b-4b4e-a356-8a322be0e85c",
+      "type": "http",
+      "documentation": "Query for conversation details w/ pagination",
+      "method": "post",
+      "endpoint": "api/v2/analytics/conversations/details/query",
+      "responses": [
+        {
+          "uuid": "12974d91-d429-4c2a-a445-52bab7f2b08c",
+          "body": "{{setVar 'page_number' (body 'paging.pageNumber' 1)}}\n{{setVar 'total' 114}}\n{{setVar 'per_page' 100}}\n{{setVar 'total_pages' (ceil (divide @total @per_page))}}\n\n{{#if (eq (multiply @page_number 1) @total_pages)}}\n  {{setVar 'previous_page_no' (subtract @page_number 1)}}\n  {{setVar 'num_conversations' (subtract @total (multiply @previous_page_no @per_page))}}\n{{else}}\n  {{setVar 'num_conversations' @per_page}}\n{{/if}}\n\n{\n  \"conversations\": [\n    {{#repeat @num_conversations}}\n    {\n      \"conversationEnd\": \"2025-03-10T05:09:00.631Z\",\n      \"conversationId\": \"{{faker 'string.uuid'}}\",\n      \"conversationStart\": \"2025-03-10T05:08:02.919Z\",\n      \"divisionIds\": [\n        \"9751e763-ea46-49b0-b66b-7c9cf9f95115\",\n        \"083286ea-a25a-4d65-b21c-91e1702bf962\"\n      ],\n      \"mediaStatsMinConversationMos\": 4.395138698024998,\n      \"mediaStatsMinConversationRFactor\": 90.60868072509766,\n      \"originatingDirection\": \"{{oneOf (array 'inbound' 'outbound')}}\",\n      \"participants\": [\n        {\n          \"externalContactId\": \"1830b618-ae79-48b0-8cdf-38898937e1f5\",\n          \"participantId\": \"{{faker 'string.uuid'}}\",\n          \"participantName\": \"National\",\n          \"purpose\": \"customer\",\n          \"sessions\": [\n            {\n              \"ani\": \"tel:{{phone}}\",\n              \"direction\": \"{{oneOf (array 'inbound' 'outbound')}}\",\n              \"dnis\": \"tel:{{phone}}\",\n              \"edgeId\": \"{{faker 'string.uuid'}}\",\n              \"mediaType\": \"voice\",\n              \"protocolCallId\": \"00174B0C-9223-17AC-A692-F0FAA180AA77-9844@{{ipv4}}\",\n              \"provider\": \"Edge\",\n              \"recording\": true,\n              \"remoteNameDisplayable\": \"National\",\n              \"requestedRoutings\": [\n                \"Direct\"\n              ],\n              \"selectedAgentId\": \"6b7f8b31-6c07-4104-b147-19fdb802562b\",\n              \"sessionDnis\": \"tel:{{phone}}\",\n              \"sessionId\": \"{{faker 'string.uuid'}}\",\n              \"usedRouting\": \"Direct\",\n              \"mediaEndpointStats\": [\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:08:31.974Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.898667613401902,\n                  \"minRFactor\": 93.17497253417969,\n                  \"receivedPackets\": 1449\n                },\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:08:33.856Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.882776589307926,\n                  \"minRFactor\": 92.45965576171875,\n                  \"receivedPackets\": 90\n                },\n                {\n                  \"codecs\": [\n                    \"audio/PCMA\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:09:00.674Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.395138698024998,\n                  \"minRFactor\": 92.49076843261719,\n                  \"receivedPackets\": 2852\n                },\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"discardedPackets\": 6,\n                  \"eventTime\": \"2025-03-10T05:09:00.674Z\",\n                  \"maxLatencyMs\": 43,\n                  \"minMos\": 4.84939591357236,\n                  \"minRFactor\": 91.07575988769531,\n                  \"receivedPackets\": 1336\n                }\n              ],\n              \"metrics\": [\n                {\n                  \"emitDate\": \"2025-03-10T05:08:03.149Z\",\n                  \"name\": \"nConnected\",\n                  \"value\": 1\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:09:00.625Z\",\n                  \"name\": \"tConnected\",\n                  \"value\": 57476\n                }\n              ],\n              \"segments\": [\n                {\n                  \"conference\": false,\n                  \"segmentEnd\": \"2025-03-10T05:08:03.149Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:02.919Z\",\n                  \"segmentType\": \"system\"\n                },\n                {\n                  \"conference\": false,\n                  \"disconnectType\": \"endpoint\",\n                  \"queueId\": \"{{faker 'string.uuid'}}\",\n                  \"segmentEnd\": \"2025-03-10T05:09:00.625Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:03.149Z\",\n                  \"segmentType\": \"interact\"\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"participantId\": \"{{faker 'string.uuid'}}\",\n          \"participantName\": \"Dummy test IVR\",\n          \"purpose\": \"ivr\",\n          \"sessions\": [\n            {\n              \"ani\": \"tel:{{phone}}\",\n              \"direction\": \"{{oneOf (array 'inbound' 'outbound')}}\",\n              \"dnis\": \"tel:{{phone}}\",\n              \"edgeId\": \"a3727ac5-2c35-4b1e-9b5c-eb29fc74a5f9\",\n              \"mediaType\": \"voice\",\n              \"peerId\": \"7afece63-6d28-3b3f-8eca-10c8a7578806\",\n              \"protocolCallId\": \"5d5bfa79-9e38-4694-88c3-c25460c1fd3c\",\n              \"provider\": \"Edge\",\n              \"remote\": \"National\",\n              \"remoteNameDisplayable\": \"National\",\n              \"sessionDnis\": \"tel:{{phone}}\",\n              \"sessionId\": \"{{faker 'string.uuid'}}\",\n              \"mediaEndpointStats\": [\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:08:32.002Z\",\n                  \"maxLatencyMs\": 60,\n                  \"minMos\": 4.895309371064429,\n                  \"minRFactor\": 93.02020263671875,\n                  \"receivedPackets\": 1658\n                }\n              ],\n              \"flow\": {\n                \"endingLanguage\": \"en-us\",\n                \"entryReason\": \"tel:{{phone}}\",\n                \"entryType\": \"dnis\",\n                \"exitReason\": \"TRANSFER\",\n                \"flowId\": \"{{faker 'string.uuid'}}\",\n                \"flowName\": \"Dummy test IVR\",\n                \"flowType\": \"INBOUNDCALL\",\n                \"flowVersion\": \"28.0\",\n                \"startingLanguage\": \"en-us\",\n                \"transferTargetAddress\": \"ec348d15-eb70-4374-957a-303361224b13\",\n                \"transferTargetName\": \"DesktopTestingQueue\",\n                \"transferType\": \"ACD\"\n              },\n              \"metrics\": [\n                {\n                  \"emitDate\": \"2025-03-10T05:08:03.205Z\",\n                  \"name\": \"nFlow\",\n                  \"value\": 1\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:08:31.922Z\",\n                  \"name\": \"tIvr\",\n                  \"value\": 28979\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:08:31.927Z\",\n                  \"name\": \"tFlow\",\n                  \"value\": 28722\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:08:31.927Z\",\n                  \"name\": \"tFlowExit\",\n                  \"value\": 28722\n                }\n              ],\n              \"segments\": [\n                {\n                  \"conference\": false,\n                  \"segmentEnd\": \"2025-03-10T05:08:02.943Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:02.929Z\",\n                  \"segmentType\": \"system\"\n                },\n                {\n                  \"conference\": false,\n                  \"disconnectType\": \"transfer\",\n                  \"segmentEnd\": \"2025-03-10T05:08:31.922Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:02.943Z\",\n                  \"segmentType\": \"ivr\"\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"participantId\": \"{{faker 'string.uuid'}}\",\n          \"participantName\": \"DesktopTestingQueue\",\n          \"purpose\": \"acd\",\n          \"sessions\": [\n            {\n              \"ani\": \"tel:{{phone}}\",\n              \"destinationAddresses\": [\n                \"sip:{{firstName}}.{{lastName}}%40{{domain}}@localhost\"\n              ],\n              \"direction\": \"{{oneOf (array 'inbound' 'outbound')}}\",\n              \"dnis\": \"tel:{{phone}}\",\n              \"edgeId\": \"a3727ac5-2c35-4b1e-9b5c-eb29fc74a5f9\",\n              \"flowInType\": \"ivr\",\n              \"mediaType\": \"voice\",\n              \"peerId\": \"7afece63-6d28-3b3f-8eca-10c8a7578806\",\n              \"protocolCallId\": \"318932ae-20d3-40b4-ab89-60b81b92758f\",\n              \"provider\": \"Edge\",\n              \"remote\": \"National\",\n              \"remoteNameDisplayable\": \"DesktopTestingQueue\",\n              \"requestedRoutings\": [\n                \"Direct\"\n              ],\n              \"selectedAgentId\": \"6b7f8b31-6c07-4104-b147-19fdb802562b\",\n              \"sessionDnis\": \"tel:{{phone}}\",\n              \"sessionId\": \"10eae62b-5979-31b7-9e23-9132f78373fc\",\n              \"usedRouting\": \"Direct\",\n              \"mediaEndpointStats\": [\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:08:33.904Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.882911841264282,\n                  \"minRFactor\": 92.46556854248047,\n                  \"receivedPackets\": 89\n                }\n              ],\n              \"metrics\": [\n                {\n                  \"emitDate\": \"2025-03-10T05:08:32.021Z\",\n                  \"name\": \"nOffered\",\n                  \"value\": 1\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:08:33.850Z\",\n                  \"name\": \"tAcd\",\n                  \"value\": 1829\n                }\n              ],\n              \"segments\": [\n                {\n                  \"conference\": false,\n                  \"queueId\": \"{{faker 'string.uuid'}}\",\n                  \"segmentEnd\": \"2025-03-10T05:08:32.021Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:31.973Z\",\n                  \"segmentType\": \"delay\"\n                },\n                {\n                  \"conference\": false,\n                  \"disconnectType\": \"transfer\",\n                  \"queueId\": \"{{faker 'string.uuid'}}\",\n                  \"segmentEnd\": \"2025-03-10T05:08:33.850Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:32.021Z\",\n                  \"segmentType\": \"interact\",\n                  \"sipResponseCodes\": [\n                    410\n                  ]\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"participantId\": \"{{faker 'string.uuid'}}\",\n          \"purpose\": \"agent\",\n          \"userId\": \"{{faker 'string.uuid'}}\",\n          \"sessions\": [\n            {\n              \"acwSkipped\": true,\n              \"ani\": \"tel:{{phone}}\",\n              \"direction\": \"{{oneOf (array 'inbound' 'outbound')}}\",\n              \"dnis\": \"tel:{{phone}}\",\n              \"edgeId\": \"{{faker 'string.uuid'}}\",\n              \"mediaType\": \"voice\",\n              \"peerId\": \"7afece63-6d28-3b3f-8eca-10c8a7578806\",\n              \"protocolCallId\": \"5e69e806-f691-45b8-9e89-b582f0694504\",\n              \"provider\": \"Edge\",\n              \"remote\": \"National\",\n              \"requestedRoutings\": [\n                \"Direct\"\n              ],\n              \"selectedAgentId\": \"6b7f8b31-6c07-4104-b147-19fdb802562b\",\n              \"sessionDnis\": \"sip:677fa62cc732222e4c552419+{{domain}};tgrp=43118d6f-8af9-4dd5-aeec-0867c5cee90f\",\n              \"sessionId\": \"{{faker 'string.uuid'}}\",\n              \"usedRouting\": \"Direct\",\n              \"mediaEndpointStats\": [\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"eventTime\": \"2025-03-10T05:09:00.662Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.89878122722326,\n                  \"minRFactor\": 93.18024444580078,\n                  \"receivedPackets\": 1359\n                },\n                {\n                  \"codecs\": [\n                    \"audio/opus\"\n                  ],\n                  \"discardedPackets\": 9,\n                  \"eventTime\": \"2025-03-10T05:09:00.663Z\",\n                  \"maxLatencyMs\": 30,\n                  \"minMos\": 4.83736203609298,\n                  \"minRFactor\": 90.60868072509766,\n                  \"receivedPackets\": 1322\n                }\n              ],\n              \"metrics\": [\n                {\n                  \"emitDate\": \"2025-03-10T05:08:33.807Z\",\n                  \"name\": \"tAlert\",\n                  \"value\": 1608\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:08:33.807Z\",\n                  \"name\": \"tAnswered\",\n                  \"value\": 1829\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:09:00.631Z\",\n                  \"name\": \"tHandle\",\n                  \"value\": 26824\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:09:00.631Z\",\n                  \"name\": \"tTalk\",\n                  \"value\": 26824\n                },\n                {\n                  \"emitDate\": \"2025-03-10T05:09:00.631Z\",\n                  \"name\": \"tTalkComplete\",\n                  \"value\": 26824\n                }\n              ],\n              \"segments\": [\n                {\n                  \"conference\": false,\n                  \"queueId\": \"{{faker 'string.uuid'}}\",\n                  \"segmentEnd\": \"2025-03-10T05:08:33.807Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:32.199Z\",\n                  \"segmentType\": \"alert\"\n                },\n                {\n                  \"conference\": false,\n                  \"disconnectType\": \"peer\",\n                  \"queueId\": \"{{faker 'string.uuid'}}\",\n                  \"segmentEnd\": \"2025-03-10T05:09:00.631Z\",\n                  \"segmentStart\": \"2025-03-10T05:08:33.807Z\",\n                  \"segmentType\": \"interact\"\n                }\n              ]\n            }\n          ]\n        }\n      ]\n    }{{/repeat}}\n  ],\n  \"totalHits\": {{@total}}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "header",
+              "modifier": "Authorization",
+              "value": "[B,b]earer .*",
+              "invert": false,
+              "operator": "regex"
+            },
+            {
+              "target": "header",
+              "modifier": "Content-Type",
+              "value": "application/json",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "2efd511d-e030-44a4-af6e-e65ba16aeccf",
+      "type": "http",
+      "documentation": "Query for queue observations",
+      "method": "post",
+      "endpoint": "api/v2/analytics/queues/observations/query",
+      "responses": [
+        {
+          "uuid": "c4c2d5e3-2389-4e8b-9827-f6b16dcf41b4",
+          "body": "{{setVar 'total_ids' (len (bodyRaw '$.filter.predicates'))}}\n\n{\n  \"systemToOrganizationMappings\": {\n    \"ON_QUEUE\": [\n      \"{{faker 'string.uuid'}}\"\n    ],\n    \"AVAILABLE\": [\n      \"{{faker 'string.uuid'}}\"\n    ],\n    \"OFFLINE\": [\n      \"{{faker 'string.uuid'}}\"\n    ]\n  },\n  \"results\": [\n    {{#repeat @total_ids}}\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oMemberUsers\",\n          \"stats\": {\n            \"count\": 23\n          }\n        },\n        {\n          \"metric\": \"oActiveUsers\",\n          \"stats\": {\n            \"count\": 23\n          }\n        },\n        {\n          \"metric\": \"oUserRoutingStatuses\",\n          \"qualifier\": \"IDLE\",\n          \"stats\": {\n            \"count\": 4\n          }\n        },\n        {\n          \"metric\": \"oUserRoutingStatuses\",\n          \"qualifier\": \"OFF_QUEUE\",\n          \"stats\": {\n            \"count\": 19\n          }\n        },\n        {\n          \"metric\": \"oOnQueueUsers\",\n          \"qualifier\": \"IDLE\",\n          \"stats\": {\n            \"count\": 4\n          }\n        },\n        {\n          \"metric\": \"oUserPresences\",\n          \"qualifier\": \"e08eaf1b-ee47-4fa9-a231-1200e284798f\",\n          \"stats\": {\n            \"count\": 4\n          }\n        },\n        {\n          \"metric\": \"oUserPresences\",\n          \"qualifier\": \"6a3af858-942f-489d-9700-5f9bcdcdae9b\",\n          \"stats\": {\n            \"count\": 1\n          }\n        },\n        {\n          \"metric\": \"oUserPresences\",\n          \"qualifier\": \"ccf3c10a-aa2c-4845-8e8d-f59fa48c58e5\",\n          \"stats\": {\n            \"count\": 18\n          }\n        },\n        {\n          \"metric\": \"oOffQueueUsers\",\n          \"qualifier\": \"6a3af858-942f-489d-9700-5f9bcdcdae9b\",\n          \"stats\": {\n            \"count\": 1\n          }\n        },\n        {\n          \"metric\": \"oOffQueueUsers\",\n          \"qualifier\": \"ccf3c10a-aa2c-4845-8e8d-f59fa48c58e5\",\n          \"stats\": {\n            \"count\": 18\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"chat\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oWaiting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oAlerting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"message\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oWaiting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oAlerting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"email\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oWaiting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oAlerting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"callback\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oWaiting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oAlerting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"voice\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oWaiting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        },\n        {\n          \"metric\": \"oAlerting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"queueId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\",\n        \"mediaType\": \"video\"\n      },\n      \"data\": [\n        {\n          \"metric\": \"oInteracting\",\n          \"stats\": {\n            \"count\": 0\n          }\n        }\n      ]\n    }\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "metrics",
+              "value": "",
+              "invert": true,
+              "operator": "empty_array"
+            },
+            {
+              "target": "body",
+              "modifier": "filter.type",
+              "value": "or",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a3628819-a4b0-4e5f-99b8-3ac7f219a2cf",
+          "body": "{\n    \"message\": \"Value [] is not valid for field type [QueryFilterType]. Allowable values are: and, or\",\n    \"code\": \"invalid.value\",\n    \"status\": 400,\n    \"contextId\": \"7dafa55d-d99c-4c98-991f-6ed70459b64a\",\n    \"details\": [],\n    \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "metrics",
+              "value": "",
+              "invert": false,
+              "operator": "empty_array"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "8abcf1a9-b4c8-474a-b631-7d09f2c24826",
+      "type": "http",
+      "documentation": "Query for user aggregates",
+      "method": "post",
+      "endpoint": "api/v2/analytics/users/aggregates/query",
+      "responses": [
+        {
+          "uuid": "547f5814-06b8-4fcd-adcb-c310505d58db",
+          "body": "{{setVar 'interval' (bodyRaw '$.interval')}}\n{{setVar 'total_ids' (len (bodyRaw '$.filter.predicates'))}}\n\n{\n  \"systemToOrganizationMappings\": {\n    \"OFFLINE\": [\n      \"{{faker 'string.uuid'}}\"\n    ]\n  },\n  \"results\": [\n    {{#repeat @total_ids}}\n    {\n      \"group\": {\n        \"userId\": \"{{body (concat '$.filter.predicates.' @index '.value') }}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"{{body 'interval'}}\",\n          \"metrics\": [\n            {\n              \"metric\": \"tSystemPresence\",\n              \"qualifier\": \"OFFLINE\",\n              \"stats\": {\n                \"sum\": 259199999\n              }\n            },\n            {\n              \"metric\": \"tOrganizationPresence\",\n              \"qualifier\": \"ccf3c10a-aa2c-4845-8e8d-f59fa48c58e5\",\n              \"stats\": {\n                \"sum\": 259199999\n              }\n            }\n          ]\n        }\n      ]\n    }\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "groupBy",
+              "value": "",
+              "invert": true,
+              "operator": "empty_array"
+            },
+            {
+              "target": "body",
+              "modifier": "metrics",
+              "value": "",
+              "invert": true,
+              "operator": "empty_array"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "735616f5-1cda-4198-b8b7-be55f471f153",
+          "body": "{\n  \"message\": \"Value [] is not valid for field type [UserAggregateDimension]. Allowable values are: userId\",\n  \"code\": \"invalid.value\",\n  \"status\": 400,\n  \"contextId\": \"2bed01b9-f066-49ca-9a62-e39178b26b5b\",\n  \"details\": [],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "metrics",
+              "value": "",
+              "invert": false,
+              "operator": "empty_array"
+            },
+            {
+              "target": "body",
+              "modifier": "groupBy",
+              "value": "userId",
+              "invert": true,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "ca49b4c0-2abc-49b6-b460-08e8bac15ecf"
+    },
+    {
+      "type": "route",
+      "uuid": "a975e5cd-052c-4edf-894f-4e15e8486b0d"
+    },
+    {
+      "type": "route",
+      "uuid": "e6d084d7-866b-4b4e-a356-8a322be0e85c"
+    },
+    {
+      "type": "route",
+      "uuid": "e0e77558-9b1d-46ca-bda5-5a19ebcae46d"
+    },
+    {
+      "type": "route",
+      "uuid": "2efd511d-e030-44a4-af6e-e65ba16aeccf"
+    },
+    {
+      "type": "route",
+      "uuid": "8abcf1a9-b4c8-474a-b631-7d09f2c24826"
+    },
+    {
+      "type": "route",
+      "uuid": "cba3d48e-f6e9-49e0-93d6-1c3fbd214f86"
+    },
+    {
+      "type": "route",
+      "uuid": "dc7f1464-7138-4d63-96ec-f2deb5134304"
+    },
+    {
+      "type": "route",
+      "uuid": "130f6862-082e-44ea-8baa-661f4f29dc42"
+    },
+    {
+      "type": "route",
+      "uuid": "a4c3ef01-1ea8-40b3-bbba-dbd40b7e6885"
+    },
+    {
+      "type": "route",
+      "uuid": "f766e6af-4990-485c-bbac-ab65c62255fe"
+    },
+    {
+      "type": "route",
+      "uuid": "f1f040f6-2095-4181-aa42-ceabcfa43b39"
+    },
+    {
+      "type": "route",
+      "uuid": "89639542-53f3-4110-abac-285874ce26dd"
+    },
+    {
+      "type": "route",
+      "uuid": "51cfe0b5-16d9-4d44-9bfb-8f7d1ac4e756"
+    }
+  ],
+  "proxyMode": true,
+  "proxyHost": "https://api.euw2.pure.cloud/api/v2/",
+  "proxyRemovePrefix": true,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}
