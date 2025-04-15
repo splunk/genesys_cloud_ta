@@ -82,23 +82,14 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-      # - name: Add local inputs
-      #   run: |
-      #     app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-      #     docker exec -u splunk splunk mkdir -p /opt/splunk/etc/apps/${app_id}/local
-      #     docker cp etc/cicd/inputs.conf splunk:/opt/splunk/etc/apps/${app_id}/local
-
-      - name: Test connectivity
+      - name: Test connectivity from Splunk to Mockoon
         run: |
-          app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
-          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
       # TODO check this
       # Shall the integration tests be executed into a different pipeline?
       # Or just run them all the time independently from any changes to client lib?
-      # - name: Run tests
-      #   run: |
-      #     python -m pytest tests/modinput_functional/*
-      #   working-directory: ./tests
+      - name: Run tests
+        run: |
+          python -m pytest tests
+        working-directory: ./tests
