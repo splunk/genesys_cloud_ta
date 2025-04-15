@@ -92,14 +92,11 @@ jobs:
       - name: Run integration tests
         run: |
           pip install -r test-requirements.txt
-          # python -m pytest
-          make run-tests-cicd
+          export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
         working-directory: ./tests
-        # shell: bash
 
       - name: Run functional tests
         if: success()
         run: |
-          make run-functional-tests-cicd
-        # shell: bash
+          python -m pytest modinput_functional/*
         working-directory: ./tests
