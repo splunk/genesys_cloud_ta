@@ -98,7 +98,6 @@ jobs:
             --data-urlencode 'grant_type=client_credentials' -v
           docker logs mockoon
           export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
-          docker logs mockoon
         working-directory: ./tests
 
       - name: Run functional tests
