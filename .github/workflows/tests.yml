@@ -70,7 +70,7 @@ jobs:
       - name: Test mockoon is alive
         run: |
           for i in {1..30}; do
-            if curl --silent --fail http://mockoon:3004/health; then
+            if curl --silent --fail http://mockoon:3004/; then
               echo "Mockoon is up!"
               exit 0
             fi
@@ -88,7 +88,7 @@ jobs:
 
       - name: Test connectivity
         run: |
-          docker exec splunk curl -v http://mockoon:3004/health || echo "Failed to reach Mockoon from Splunk"
+          docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
       # TODO check this
       # Shall the integration tests be executed into a different pipeline?
