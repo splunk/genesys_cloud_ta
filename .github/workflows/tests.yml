@@ -63,6 +63,7 @@ jobs:
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
+            -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
@@ -81,14 +82,17 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-      - name: Add local inputs
-        run: |
-          app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          docker exec -u splunk splunk mkdir -p /opt/splunk/etc/apps/${app_id}/local
-          docker cp etc/cicd/inputs.conf splunk:/opt/splunk/etc/apps/${app_id}/local
+      # - name: Add local inputs
+      #   run: |
+      #     app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+      #     docker exec -u splunk splunk mkdir -p /opt/splunk/etc/apps/${app_id}/local
+      #     docker cp etc/cicd/inputs.conf splunk:/opt/splunk/etc/apps/${app_id}/local
 
       - name: Test connectivity
         run: |
+          app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
+          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
       # TODO check this
