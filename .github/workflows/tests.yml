@@ -92,7 +92,15 @@ jobs:
       - name: Run integration tests
         run: |
           pip install -r test-requirements.txt
+          curl --location 'http://localhost:3004/oauth/token' \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --header 'Authorization: Basic thisisarandomvalue' \
+            --data-urlencode 'grant_type=client_credentials' -v
           export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
+          curl --location 'http://localhost:3004/oauth/token' \
+            --header 'Content-Type: application/x-www-form-urlencoded' \
+            --header 'Authorization: Basic thisisarandomvalue' \
+            --data-urlencode 'grant_type=client_credentials' -v
         working-directory: ./tests
 
       - name: Run functional tests
