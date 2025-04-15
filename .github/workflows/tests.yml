@@ -62,7 +62,7 @@ jobs:
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
-            -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id}
+            -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
