@@ -1,4 +1,4 @@
-.PHONY : venv build run package install-docs run-docs run-tests run-functional-tests run-tests-cicd run-functional-tests-cicd
+.PHONY: venv build run package
 
 APP_VERSION := $$(cat globalConfig.json | jq -r '.meta.version')
 APP_NAME := $$(cat globalConfig.json | jq -r '.meta.name')
