@@ -91,7 +91,7 @@ jobs:
       # Or just run them all the time independently from any changes to client lib?
       - name: Run integration tests
         run: |
-          pip install -r tests/test-requirements.txt
+          pip install -r test-requirements.txt
           # python -m pytest
           make run-tests-cicd
         working-directory: ./tests

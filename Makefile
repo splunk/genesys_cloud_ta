@@ -1,4 +1,4 @@
-.PHONY : venv build run package install-docs run-docs
+.PHONY : venv build run package install-docs run-docs run-tests run-functional-tests
 
 APP_VERSION := $$(cat globalConfig.json | jq -r '.meta.version')
 APP_NAME := $$(cat globalConfig.json | jq -r '.meta.name')
@@ -42,4 +42,4 @@ run-functional-tests: install-tests
 	python -m pytest tests/modinput_functional/*
 
 run-functional-tests-cicd:
-	python -m pytest tests/modinput_functional/*
+	python -m pytest modinput_functional/*
