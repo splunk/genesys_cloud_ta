@@ -91,5 +91,6 @@ jobs:
       # Or just run them all the time independently from any changes to client lib?
       - name: Run tests
         run: |
+          pip install --upgrade PureCloudPlatformClientV2==221.0.0
           python -m pytest
         working-directory: ./tests
