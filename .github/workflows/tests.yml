@@ -91,5 +91,5 @@ jobs:
       # Or just run them all the time independently from any changes to client lib?
       - name: Run tests
         run: |
-          python -m pytest tests
+          python -m pytest
         working-directory: ./tests
