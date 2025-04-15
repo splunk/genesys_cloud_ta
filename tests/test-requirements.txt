@@ -1,0 +1,4 @@
+pytest==6.2.4
+splunk-sdk
+PureCloudPlatformClientV2==221.0.0
+watchdog==3.0.0
