@@ -84,7 +84,7 @@ jobs:
       - name: Add local inputs
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          docker exec splunk mkdir -p /opt/splunk/etc/apps/${app_id}/local
+          docker exec -u splunk splunk mkdir -p /opt/splunk/etc/apps/${app_id}/local
           docker cp etc/cicd/inputs.conf splunk:/opt/splunk/etc/apps/${app_id}/local
 
       - name: Test connectivity
