@@ -89,7 +89,7 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          docker exec -i splunk ls -a /opt/splunk/etc/system/
+          # docker exec -i splunk ls -a /opt/splunk/etc/system/
           # docker exec -i splunk ls -a /opt/splunk/etc/system/default/
           # docker exec -i splunk cat /opt/splunk/etc/system/default/server.conf
           # docker exec -i splunk cat /opt/splunk/etc/system/local/server.conf
