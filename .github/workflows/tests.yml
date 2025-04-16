@@ -17,7 +17,7 @@ concurrency:
 jobs:
   splunk-test:
     name: Deploy and test the TA
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -86,8 +86,8 @@ jobs:
           exit 1
 
       - name: Test Splunk is alive
-        env:
-          OPENSSL_CONF: ${{ github.workspace }}/etc/cicd/custom_openssl.cnf
+        # env:
+        #   OPENSSL_CONF: ${{ github.workspace }}/etc/cicd/custom_openssl.cnf
         run: |
           docker logs splunk
           docker ps -a | grep splunk
