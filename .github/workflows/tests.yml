@@ -42,6 +42,8 @@ jobs:
       - name: Create Docker network
         run: docker network create shared-net
 
+      # NOTE:
+      # Not having services because of: connectivity and volumes mounting
       - name: Start Mockoon container
         run: |
           docker run -d --name mockoon \
@@ -86,22 +88,18 @@ jobs:
         run: |
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
-      # TODO check this
-      # Shall the integration tests be executed into a different pipeline?
-      # Or just run them all the time independently from any changes to client lib?
       - name: Run integration tests
         run: |
           pip install -r test-requirements.txt
-          curl --location 'http://localhost:3004/oauth/token' \
-            --header 'Content-Type: application/x-www-form-urlencoded' \
-            --header 'Authorization: Basic thisisarandomvalue' \
-            --data-urlencode 'grant_type=client_credentials' -v
-          docker logs mockoon
           export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
         working-directory: ./tests
 
       - name: Run functional tests
         if: success()
         run: |
+          echo "Testing Splunk connectivity [8000]"
+          curl -I http://localhost:8000
+          echo "Testing Splunk connectivity [8089]"
+          curl -k https://localhost:8089/services
           python -m pytest modinput_functional/*
         working-directory: ./tests
