@@ -94,6 +94,19 @@ jobs:
           openssl version -a
           # curl -k -v https://localhost:8089 --tls-max 1.2
 
+      - name: Wait for Splunk to be ready
+        run: |
+          echo "Waiting for Splunk to be ready..."
+          for i in {1..30}; do
+            if curl -k -s https://localhost:8089/services/server/info -u admin:password | grep -q "<response>"; then
+              echo "Splunk is ready"
+              break
+            else
+              echo "Still waiting ($i)..."
+              sleep 5
+            fi
+          done
+
       - name: Test connectivity from Splunk to Mockoon
         run: |
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
