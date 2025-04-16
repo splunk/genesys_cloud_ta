@@ -17,7 +17,7 @@ concurrency:
 jobs:
   splunk-test:
     name: Deploy and test the TA
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -88,6 +88,7 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
+          curl -k -v https://localhost:8089
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
