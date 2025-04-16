@@ -90,7 +90,7 @@ jobs:
           docker logs splunk
           docker ps -a | grep splunk
           openssl version
-          curl -k -v https://localhost:8089
+          curl -k -v https://localhost:8089 --tlsv1.2
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
