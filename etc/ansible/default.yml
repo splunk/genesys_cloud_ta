@@ -2,7 +2,7 @@ splunk:
   conf:
     - key: server
       value:
-        directory: /opt/splunk/etc/system/local/
+        directory: /opt/splunk/etc/system/local
         content:
           sslConfig:
             sslVersions: "*,-ssl2,-ssl3"
