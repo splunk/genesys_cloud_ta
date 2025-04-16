@@ -66,6 +66,7 @@ jobs:
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
             -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
+            -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
