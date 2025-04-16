@@ -32,6 +32,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
+          sudo apt-get install libssl-dev
 
       - name: Build TA
         run: |
@@ -88,11 +89,6 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          docker inspect splunk
-          # echo "Testing Splunk connectivity [8000]"
-          # curl -I http://localhost:8000
-          # echo "Testing Splunk connectivity [8089]"
-          # curl -k https://localhost:8089/services
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
