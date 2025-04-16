@@ -89,6 +89,7 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
+          docker exec -i splunk cat /opt/splunk/etc/system/local/server.conf
           curl -k -v https://localhost:8089
 
       - name: Test connectivity from Splunk to Mockoon
