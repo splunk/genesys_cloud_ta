@@ -835,13 +835,12 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.0.0+70c3103",
+        "version": "0.0.0+319da6e",
         "displayName": "Genesys Cloud Add-on",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
             "light",
             "dark"
-        ],
-        "_uccVersion": "5.55.0"
+        ]
     }
 }
