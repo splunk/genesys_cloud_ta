@@ -55,7 +55,7 @@ jobs:
 
       - name: Start Splunk container
         env:
-          SPLUNK_START_ARGS: --answer-yes --no-prompt --accept-license
+          SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
           SPLUNK_PASSWORD: password
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
@@ -87,6 +87,8 @@ jobs:
       - name: Test Splunk is alive
         run: |
           docker logs splunk
+          docker ps -a | grep splunk
+          docker inspect splunk
           # echo "Testing Splunk connectivity [8000]"
           # curl -I http://localhost:8000
           # echo "Testing Splunk connectivity [8089]"
