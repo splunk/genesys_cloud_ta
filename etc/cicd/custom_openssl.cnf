@@ -1,0 +1,4 @@
+.include /etc/ssl/openssl.cnf
+
+[system_default_sect]
+Options = SSL_OP_IGNORE_UNEXPECTED_EOF
