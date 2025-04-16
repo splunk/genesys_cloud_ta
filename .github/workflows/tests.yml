@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [9.3.3]
+        version: [9.2.5]
         # version: [9.4.1, 9.3.3, 9.2.5]
     steps:
       - uses: actions/checkout@v4
@@ -89,10 +89,10 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          docker exec -i splunk ls -a /opt/splunk/etc/system/default/
           docker exec -i splunk ls -a /opt/splunk/etc/system/
-          docker exec -i splunk cat /opt/splunk/etc/system/default/server.conf
-          docker exec -i splunk cat /opt/splunk/etc/system/local/server.conf
+          # docker exec -i splunk ls -a /opt/splunk/etc/system/default/
+          # docker exec -i splunk cat /opt/splunk/etc/system/default/server.conf
+          # docker exec -i splunk cat /opt/splunk/etc/system/local/server.conf
           curl -k -v https://localhost:8089
 
       - name: Test connectivity from Splunk to Mockoon
