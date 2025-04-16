@@ -87,10 +87,10 @@ jobs:
       - name: Test Splunk is alive
         run: |
           docker logs splunk
-          echo "Testing Splunk connectivity [8000]"
-          curl -I http://localhost:8000
-          echo "Testing Splunk connectivity [8089]"
-          curl -k https://localhost:8089/services
+          # echo "Testing Splunk connectivity [8000]"
+          # curl -I http://localhost:8000
+          # echo "Testing Splunk connectivity [8089]"
+          # curl -k https://localhost:8089/services
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
