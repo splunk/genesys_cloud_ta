@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -66,10 +66,10 @@ jobs:
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
             -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
-            -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
+        # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
 
       - name: Test mockoon is alive
         run: |
@@ -89,11 +89,8 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          # docker exec -i splunk ls -a /opt/splunk/etc/system/
-          # docker exec -i splunk ls -a /opt/splunk/etc/system/default/
-          # docker exec -i splunk cat /opt/splunk/etc/system/default/server.conf
-          # docker exec -i splunk cat /opt/splunk/etc/system/local/server.conf
-          curl -k -v https://localhost:8089
+          openssl version
+          # curl -k -v https://localhost:8089
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
