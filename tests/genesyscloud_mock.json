@@ -379,7 +379,7 @@
         },
         {
           "uuid": "35e63908-070a-47e2-8873-41f9091c0af8",
-          "body": "{\n    \"access_token\": \"uVX5OvBW7DK-neu--i8vuoiVzwBINKlm9r44B_QNoBVOqkIpUQTnxdzt1ULMfwpMpUxxLbvoBesExFcvKRTJ_w\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 86399\n}",
+          "body": "{\n    \"access_token\": \"{{faker 'internet.jwt'}}\",\n    \"token_type\": \"bearer\",\n    \"expires_in\": 86399\n}",
           "latency": 0,
           "statusCode": 200,
           "label": "",
