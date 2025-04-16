@@ -17,7 +17,7 @@ concurrency:
 jobs:
   splunk-test:
     name: Deploy and test the TA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.9
+          python-version: 3.7
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -69,6 +69,7 @@ jobs:
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
+          sleep 30
         # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
 
       - name: Test mockoon is alive
@@ -91,21 +92,8 @@ jobs:
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          openssl version -a
+          # openssl version -a
           # curl -k -v https://localhost:8089 --tls-max 1.2
-
-      - name: Wait for Splunk to be ready
-        run: |
-          echo "Waiting for Splunk to be ready..."
-          for i in {1..30}; do
-            if curl -k -s https://localhost:8089/services/server/info -u admin:password | grep -q "<response>"; then
-              echo "Splunk is ready"
-              break
-            else
-              echo "Still waiting ($i)..."
-              sleep 5
-            fi
-          done
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
