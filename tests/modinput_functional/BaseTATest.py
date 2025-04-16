@@ -49,6 +49,7 @@ class BaseTATest():
             port=cls.splunkd_port,
             username=cls.username,
             password=cls.password,
+            verify=False,
             app=cls.TA_APP_NAME)
         cls.create_genesyscloud_accounts()
         cls.logger.info("Creating index")
