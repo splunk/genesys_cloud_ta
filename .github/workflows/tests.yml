@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
 
-      - name: Build and bundle TA
+      - name: Build TA
         run: |
           app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
@@ -42,7 +42,7 @@ jobs:
           cp etc/cicd/inputs.conf output/${app_id}/local
           chmod -R +r output
           chmod -R go-w output
-          ucc-gen package --path output/${app_id}
+          # ucc-gen package --path output/${app_id}
         shell: bash
 
       - name: Create Docker network
@@ -75,7 +75,7 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (min. 2minutes)
-          sleep 120
+          sleep 130
           # echo "Print App Configuration"
           # curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
 
@@ -106,18 +106,13 @@ jobs:
         run: |
           docker logs splunk
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
+          # app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
           # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
-          ls -la .
-          FILE="${app_id}-${app_v}.tar.gz"
-          echo "${FILE}"
-          curl -k -u admin:password -v -X POST \
-            https://localhost:8089/services/apps/local \
-            -H "Content-Type: multipart/form-data" \
-            -F name=@"${FILE};type=application/octet-stream" \
-            -F update=true
-          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
+
+          docker cp output/${app_id} splunk:/opt/splunk/etc/apps/${app_id}
+          docker exec -i splunk ls -a /opt/splunk/etc/apps
+          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
 
       - name: Test connectivity from Splunk to Mockoon
