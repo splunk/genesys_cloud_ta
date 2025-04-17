@@ -87,6 +87,15 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
+      - name: Print App Configuration
+        run: |
+          curl -k -s -u admin:password https://localhost:8089/services/apps/local/genesys_cloud_ta
+
+      - name: Restart instance
+        run: |
+          curl -k -s -u admin:password https://localhost:8089/services/server/control/restart -X POST
+          sleep 30
+
       - name: Test Splunk is alive
         run: |
           docker logs splunk
@@ -96,6 +105,7 @@ jobs:
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/genesys_cloud_ta/data/inputs?output_mode=json' | jq -r '.entry[].name'
+          curl -s -k -u admin:password https://localhost:8089/services/apps/local/genesys_cloud_ta
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
