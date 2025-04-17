@@ -72,9 +72,10 @@ jobs:
           echo "${SPLUNK_APPS_URL}"
           docker run -d --name splunk \
             --network shared-net \
+            -v ${SPLUNK_APPS_URL}:/tmp/ta.tgz \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
-            -e SPLUNK_APPS_URL="$SPLUNK_APPS_URL" \
+            -e SPLUNK_APPS_URL="file:///tmp/ta.tgz" \
             -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
             -p 8000:8000 \
             -p 8089:8089 \
