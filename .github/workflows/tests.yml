@@ -60,17 +60,23 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          mkdir -p ${{ github.workspace }}/output/${app_id}/local
+          cp ${{ github.workspace }}/etc/cicd/inputs.conf ${{ github.workspace }}/output/${app_id}/local/
+          ls -la ${{ github.workspace }}/output/${app_id}/local
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
-            -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running
           sleep 30
+          echo "Print App Configuration"
+          curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
+
+        # -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
         # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
 
       - name: Test mockoon is alive
@@ -87,14 +93,10 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-      - name: Print App Configuration
-        run: |
-          curl -k -s -u admin:password https://localhost:8089/services/apps/local/genesys_cloud_ta
-
-      - name: Restart instance
-        run: |
-          curl -k -s -u admin:password https://localhost:8089/services/server/control/restart -X POST
-          sleep 30
+      # - name: Restart instance
+      #   run: |
+      #     curl -k -s -u admin:password https://localhost:8089/services/server/control/restart -X POST
+      #     sleep 30
 
       - name: Test Splunk is alive
         run: |
@@ -104,8 +106,7 @@ jobs:
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
-          curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/genesys_cloud_ta/data/inputs?output_mode=json' | jq -r '.entry[].name'
-          curl -s -k -u admin:password https://localhost:8089/services/apps/local/genesys_cloud_ta
+          curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
