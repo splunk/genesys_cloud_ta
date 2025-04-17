@@ -60,6 +60,8 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          sudo chown -R splunk:splunk ${{ github.workspace }}/output/${app_id}
+          sudo chown -R splunk:splunk ${{ github.workspace }}/etc/cicd/inputs.conf
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
