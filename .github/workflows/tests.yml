@@ -106,7 +106,7 @@ jobs:
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
-          curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
+          # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
