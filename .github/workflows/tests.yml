@@ -117,13 +117,14 @@ jobs:
           python -m pytest modinput_functional/*
         working-directory: ./tests
 
-      - if: ${{ steps.ftests.conclusion == 'failure' }}
+      - if: always()
         run: |
           mkdir -p logs/
           docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
 
       - name: Upload Mockoon logs
-        if: ${{ steps.ftests.conclusion == 'failure' }}
+        # if: ${{ steps.ftests.conclusion == 'failure' }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mockoon-logs
