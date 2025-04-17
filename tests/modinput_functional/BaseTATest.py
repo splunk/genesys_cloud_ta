@@ -21,7 +21,8 @@ LOG_HANDLER.setLevel(logging.DEBUG)
 class BaseTATest():
     TA_APP_NAME = "genesys_cloud_ta"
     TA_APP_USER = "nobody"
-    INDEX = "genesyscloud"
+    # INDEX = "genesyscloud"
+    INDEX = "default"
     CLIENT_ID = None
     AWS_REGION = None
     CLIENT_SECRET = None
@@ -52,23 +53,25 @@ class BaseTATest():
             verify=False,
             app=cls.TA_APP_NAME)
         cls.create_genesyscloud_accounts()
-        cls.logger.info("Creating index")
-        cls.splunk_client.indexes.create(cls.INDEX, **{"sharing": "app",
-            "owner": "nobody", "app": cls.TA_APP_NAME })
-        # Reloading the app to avoid issues
-        cls.splunk_client.apps[cls.TA_APP_NAME].reload()
-        # Testing index
-        index_conf = cls.splunk_client.confs['indexes'][cls.INDEX]
-        cls.logger.info(f"{index_conf.access}")
+        # SKIPPING index creation
+        # cls.logger.info("Creating index")
+        # cls.splunk_client.indexes.create(cls.INDEX, **{"sharing": "app",
+        #     "owner": "nobody", "app": cls.TA_APP_NAME })
+        # # Reloading the app to avoid issues
+        # cls.splunk_client.apps[cls.TA_APP_NAME].reload()
+        # # Testing index
+        # index_conf = cls.splunk_client.confs['indexes'][cls.INDEX]
+        # cls.logger.info(f"{index_conf.access}")
 
 
     @classmethod
     def teardown_class(cls):
         cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
-        index = cls.splunk_client.indexes[cls.INDEX]
-        # Clean index before deleting (removes all events)
-        index.clean(timeout=300)
-        index.delete()
+        # SKIPPING index deletion
+        # index = cls.splunk_client.indexes[cls.INDEX]
+        # # Clean index before deleting (removes all events)
+        # index.clean(timeout=300)
+        # index.delete()
 
         cls.splunk_client = None
 
