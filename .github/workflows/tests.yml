@@ -45,7 +45,7 @@ jobs:
           cp etc/cicd/inputs.conf output/${app_id}/local
           chmod -R +r output
           chmod -R go-w output
-          ucc-gen package --path output/${app_id}
+          # ucc-gen package --path output/${app_id}
         shell: bash
 
       - name: Create Docker network
@@ -67,9 +67,7 @@ jobs:
           SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
           SPLUNK_PASSWORD: password
           GENESYSCLOUD_HOST: http://mockoon:3004
-          # SPLUNK_APPS_URL: ${{ github.workspace }}/${{ steps.build.outputs.app_id }}-${{ steps.build.outputs.app_version }}.tar.gz
         run: |
-          echo "${SPLUNK_APPS_URL}"
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
@@ -81,11 +79,7 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (min. 2minutes)
-          sleep 180
-
-        # -e SPLUNK_APPS_URL="file:///tmp/ta.tgz" \
-        # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
-        # -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
+          sleep 150
 
       - name: Test mockoon is alive
         run: |
@@ -101,21 +95,12 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-      # - name: Restart instance
-      #   run: |
-      #     curl -k -s -u admin:password https://localhost:8089/services/server/control/restart -X POST
-      #     sleep 30
-
       - name: Test Splunk is alive
         run: |
           docker logs splunk
-          # app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
+          # docker exec -i splunk ls -a /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}
+          # docker exec -i splunk ls -la /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}/local
           # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
-          # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
-
-          # docker exec -i splunk ls -a /opt/splunk/etc/apps
-          docker exec -i splunk ls -a /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}
-          docker exec -i splunk ls -la /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}/local
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
@@ -128,7 +113,16 @@ jobs:
         working-directory: ./tests
 
       - name: Run functional tests
+        id: ftests
         if: success()
         run: |
           python -m pytest modinput_functional/*
+          docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
         working-directory: ./tests
+
+      - name: Upload Mockoon logs
+        if: ${{ steps.ftests.conclusion == 'failure' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mockoon-logs
+          path: logs/mockoon.log
