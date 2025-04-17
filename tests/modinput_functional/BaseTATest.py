@@ -57,6 +57,9 @@ class BaseTATest():
         cls.splunk_client.indexes.create(cls.INDEX)
         # Reloading the app to avoid issues
         cls.splunk_client.apps[cls.TA_APP_NAME].reload()
+        # Testing index
+        response = cls.splunk_client.get(f"configs/conf-indexes/{cls.INDEX}")
+        cls.logger.info(response['entry'][0]['acl'])  # shows app, owner, sharing
 
 
     @classmethod
@@ -104,6 +107,8 @@ class BaseTATest():
         :param new_state: state to be assigned to the input
         """
         input_obj = cls.splunk_client.inputs[input_name]
+        cls.logger.info(f"Refreshing state of input {input_obj.content}")
+        input_obj.refresh()
         current_state = input_obj.content.get('disabled')
         if int(current_state) != new_state:
             msg = "Disabling" if new_state == 1 else "Enabling"
@@ -112,7 +117,6 @@ class BaseTATest():
                 input_obj.disable()
             else:
                 input_obj.enable()
-            input_obj.refresh()
             # Reload the app to avoid inconsistent states
             # cls.splunk_client.apps[cls.TA_APP_NAME].reload()
 
