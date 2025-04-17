@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
 
-      - name: Build and bundle TA
+      - name: Build TA
         id: build
         run: |
           app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
@@ -45,7 +45,6 @@ jobs:
           cp etc/cicd/inputs.conf output/${app_id}/local
           chmod -R +r output
           chmod -R go-w output
-          # ucc-gen package --path output/${app_id}
         shell: bash
 
       - name: Create Docker network
@@ -62,6 +61,8 @@ jobs:
             mockoon/cli:latest \
             --data /data/mockoon.json --port 3004 --log-transaction
 
+      # NOTE:
+      # Splunk to be executed as root to avoid errors when toggling inputs states via REST
       - name: Start Splunk container
         env:
           SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
@@ -78,7 +79,7 @@ jobs:
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
-          # Wait for splunk to be up and running (min. 2minutes)
+          # Wait for splunk to be up and running (~2min)
           sleep 150
 
       - name: Test mockoon is alive
@@ -95,7 +96,7 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-      - name: Test Splunk is alive
+      - name: Test Splunk is ready
         run: |
           docker logs splunk
           # docker exec -i splunk ls -a /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}
@@ -117,11 +118,14 @@ jobs:
         if: success()
         run: |
           python -m pytest modinput_functional/*
-          docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
         working-directory: ./tests
 
+      - run: |
+          echo ${{ steps.ftests.conclusion }}
+          docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
+
       - name: Upload Mockoon logs
-        if: ${{ steps.ftests.conclusion == 'failure' }}
+        # if: ${{ steps.ftests.conclusion == 'failure' }}
         uses: actions/upload-artifact@v4
         with:
           name: mockoon-logs
