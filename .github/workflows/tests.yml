@@ -47,8 +47,7 @@ jobs:
           chmod -R go-w output
         shell: bash
 
-      - name: Create Docker network
-        run: docker network create shared-net
+      - run: docker network create shared-net
 
       # NOTE:
       # Not having services because of: connectivity and volumes mounting
@@ -98,10 +97,8 @@ jobs:
 
       - name: Test Splunk is ready
         run: |
-          docker logs splunk
-          # docker exec -i splunk ls -a /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}
-          # docker exec -i splunk ls -la /opt/splunk/etc/apps/${{ steps.build.outputs.app_id }}/local
-          # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
+          EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
+          docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
@@ -120,12 +117,14 @@ jobs:
           python -m pytest modinput_functional/*
         working-directory: ./tests
 
-      - run: |
+      - if: always()
+        run: |
           echo ${{ steps.ftests.conclusion }}
           docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
 
       - name: Upload Mockoon logs
         # if: ${{ steps.ftests.conclusion == 'failure' }}
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mockoon-logs
