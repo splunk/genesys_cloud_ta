@@ -58,7 +58,8 @@ class BaseTATest():
         # Reloading the app to avoid issues
         cls.splunk_client.apps[cls.TA_APP_NAME].reload()
         # Testing index
-        response = cls.splunk_client.get(f"configs/conf-indexes/{cls.INDEX}")
+        response = cls.splunk_client.get(f"configs/conf-indexes/{cls.INDEX}?output_mode=json")
+        cls.logger.info(response)
         cls.logger.info(response['entry'][0]['acl'])  # shows app, owner, sharing
 
 
