@@ -33,7 +33,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
 
-      - name: Build TA
+      - name: Build and bundle TA
         run: |
           app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
@@ -42,7 +42,7 @@ jobs:
           cp etc/cicd/inputs.conf output/${app_id}/local
           chmod -R +r output
           chmod -R go-w output
-          # ucc-gen package --path output/${app_id}
+          ucc-gen package --path output/${app_id}
         shell: bash
 
       - name: Create Docker network
@@ -66,10 +66,14 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
+          APP_PATH="${app_id}-${app_v}.tar.gz"
+          echo "$APP_PATH"
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
+            -e SPLUNK_APPS_URL="$APP_PATH"
             -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
             -p 8000:8000 \
             -p 8089:8089 \
@@ -110,8 +114,7 @@ jobs:
           # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
 
-          docker cp output/${app_id} splunk:/opt/splunk/etc/apps/${app_id}
-          docker exec -i splunk ls -a /opt/splunk/etc/apps
+          # docker exec -i splunk ls -a /opt/splunk/etc/apps
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
 
