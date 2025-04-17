@@ -60,23 +60,23 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          mkdir -p ${{ github.workspace }}/output/${app_id}/local
-          cp ${{ github.workspace }}/etc/cicd/inputs.conf ${{ github.workspace }}/output/${app_id}/local/
-          ls -la ${{ github.workspace }}/output/${app_id}/local
+          # mkdir -p ${{ github.workspace }}/output/${app_id}/local
+          # cp ${{ github.workspace }}/etc/cicd/inputs.conf ${{ github.workspace }}/output/${app_id}/local/
+          # ls -la ${{ github.workspace }}/output/${app_id}/local
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -v ${{ github.workspace }}/output/${app_id}:/opt/splunk/etc/apps/${app_id} \
+            -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running
           sleep 30
-          echo "Print App Configuration"
-          curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
+          # echo "Print App Configuration"
+          # curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
 
-        # -v ${{ github.workspace }}/etc/cicd/inputs.conf:/opt/splunk/etc/apps/${app_id}/local/inputs.conf \
         # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
 
       - name: Test mockoon is alive
