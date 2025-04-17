@@ -110,10 +110,10 @@ jobs:
           # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
           ls -la .
-          curl -k -u admin:password \
+          curl -k -u admin:password -X POST \
             https://localhost:8089/services/apps/local \
-            -F "name=${app_id}-${app_v}.tar.gz" \
-            -F "update=true" -X POST
+            -F "name=@${app_id}-${app_v}.tar.gz" \
+            -F "update=true"
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
 
