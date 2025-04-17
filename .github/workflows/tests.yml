@@ -69,6 +69,7 @@ jobs:
             -p 8000:8000 \
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
+          # Wait for splunk to be up and running
           sleep 30
         # -v ${{ github.workspace }}/etc/ansible/default.yml:/tmp/defaults/default.yml \
 
@@ -86,18 +87,15 @@ jobs:
           echo "Mockoon failed to start"
           exit 1
 
-        # env:
-        #   OPENSSL_CONF: ${{ github.workspace }}/etc/cicd/custom_openssl.cnf
       - name: Test Splunk is alive
         run: |
           docker logs splunk
           docker ps -a | grep splunk
-          # openssl version -a
-          # curl -k -v https://localhost:8089 --tls-max 1.2
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
           docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
+          curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/genesys_cloud_ta/data/inputs?output_mode=json' | jq -r '.entry[].name'
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
