@@ -99,6 +99,7 @@ jobs:
 
       - name: Test Splunk is alive
         run: |
+          sleep 40
           docker logs splunk
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
