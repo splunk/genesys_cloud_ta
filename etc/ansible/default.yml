@@ -1,9 +1,0 @@
-splunk:
-  conf:
-    - key: server
-      value:
-        directory: /opt/splunk/etc/system/local
-        content:
-          sslConfig:
-            sslVersions: "*,-ssl2,-ssl3"
-            sslVersionsForClient: "*,-ssl2,-ssl3"
