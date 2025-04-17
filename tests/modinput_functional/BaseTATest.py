@@ -51,6 +51,7 @@ class BaseTATest():
             password=cls.password,
             verify=False,
             sharing='app',
+            owner='nobody',
             app=cls.TA_APP_NAME)
         cls.create_genesyscloud_accounts()
         cls.logger.info("Creating index")
@@ -58,12 +59,8 @@ class BaseTATest():
         # Reloading the app to avoid issues
         cls.splunk_client.apps[cls.TA_APP_NAME].reload()
         # Testing index
-        # response = cls.splunk_client.get(f"configs/conf-indexes/{cls.INDEX}?output_mode=json")
         index_conf = cls.splunk_client.confs['indexes'][cls.INDEX]
-        cls.logger.info(f"{index_conf}")
-        cls.logger.info(f"{index_conf.content}")
         cls.logger.info(f"{index_conf.access}")
-        # cls.logger.info(response['entry'][0]['acl'])  # shows app, owner, sharing
 
 
     @classmethod
