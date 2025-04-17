@@ -107,8 +107,6 @@ jobs:
           docker logs splunk
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
-          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
-          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
           # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
           ls -la .
@@ -116,6 +114,8 @@ jobs:
             https://localhost:8089/services/apps/local \
             -F "name=${app_id}-${app_v}.tar.gz" \
             -F "update=true" -X POST
+          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
+          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
