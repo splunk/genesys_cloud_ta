@@ -37,6 +37,8 @@ jobs:
         run: |
           app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
           ucc-gen build --ta-version ${app_version}
+          chmod -R +r output
+          chmod -R go-w output
         shell: bash
 
       - name: Create Docker network
@@ -60,8 +62,8 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          sudo chown -R splunk:splunk ${{ github.workspace }}/output/${app_id}
-          sudo chown -R splunk:splunk ${{ github.workspace }}/etc/cicd/inputs.conf
+          # sudo chown -R splunk:splunk ${{ github.workspace }}/output/${app_id}
+          # sudo chown -R splunk:splunk ${{ github.workspace }}/etc/cicd/inputs.conf
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
@@ -101,9 +103,9 @@ jobs:
         run: |
           docker logs splunk
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
-          docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
-          docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
+          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
+          docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
+          # docker exec -i splunk cat /opt/splunk/etc/apps/${app_id}/local/inputs.conf
           # curl -s -k -u admin:password 'https://localhost:8089/servicesNS/nobody/${app_id}/data/inputs?output_mode=json' | jq -r '.entry[].name'
 
       - name: Test connectivity from Splunk to Mockoon
