@@ -50,10 +50,13 @@ class BaseTATest():
             username=cls.username,
             password=cls.password,
             verify=False,
+            sharing='app',
             app=cls.TA_APP_NAME)
         cls.create_genesyscloud_accounts()
         cls.logger.info("Creating index")
         cls.splunk_client.indexes.create(cls.INDEX)
+        # Reloading the app to avoid issues
+        cls.splunk_client.apps[cls.TA_APP_NAME].reload()
 
 
     @classmethod
@@ -109,6 +112,10 @@ class BaseTATest():
                 input_obj.disable()
             else:
                 input_obj.enable()
+            input_obj.refresh()
+            # Reload the app to avoid inconsistent states
+            # cls.splunk_client.apps[cls.TA_APP_NAME].reload()
+
         # cls.logger.info(f"Check whether enabled? {inp.content}")
         # {'account': 'mock', 'disabled': '1', 'host': '$decideOnStartup', 'host_resolved': 'so1', 'index': 'genesyscloud', 'interval': '300', 'python.version': None}
 
