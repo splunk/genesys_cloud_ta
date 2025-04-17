@@ -72,7 +72,7 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running
-          sleep 30
+          sleep 60
           # echo "Print App Configuration"
           # curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
 
