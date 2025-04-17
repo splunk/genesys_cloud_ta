@@ -60,9 +60,6 @@ jobs:
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-          # mkdir -p ${{ github.workspace }}/output/${app_id}/local
-          # cp ${{ github.workspace }}/etc/cicd/inputs.conf ${{ github.workspace }}/output/${app_id}/local/
-          # ls -la ${{ github.workspace }}/output/${app_id}/local
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
@@ -101,7 +98,6 @@ jobs:
       - name: Test Splunk is alive
         run: |
           docker logs splunk
-          docker ps -a | grep splunk
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -a /opt/splunk/etc/apps/${app_id}/local
