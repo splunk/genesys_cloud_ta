@@ -112,9 +112,10 @@ jobs:
           ls -la .
           FILE="${app_id}-${app_v}.tar.gz"
           echo "${FILE}"
-          curl -k -u admin:password -X POST \
+          curl -k -u admin:password -v -X POST \
             https://localhost:8089/services/apps/local \
-            -F name=@"$FILE" \
+            -H "Content-Type: multipart/form-data" \
+            -F name=@"${FILE};type=application/octet-stream" \
             -F update=true
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}
           docker exec -i splunk ls -la /opt/splunk/etc/apps/${app_id}/local
