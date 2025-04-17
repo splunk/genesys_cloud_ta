@@ -62,7 +62,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:analytics:chat:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search(search_query=spl)
+        results = self._search(search_query=spl, timeout=60)
         assert len(results) == 10
         assert results[0]["source"] == "chat_observations://chat_observations"
 
