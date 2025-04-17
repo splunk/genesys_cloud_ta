@@ -67,7 +67,7 @@ jobs:
         run: |
           app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
           app_v=$(cat "package/app.manifest" | jq -r '.info.id.version')
-          APP_PATH="${app_id}-${app_v}.tar.gz"
+          APP_PATH="${{ github.workspace }}/${app_id}-${app_v}.tar.gz"
           echo "$APP_PATH"
           docker run -d --name splunk \
             --network shared-net \
@@ -79,7 +79,7 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (min. 2minutes)
-          sleep 130
+          sleep 180
           # echo "Print App Configuration"
           # curl -k -s -u admin:password https://localhost:8089/services/apps/local/${app_id}?output_mode=json
 
