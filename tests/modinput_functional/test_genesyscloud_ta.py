@@ -13,8 +13,7 @@ class TestGenesysCloudTA(BaseTATest):
         super(TestGenesysCloudTA, self).setup_method(method)
 
     def teardown_method(self, method):
-        # super(TestGenesysCloudTA, self).teardown_method(method)
-        self.logger.info("teardown_method() - skipping for troubleshooting")
+        super(TestGenesysCloudTA, self).teardown_method(method)
 
     def _search(self, search_query: str, timeout: int=40, sleep_interval: int=5) -> list:
         """
@@ -63,7 +62,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:analytics:chat:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search(search_query=spl, timeout=120)
+        results = self._search(search_query=spl)
         assert len(results) == 10
         assert results[0]["source"] == "chat_observations://chat_observations"
 

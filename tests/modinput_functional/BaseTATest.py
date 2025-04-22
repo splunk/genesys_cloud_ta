@@ -57,19 +57,15 @@ class BaseTATest():
         cls.splunk_client.indexes.create(cls.INDEX)
         # Reloading the app to avoid issues
         cls.splunk_client.apps[cls.TA_APP_NAME].reload()
-        # # Testing index
-        # index_conf = cls.splunk_client.confs['indexes'][cls.INDEX]
-        # cls.logger.info(f"{index_conf.access}")
 
 
     @classmethod
     def teardown_class(cls):
-        # Skipping for testing the CI/CD
-        # cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
-        # index = cls.splunk_client.indexes[cls.INDEX]
-        # # Clean index before deleting (removes all events)
-        # index.clean(timeout=300)
-        # index.delete()
+        cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
+        index = cls.splunk_client.indexes[cls.INDEX]
+        # Clean index before deleting (removes all events)
+        index.clean(timeout=300)
+        index.delete()
 
         cls.splunk_client = None
 
