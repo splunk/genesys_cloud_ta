@@ -38,7 +38,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         try:
             session_key = inputs.metadata["session_key"]
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                "users_aggregates_checkpointer",
+                "user_aggregates_checkpointer",
                 session_key,
                 ADDON_NAME,
             )

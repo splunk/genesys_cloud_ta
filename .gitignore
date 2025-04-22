@@ -9,3 +9,6 @@ local.meta
 .pypirc
 *.so
 *.log
+*.pdf
+dist/
+.pytest_cache
