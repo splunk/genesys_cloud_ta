@@ -84,7 +84,7 @@ jobs:
           echo "GENESYSCLOUD_HOST=$value"
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
           echo "Adding the env variable to /etc/environment"
-          docker exec splunk sh -c 'echo "GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)" >> /etc/environment && export GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)'
+          docker exec -u 0 splunk sh -c 'echo "GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)" >> /etc/environment && export GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)'
 
       - name: Test mockoon is alive
         run: |
