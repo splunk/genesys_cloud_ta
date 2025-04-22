@@ -1,14 +1,12 @@
 name: tests
 
 on:
-  # Temporary for testing
-  push
-  # pull_request:
-  #   branches:
-  #     - main
-  #   types: [opened, reopened, synchronize]
-  #   paths:
-  #     - package/**
+  pull_request:
+    branches:
+      - main
+    types: [opened, reopened, synchronize]
+    paths:
+      - package/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
