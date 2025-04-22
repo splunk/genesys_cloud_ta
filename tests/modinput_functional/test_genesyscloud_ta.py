@@ -13,7 +13,8 @@ class TestGenesysCloudTA(BaseTATest):
         super(TestGenesysCloudTA, self).setup_method(method)
 
     def teardown_method(self, method):
-        super(TestGenesysCloudTA, self).teardown_method(method)
+        # super(TestGenesysCloudTA, self).teardown_method(method)
+        self.logger.info("teardown_method() - skipping for troubleshooting")
 
     def _search(self, search_query: str, timeout: int=40, sleep_interval: int=5) -> list:
         """
