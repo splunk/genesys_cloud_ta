@@ -21,8 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [9.2.5]
-        # version: [9.4.1, 9.3.3, 9.2.5]
+        version: [9.4.1, 9.3.3, 9.2.5]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
