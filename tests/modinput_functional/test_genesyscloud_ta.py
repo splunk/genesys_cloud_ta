@@ -66,7 +66,6 @@ class TestGenesysCloudTA(BaseTATest):
         assert len(results) == 10
         assert results[0]["source"] == "chat_observations://chat_observations"
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_conversations_details(self):
         """
         This test will check whether data was successfully indexed
@@ -77,7 +76,6 @@ class TestGenesysCloudTA(BaseTATest):
         assert len(results) == 114
         assert results[0]["source"] == "conversations_details://conversations_details"
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_conversations_metrics(self):
         """
         This test will check whether data was successfully indexed
@@ -88,7 +86,6 @@ class TestGenesysCloudTA(BaseTATest):
         assert len(results) == 4
         assert results[0]["source"] == "conversations_metrics://conversations_metrics"
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_user_routing_status(self):
         """
         This test will check whether data was successfully indexed
@@ -100,7 +97,6 @@ class TestGenesysCloudTA(BaseTATest):
         assert len(results) == 358
         assert results[0]["source"] == "user_routing_status://user_routing_status"
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_edges_metrics(self):
         """
         This test will check whether data was successfully indexed and the lookup
@@ -119,7 +115,6 @@ class TestGenesysCloudTA(BaseTATest):
         lookup_results = self._search(search_query=spl)
         assert len(lookup_results) == 157
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_edges_phones(self):
         """
         This test will check whether data was successfully indexed and the lookup
@@ -138,7 +133,6 @@ class TestGenesysCloudTA(BaseTATest):
         lookup_results = self._search(search_query=spl)
         assert len(lookup_results) == 25
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_edges_trunks_metrics(self):
         """
         This test will check whether data was successfully indexed and the lookup
@@ -156,7 +150,6 @@ class TestGenesysCloudTA(BaseTATest):
         lookup_results = self._search(search_query=spl)
         assert len(lookup_results) == 14
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_queue_observations(self):
         """
         This test will check whether data was successfully indexed and the lookup
@@ -175,7 +168,6 @@ class TestGenesysCloudTA(BaseTATest):
         lookup_results = self._search(search_query=spl)
         assert len(lookup_results) == 157
 
-    @pytest.mark.skip(reason="already tested")
     def test_input_user_aggregates(self):
         """
         This test will check whether data was successfully indexed and the lookup
