@@ -74,6 +74,7 @@ jobs:
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
             -e SPLUNK_USER="root" \
+            -v ${{ github.workspace }}/etc/cicd/environment:/etc/environment
             -v ${{ github.workspace }}/output/${{ steps.build.outputs.app_id }}:/opt/splunk/etc/apps/${{ steps.build.outputs.app_id }} \
             -p 8000:8000 \
             -p 8089:8089 \
@@ -83,8 +84,7 @@ jobs:
           value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
           echo "GENESYSCLOUD_HOST=$value"
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
-          echo "Adding the env variable to /etc/environment"
-          docker exec -u 0 splunk sh -c 'echo "GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)" >> /etc/environment && export GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)'
+          docker exec splunk sh -c 'cat /etc/environment'
 
       - name: Test mockoon is alive
         run: |
@@ -147,5 +147,5 @@ jobs:
         if: always()
         with:
           name: Tests Results
-          path: 'junit/*.xml'
+          path: 'tests/junit/*.xml'
           reporter: java-junit
