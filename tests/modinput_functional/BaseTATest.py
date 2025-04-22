@@ -50,6 +50,7 @@ class BaseTATest():
             username=cls.username,
             password=cls.password,
             verify=False,
+            sharing='app',
             app=cls.TA_APP_NAME)
         cls.create_genesyscloud_accounts()
         cls.logger.info("Creating index")
@@ -63,11 +64,12 @@ class BaseTATest():
 
     @classmethod
     def teardown_class(cls):
-        cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
-        index = cls.splunk_client.indexes[cls.INDEX]
-        # Clean index before deleting (removes all events)
-        index.clean(timeout=300)
-        index.delete()
+        # Skipping for testing the CI/CD
+        # cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
+        # index = cls.splunk_client.indexes[cls.INDEX]
+        # # Clean index before deleting (removes all events)
+        # index.clean(timeout=300)
+        # index.delete()
 
         cls.splunk_client = None
 
