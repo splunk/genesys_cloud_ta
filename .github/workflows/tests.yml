@@ -80,6 +80,11 @@ jobs:
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (~2min)
           sleep 150
+          value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
+          echo "GENESYSCLOUD_HOST=$value"
+          echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
+          echo "Adding the env variable to /etc/environment"
+          docker exec splunk sh -c 'echo "GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)" >> /etc/environment && export GENESYSCLOUD_HOST=$(printenv GENESYSCLOUD_HOST)'
 
       - name: Test mockoon is alive
         run: |
@@ -113,9 +118,10 @@ jobs:
       - name: Run functional tests
         id: ftests
         env:
-          GENESYSCLOUD_HOST: http://mockoon:3004
+          GENESYSCLOUD_HOST: ${{ env.GENESYSCLOUD_HOST }}
         if: success()
         run: |
+          echo "GENESYSCLOUD_HOST is: $GENESYSCLOUD_HOST"
           mkdir -p junit
           python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
         working-directory: ./tests
