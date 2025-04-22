@@ -126,14 +126,14 @@ jobs:
         if: always()
         run: |
           mkdir -p logs/
-          docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
+          docker logs mockoon > ${{ github.workspace }}/logs/mockoon-${{ matrix.version }}.log 2>&1
 
       - name: Upload Mockoon logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mockoon-logs
-          path: logs/mockoon.log
+          path: logs/mockoon-${{ matrix.version }}.log
 
       - uses: dorny/test-reporter@v2
         if: always()
