@@ -31,24 +31,18 @@ def validate_input(definition: smi.ValidationDefinition):
     return
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
-    """
-    Main function to retrieve Genesys Cloud conversation metrics,
-    process them, and write them to Splunk.
-    """
     for input_name, input_item in inputs.inputs.items():
         normalized_input_name = input_name.split("/")[-1]
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
 
-            # Initialize KV store checkpointer
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
-                 "conversations_metrics_checkpointer",
-                  session_key,
-                  ADDON_NAME,
+                "conversations_metrics_checkpointer",
+                session_key,
+                ADDON_NAME,
             )
 
-            # Set log level dynamically
             log_level = conf_manager.get_log_level(
                 logger=logger,
                 session_key=session_key,
@@ -59,27 +53,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            # Retrieve account credentials with error handling
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
 
-            # Initialize Genesys Cloud client
             client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
-            # Retrieve the last checkpoint or set it to 1970-01-01 if it doesn't exist
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name) 
-                or  datetime(1970, 1, 1).timestamp()
+                kvstore_checkpointer.get(checkpointer_key_name)
+                or datetime(1970, 1, 1).timestamp()
             )
 
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             now = datetime.now(timezone.utc)
-
-            # Define time interval for data retrieval
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            # Define metrics for data retrieval
+
             metrics = [
                 "nBlindTransferred", "nBotInteractions", "nCobrowseSessions", "nConnected",
                 "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
@@ -94,19 +83,31 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail",
                 "tWait", "nOffered"
             ]
-
             group_by = ["queueId"]
+
+            media_types_raw = input_item.get("media_types", "")
+            directions_raw = input_item.get("directions", "")
+            media_types = media_types_raw.split("|") if media_types_raw else []
+            directions = directions_raw.split("|") if directions_raw else []
+
+
+            media_type_predicates = [{"dimension": "mediaType", "value": mt} for mt in media_types]
+            direction_predicates = [{"dimension": "direction", "value": d} for d in directions]
+
+            filter_block = {"type": "and", "clauses": []}
+            if media_type_predicates:
+                filter_block["clauses"].append({"type": "or", "predicates": media_type_predicates})
+            if direction_predicates:
+                filter_block["clauses"].append({"type": "or", "predicates": direction_predicates})
 
             body = {
                 "interval": interval,
                 "metrics": metrics,
-                "group_by": group_by
+                "groupBy": group_by,
+                "filter": filter_block
             }
-            logger.debug(f"Request body: {body}")
 
             sourcetype = "genesyscloud:analytics:flows:metric"
-
-            # Perform API request
             response = client.post(
                 "ConversationsApi",
                 "post_analytics_conversations_aggregates_query",
@@ -114,8 +115,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 body
             )
             to_process_data = response.to_dict().get("results", [])
-
-            # Ensure data exists before processing
+            
             if to_process_data:
                 for event in to_process_data:
                     try:
@@ -134,7 +134,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     except Exception as e:
                         logger.error(f"Failed to write event: {str(e)}")
 
-                # Only update checkpoint if data was processed
                 kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
 
                 log.events_ingested(
