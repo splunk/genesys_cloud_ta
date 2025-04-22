@@ -100,10 +100,10 @@ jobs:
 
       - name: Test connectivity from Splunk to Mockoon
         run: |
-          echo "Test whether Splunk is ready"
+          echo "Test whether Splunk is ready..."
           EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
           docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
-          echo "Test connectivity"
+          echo "Test connectivity..."
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
       - name: Run integration tests
