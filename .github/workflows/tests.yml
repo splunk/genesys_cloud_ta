@@ -82,9 +82,7 @@ jobs:
           # Wait for splunk to be up and running (~2min)
           sleep 150
           value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
-          echo "GENESYSCLOUD_HOST=$value"
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
-          docker exec splunk sh -c 'cat /etc/environment'
 
       - name: Test mockoon is alive
         run: |
@@ -109,29 +107,26 @@ jobs:
         run: |
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
-      - name: Run integration tests. [Skipping]
+      - name: Run integration tests
+        env:
+          GENESYSCLOUD_HOST: http://localhost:3004
         run: |
           pip install -r test-requirements.txt
-          # export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
+          mkdir -p junit
+          python -m pytest integration/* --junitxml=junit/integration-test-results-${{ matrix.version }}.xml
         working-directory: ./tests
 
       - name: Run functional tests
+        if: success()
         id: ftests
         env:
           GENESYSCLOUD_HOST: ${{ env.GENESYSCLOUD_HOST }}
-        if: success()
         run: |
-          echo "GENESYSCLOUD_HOST is: $GENESYSCLOUD_HOST"
-          mkdir -p junit
           python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
         working-directory: ./tests
 
       - if: always()
         run: |
-          # echo "Is there data indexed?"
-          # curl --retry-delay 5 --retry 5 -f -k -u admin:password -X POST 'https://localhost:8089/services/search/v2/jobs/export' -d search="search index=genesyscloud | head 10" -d output_mode=json -d earliest_time=0 -d latest_time=now
-          # echo "Test data availability"
-          # curl --retry-delay 5 --retry 5 -f -k -u admin:password -X POST 'https://localhost:8089/services/search/v2/jobs/export' -d search="search index=genesyscloud sourcetype=\"genesyscloud:analytics:chats:metrics\"" -d output_mode=json -d earliest_time=0 -d latest_time=now -d | jq -e "(.result.source | contains('chat_observations://chat_observations'))"
           mkdir -p logs/
           docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
 
