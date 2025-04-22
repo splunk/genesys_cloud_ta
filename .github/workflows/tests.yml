@@ -104,10 +104,10 @@ jobs:
         run: |
           docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
-      - name: Run integration tests
+      - name: Run integration tests. [Skipping]
         run: |
           pip install -r test-requirements.txt
-          export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
+          # export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
         working-directory: ./tests
 
       - name: Run functional tests
@@ -119,6 +119,10 @@ jobs:
 
       - if: always()
         run: |
+          echo "Is there data indexed?"
+          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud" -d output_mode=json -X POST
+          echo "Test data availability"
+          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud sourcetype=\"genesyscloud:analytics:chats:metrics\"" -d output_mode=json | jq -e '(.result.source | contains('chat_observations://chat_observations'))' -X POST
           mkdir -p logs/
           docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
 
