@@ -120,9 +120,9 @@ jobs:
       - if: always()
         run: |
           echo "Is there data indexed?"
-          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud" -d output_mode=json -X POST
+          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud" -d output_mode=json -d earliest_time=0 -d latest_time=now -X POST
           echo "Test data availability"
-          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud sourcetype=\"genesyscloud:analytics:chats:metrics\"" -d output_mode=json | jq -e '(.result.source | contains('chat_observations://chat_observations'))' -X POST
+          curl --retry-delay 5 --retry 5 -f -k -u admin:password https://localhost:8089/services/search/v2/jobs/export -d search="search index=genesyscloud sourcetype=\"genesyscloud:analytics:chats:metrics\"" -d output_mode=json -d earliest_time=0 -d latest_time=now -d -X POST | jq -e '(.result.source | contains('chat_observations://chat_observations'))'
           mkdir -p logs/
           docker logs mockoon > ${{ github.workspace }}/logs/mockoon.log 2>&1
 
