@@ -102,7 +102,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             body = {
                 "interval": interval,
                 "metrics": metrics,
-                "groupBy": group_by,
+                "group_by": group_by,
                 "filter": filter_block
             }
 
@@ -113,23 +113,26 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "ConversationAggregationQuery",
                 body
             )
-            to_process_data = response.to_dict().get("results", [])
-
-            if to_process_data:
+            if response:
+                to_process_data = response.to_dict().get("results", [])
                 for event in to_process_data:
                     try:
-                        interval_start_time = (
-                            datetime.strptime(event["data"][0]["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
-                            if event.get("data") else round(start_time.timestamp(), 3)
-                        )
-                        event_writer.write_event(
-                            smi.Event(
-                                data=json.dumps(event, ensure_ascii=False, default=str),
-                                index=input_item.get("index"),
-                                sourcetype=sourcetype,
-                                time=interval_start_time
+                        for data_entry in event["data"]:
+                            interval_start_time = (
+                                datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+                                if event.get("data") else round(start_time.timestamp(), 3)
                             )
-                        )
+                            for metrics in data_entry["metrics"]:
+                                metrics["group"] = event["group"]
+                                metrics["interval"] = data_entry["interval"]
+                                event_writer.write_event(
+                                    smi.Event(
+                                        data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                        index=input_item.get("index"),
+                                        sourcetype=sourcetype,
+                                        time=interval_start_time
+                                    )
+                                )
                     except Exception as e:
                         logger.error(f"Failed to write event: {str(e)}")
 
