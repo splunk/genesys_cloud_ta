@@ -90,7 +90,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             media_types = media_types_raw.split("|") if media_types_raw else []
             directions = directions_raw.split("|") if directions_raw else []
 
-
             media_type_predicates = [{"dimension": "mediaType", "value": mt} for mt in media_types]
             direction_predicates = [{"dimension": "direction", "value": d} for d in directions]
 
@@ -115,7 +114,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 body
             )
             to_process_data = response.to_dict().get("results", [])
-            
+
             if to_process_data:
                 for event in to_process_data:
                     try:
