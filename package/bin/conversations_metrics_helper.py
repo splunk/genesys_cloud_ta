@@ -86,7 +86,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             group_by = ["queueId"]
 
             media_types_raw = input_item.get("media_types", "")
-            directions_raw = input_item.get("directions", "")
+            directions_raw = input_item.get("direction", "")
             media_types = media_types_raw.split("|") if media_types_raw else []
             directions = directions_raw.split("|") if directions_raw else []
 

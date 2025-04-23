@@ -509,7 +509,7 @@
                         },
                         {
                             "type": "multipleSelect",
-                            "field": "directions",
+                            "field": "direction",
                             "label": "Direction",
                             "help": "The direction of the communication (select at least one)",
                             "required": true,
