@@ -511,7 +511,7 @@
                             "type": "multipleSelect",
                             "field": "directions",
                             "label": "Direction",
-                            "help": "Direction if the media you will ingest (at least one must be selected)",
+                            "help": "The direction of the communication (select at least one)",
                             "required": true,
                             "options": {
                                 "delimiter": "|",
@@ -530,8 +530,8 @@
                         {
                             "type": "multipleSelect",
                             "field": "media_types",
-                            "label": "Media Types",
-                            "help": "the Media Type(s) you would like to ingest (at least one must be selected)",
+                            "label": "Media Type(s)",
+                            "help": "The session media type(s) to ingest (select at least one)",
                             "required": true,
                             "options": {
                                 "delimiter": "|",
@@ -563,6 +563,10 @@
                                     {
                                         "value": "screenshare",
                                         "label": "Screen Share"
+                                    },
+                                    {
+                                        "value": "unknown",
+                                        "label": "Unknown"
                                     },
                                     {
                                         "value": "video",
