@@ -839,85 +839,6 @@
       "streamingInterval": 0
     },
     {
-      "uuid": "e0e77558-9b1d-46ca-bda5-5a19ebcae46d",
-      "type": "http",
-      "documentation": "Query for conversation aggregates",
-      "method": "post",
-      "endpoint": "api/v2/analytics/conversations/aggregates/query",
-      "responses": [
-        {
-          "uuid": "ad8a2893-0147-4c55-aac3-4e1f92d81de2",
-          "body": "{\n    \"results\": [\n      {{#repeat 10}}\n      {\n        \"group\": { \n          \"mediaType\": \"message\",\n          \"queueId\": \"{{faker 'string.uuid'}}\"\n        },\n        \"data\": [\n          {\n            \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n            \"metrics\": [\n              {\n                \"metric\": \"nConnected\",\n                \"stats\": {\n                  \"count\": 171\n                }\n              },\n              {\n                \"metric\": \"nError\",\n                \"stats\": {\n                  \"count\": 1\n                }\n              },\n              {\n                \"metric\": \"tAgentResponseTime\",\n                \"stats\": {\n                  \"max\": 594742,\n                  \"min\": 594742,\n                  \"count\": 1,\n                  \"sum\": 594742\n                }\n              },\n              {\n                \"metric\": \"tConnected\",\n                \"stats\": {\n                  \"max\": 4032,\n                  \"min\": 2306,\n                  \"count\": 10,\n                  \"sum\": 34246\n                }\n              },\n              {\n                \"metric\": \"tMonitoring\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              },\n              {\n                \"metric\": \"tMonitoringComplete\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              }\n            ]\n          }\n        ]\n      }{{/repeat}}\n    ]\n  }",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "Query with filter",
-          "headers": [
-            {
-              "key": "cache-control",
-              "value": "no-cache, no-store, must-revalidate"
-            },
-            {
-              "key": "connection",
-              "value": "close"
-            },
-            {
-              "key": "content-type",
-              "value": "application/json"
-            }
-          ],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [
-            {
-              "target": "body",
-              "modifier": "filter.type",
-              "value": "and",
-              "invert": false,
-              "operator": "equals"
-            }
-          ],
-          "rulesOperator": "AND",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": false,
-          "crudKey": "id",
-          "callbacks": []
-        },
-        {
-          "uuid": "34122628-ab7e-470e-8494-3b985fc21e88",
-          "body": "{\n  \"results\": [\n    {\n      \"group\": {\n        \"mediaType\": \"callback\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nConnected\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tActiveCallback\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tActiveCallbackComplete\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 9945,\n                \"min\": 5921,\n                \"count\": 3,\n                \"sum\": 23838\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2097,\n                \"count\": 11,\n                \"sum\": 130823\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 73346230,\n                \"min\": 416207,\n                \"count\": 4,\n                \"sum\": 110962827\n              }\n            },\n            {\n              \"metric\": \"tFirstConnect\",\n              \"stats\": {\n                \"max\": 290718,\n                \"min\": 290718,\n                \"count\": 1,\n                \"sum\": 290718\n              }\n            },\n            {\n              \"metric\": \"tFirstDial\",\n              \"stats\": {\n                \"max\": 285696,\n                \"min\": 285696,\n                \"count\": 1,\n                \"sum\": 285696\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 8132,\n                \"count\": 4,\n                \"sum\": 318215\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2883,\n                \"count\": 7,\n                \"sum\": 118383\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 206596,\n                \"min\": 2211,\n                \"count\": 5,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 2211,\n                \"count\": 4,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0,\n                \"numerator\": 0,\n                \"denominator\": 4,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"cobrowse\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nCobrowseSessions\",\n              \"stats\": {\n                \"count\": 39\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"message\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nBotInteractions\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 10\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 2\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"oMessageTurn\",\n              \"stats\": {\n                \"max\": 3,\n                \"min\": 1,\n                \"count\": 9,\n                \"sum\": 15\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 4334459,\n                \"min\": 3928,\n                \"count\": 10,\n                \"sum\": 20253985\n              }\n            },\n            {\n              \"metric\": \"tAgentResponseTime\",\n              \"stats\": {\n                \"max\": 575147358,\n                \"min\": 34802,\n                \"count\": 10,\n                \"sum\": 667880782\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 15487,\n                \"min\": 2765,\n                \"count\": 9,\n                \"sum\": 58605\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 9,\n                \"sum\": 92049245\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 575453681,\n                \"min\": 41487,\n                \"count\": 11,\n                \"sum\": 668683945\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 575150181,\n                \"min\": 21268,\n                \"count\": 10,\n                \"sum\": 596026384\n              }\n            },\n            {\n              \"metric\": \"tHeld\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tHeldComplete\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 572971290,\n                \"min\": 2630,\n                \"count\": 12,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 572993822,\n                \"min\": 6805,\n                \"count\": 10,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0.7777777777777778,\n                \"numerator\": 7,\n                \"denominator\": 9,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"voice\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nError\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOutbound\",\n              \"stats\": {\n                \"count\": 5\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 20592,\n                \"min\": 2067,\n                \"count\": 5,\n                \"sum\": 29509\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tContacting\",\n              \"stats\": {\n                \"max\": 939,\n                \"min\": 28,\n                \"count\": 5,\n                \"sum\": 1896\n              }\n            },\n            {\n              \"metric\": \"tDialing\",\n              \"stats\": {\n                \"max\": 12071,\n                \"min\": 9714,\n                \"count\": 5,\n                \"sum\": 57910\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 39949,\n                \"min\": 11814,\n                \"count\": 5,\n                \"sum\": 110878\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tVoicemail\",\n              \"stats\": {\n                \"max\": 120159,\n                \"min\": 53848,\n                \"count\": 4,\n                \"sum\": 321634\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "Query without filter",
-          "headers": [],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [
-            {
-              "target": "body",
-              "modifier": "filter.type",
-              "value": "and",
-              "invert": true,
-              "operator": "equals"
-            }
-          ],
-          "rulesOperator": "AND",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": false,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
       "uuid": "e6d084d7-866b-4b4e-a356-8a322be0e85c",
       "type": "http",
       "documentation": "Query for conversation details w/ pagination",
@@ -1164,6 +1085,85 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
+    },
+    {
+      "uuid": "36beedd9-034f-4110-8f10-751080527158",
+      "type": "http",
+      "documentation": "Query for conversation aggregates",
+      "method": "post",
+      "endpoint": "api/v2/analytics/conversations/aggregates/query",
+      "responses": [
+        {
+          "uuid": "19cdd2f1-aca7-4400-8e88-0e81e17c933c",
+          "body": "{\n    \"results\": [\n      {{#repeat 10}}\n      {\n        \"group\": { \n          \"mediaType\": \"message\",\n          \"queueId\": \"{{faker 'string.uuid'}}\"\n        },\n        \"data\": [\n          {\n            \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n            \"metrics\": [\n              {\n                \"metric\": \"nConnected\",\n                \"stats\": {\n                  \"count\": 171\n                }\n              },\n              {\n                \"metric\": \"nError\",\n                \"stats\": {\n                  \"count\": 1\n                }\n              },\n              {\n                \"metric\": \"tAgentResponseTime\",\n                \"stats\": {\n                  \"max\": 594742,\n                  \"min\": 594742,\n                  \"count\": 1,\n                  \"sum\": 594742\n                }\n              },\n              {\n                \"metric\": \"tConnected\",\n                \"stats\": {\n                  \"max\": 4032,\n                  \"min\": 2306,\n                  \"count\": 10,\n                  \"sum\": 34246\n                }\n              },\n              {\n                \"metric\": \"tMonitoring\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              },\n              {\n                \"metric\": \"tMonitoringComplete\",\n                \"stats\": {\n                  \"max\": 30568,\n                  \"min\": 30568,\n                  \"count\": 1,\n                  \"sum\": 30568\n                }\n              }\n            ]\n          }\n        ]\n      }{{/repeat}}\n    ]\n  }",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Query for chat",
+          "headers": [
+            {
+              "key": "cache-control",
+              "value": "no-cache, no-store, must-revalidate"
+            },
+            {
+              "key": "connection",
+              "value": "close"
+            },
+            {
+              "key": "content-type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "$.filter.clauses.*.predicates.*.value",
+              "value": "outbound",
+              "invert": true,
+              "operator": "array_includes"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "16bdda1b-e91b-4630-90fc-fc3375c6d431",
+          "body": "{\n  \"results\": [\n    {\n      \"group\": {\n        \"mediaType\": \"callback\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nConnected\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tActiveCallback\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tActiveCallbackComplete\",\n              \"stats\": {\n                \"max\": 114237,\n                \"min\": 114237,\n                \"count\": 1,\n                \"sum\": 114237\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 9945,\n                \"min\": 5921,\n                \"count\": 3,\n                \"sum\": 23838\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2097,\n                \"count\": 11,\n                \"sum\": 130823\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 73346230,\n                \"min\": 416207,\n                \"count\": 4,\n                \"sum\": 110962827\n              }\n            },\n            {\n              \"metric\": \"tFirstConnect\",\n              \"stats\": {\n                \"max\": 290718,\n                \"min\": 290718,\n                \"count\": 1,\n                \"sum\": 290718\n              }\n            },\n            {\n              \"metric\": \"tFirstDial\",\n              \"stats\": {\n                \"max\": 285696,\n                \"min\": 285696,\n                \"count\": 1,\n                \"sum\": 285696\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 8132,\n                \"count\": 4,\n                \"sum\": 318215\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 30140,\n                \"min\": 2883,\n                \"count\": 7,\n                \"sum\": 118383\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 206596,\n                \"min\": 2211,\n                \"count\": 5,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 222903,\n                \"min\": 2211,\n                \"count\": 4,\n                \"sum\": 294377\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0,\n                \"numerator\": 0,\n                \"denominator\": 4,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 73342037,\n                \"min\": 79057,\n                \"count\": 4,\n                \"sum\": 110554154\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"cobrowse\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nCobrowseSessions\",\n              \"stats\": {\n                \"count\": 39\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"message\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nBotInteractions\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"nOffered\",\n              \"stats\": {\n                \"count\": 10\n              }\n            },\n            {\n              \"metric\": \"nOverSla\",\n              \"stats\": {\n                \"count\": 2\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 6\n              }\n            },\n            {\n              \"metric\": \"oMessageTurn\",\n              \"stats\": {\n                \"max\": 3,\n                \"min\": 1,\n                \"count\": 9,\n                \"sum\": 15\n              }\n            },\n            {\n              \"metric\": \"tAcd\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 4334459,\n                \"min\": 3928,\n                \"count\": 10,\n                \"sum\": 20253985\n              }\n            },\n            {\n              \"metric\": \"tAgentResponseTime\",\n              \"stats\": {\n                \"max\": 575147358,\n                \"min\": 34802,\n                \"count\": 10,\n                \"sum\": 667880782\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 15487,\n                \"min\": 2765,\n                \"count\": 9,\n                \"sum\": 58605\n              }\n            },\n            {\n              \"metric\": \"tAnswered\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 9,\n                \"sum\": 92049245\n              }\n            },\n            {\n              \"metric\": \"tConnected\",\n              \"stats\": {\n                \"max\": 575453681,\n                \"min\": 41487,\n                \"count\": 11,\n                \"sum\": 668683945\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 575150181,\n                \"min\": 21268,\n                \"count\": 10,\n                \"sum\": 596026384\n              }\n            },\n            {\n              \"metric\": \"tHeld\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tHeldComplete\",\n              \"stats\": {\n                \"max\": 2137005,\n                \"min\": 3687,\n                \"count\": 2,\n                \"sum\": 2140692\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 572971290,\n                \"min\": 2630,\n                \"count\": 12,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 572993822,\n                \"min\": 6805,\n                \"count\": 10,\n                \"sum\": 573631707\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            },\n            {\n              \"metric\": \"oServiceLevel\",\n              \"stats\": {\n                \"ratio\": 0.7777777777777778,\n                \"numerator\": 7,\n                \"denominator\": 9,\n                \"target\": 0.8\n              }\n            },\n            {\n              \"metric\": \"tWait\",\n              \"stats\": {\n                \"max\": 91955869,\n                \"min\": 3666,\n                \"count\": 10,\n                \"sum\": 92106833\n              }\n            }\n          ]\n        }\n      ]\n    },\n    {\n      \"group\": {\n        \"mediaType\": \"voice\",\n        \"queueId\": \"{{faker 'string.uuid'}}\"\n      },\n      \"data\": [\n        {\n          \"interval\": \"2025-03-01T00:00:00.000Z/2025-03-12T23:59:59.999Z\",\n          \"metrics\": [\n            {\n              \"metric\": \"nBlindTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nError\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"nOutbound\",\n              \"stats\": {\n                \"count\": 5\n              }\n            },\n            {\n              \"metric\": \"nTransferred\",\n              \"stats\": {\n                \"count\": 4\n              }\n            },\n            {\n              \"metric\": \"tAcw\",\n              \"stats\": {\n                \"max\": 20592,\n                \"min\": 2067,\n                \"count\": 5,\n                \"sum\": 29509\n              }\n            },\n            {\n              \"metric\": \"tAlert\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tContacting\",\n              \"stats\": {\n                \"max\": 939,\n                \"min\": 28,\n                \"count\": 5,\n                \"sum\": 1896\n              }\n            },\n            {\n              \"metric\": \"tDialing\",\n              \"stats\": {\n                \"max\": 12071,\n                \"min\": 9714,\n                \"count\": 5,\n                \"sum\": 57910\n              }\n            },\n            {\n              \"metric\": \"tHandle\",\n              \"stats\": {\n                \"max\": 39949,\n                \"min\": 11814,\n                \"count\": 5,\n                \"sum\": 110878\n              }\n            },\n            {\n              \"metric\": \"tNotResponding\",\n              \"stats\": {\n                \"max\": 12020,\n                \"min\": 9716,\n                \"count\": 5,\n                \"sum\": 57750\n              }\n            },\n            {\n              \"metric\": \"tTalk\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tTalkComplete\",\n              \"stats\": {\n                \"max\": 6660,\n                \"min\": 2244,\n                \"count\": 4,\n                \"sum\": 21563\n              }\n            },\n            {\n              \"metric\": \"tVoicemail\",\n              \"stats\": {\n                \"max\": 120159,\n                \"min\": 53848,\n                \"count\": 4,\n                \"sum\": 321634\n              }\n            },\n            {\n              \"metric\": \"oServiceTarget\",\n              \"stats\": {\n                \"current\": 0.8\n              }\n            }\n          ]\n        }\n      ]\n    }\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Query for all metrics",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "$.filter.clauses.*.predicates.*.value",
+              "value": "outbound",
+              "invert": false,
+              "operator": "array_includes"
+            }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -1181,7 +1181,7 @@
     },
     {
       "type": "route",
-      "uuid": "e0e77558-9b1d-46ca-bda5-5a19ebcae46d"
+      "uuid": "36beedd9-034f-4110-8f10-751080527158"
     },
     {
       "type": "route",
