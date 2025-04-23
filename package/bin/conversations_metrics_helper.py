@@ -106,7 +106,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "filter": filter_block
             }
 
-            sourcetype = "genesyscloud:analytics:flows:metric"
+            sourcetype = "genesyscloud:analytics:flows:metrics"
             response = client.post(
                 "ConversationsApi",
                 "post_analytics_conversations_aggregates_query",
