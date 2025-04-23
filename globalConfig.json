@@ -899,7 +899,7 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.0.0+4ec8dab",
+        "version": "0.0.1",
         "displayName": "Genesys Cloud Add-on",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
