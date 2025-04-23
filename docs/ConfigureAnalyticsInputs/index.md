@@ -3,7 +3,6 @@
 **Description:** Analytics inputs enable collection of:
 
 - Queue Observations,
-- Chat Observations,
 - Conversations Metrics,
 - Conversations Details.
 
@@ -23,7 +22,7 @@ Configure your inputs on the Splunk platform instance responsible for collecting
 Configure your inputs using Splunk Web on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder.
 
 1. In the Genesys Cloud Add-on for Splunk, click **Inputs > Create New Input > Analytics**.
-2. Select one of the available inputs among **Queue Observations**, **Chat Observations**, **Conversations Metrics** and **Conversations Details**.
+2. Select one of the available inputs among **Queue Observations**, **Conversations Metrics** and **Conversations Details**.
 3. Enter the parameter values using information provided in the input parameter table below.
 4. Click **Add**.
 5. Verify that data is successfully arriving by running the following searches on your search head:
@@ -32,7 +31,7 @@ Configure your inputs using Splunk Web on the Splunk platform instance responsib
     sourcetype=genesyscloud:analytics:*
 ```
 
-If you do not see any events, check the **Troubleshooting** tab on your data collection node to verify that your accounts, forwarders, and inputs are all configured successfully.
+If you do not see any events, check the [Troubleshooting](../Troubleshooting/index.md) section.
 
 ## Configure inputs in the configuration files
 
@@ -44,12 +43,6 @@ Configure your inputs using the configuration files on the Splunk platform insta
 ```
 <!-- Queue Observations -->
 [queue_observations://<queue_observations_input_name>]
-account = <value>
-index = <value>
-interval = <value>
-
-<!-- Chat Observations -->
-[chat_observations://<chat_observations_input_name>]
 account = <value>
 index = <value>
 interval = <value>
@@ -75,7 +68,7 @@ interval = <value>
     sourcetype=genesyscloud:analytics:*
 ```
 
-If you do not see any events, check the **Troubleshooting** tab on your data collection node to verify that your accounts, forwarders, and inputs are all configured successfully.
+If you do not see any events, check the [Troubleshooting](../Troubleshooting/index.md) section.
 
 ## Input Parameters
 
@@ -87,3 +80,7 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`account`                |Account Name                      |The Genesys Cloud account from which you want to gather data.|
 |`index`                  |Index                             |The index in which the data should be stored. The default is <code>default</code>.|
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code>.|
+| `direction`             |Direction                         |The direction of the communication.
+| `media_types`           |Media Type(s)                     |The session media type(s).
+
+Direction and Media Type(s) possible values are taken from [Genesys Cloud Specs](https://developer.genesys.cloud/analyticsdatamanagement/analytics/aggregate/conversation-query#dimensions).

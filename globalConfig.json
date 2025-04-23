@@ -217,71 +217,6 @@
                     "title": "Queue Observations"
                 },
                 {
-                    "name": "chat_observations",
-                    "entity": [
-                        {
-                            "type": "text",
-                            "label": "Name",
-                            "validators": [
-                                {
-                                    "type": "regex",
-                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
-                                    "pattern": "^[a-zA-Z]\\w*$"
-                                },
-                                {
-                                    "type": "string",
-                                    "errorMsg": "Length of input name should be between 1 and 100",
-                                    "minLength": 1,
-                                    "maxLength": 100
-                                }
-                            ],
-                            "field": "name",
-                            "help": "A unique name for the data input.",
-                            "required": true
-                        },
-                        {
-                            "type": "interval",
-                            "field": "interval",
-                            "label": "Interval",
-                            "help": "Time interval of the data input, in seconds.",
-                            "required": true,
-                            "defaultValue": "300"
-                        },
-                        {
-                            "type": "singleSelect",
-                            "field": "index",
-                            "label": "Index",
-                            "defaultValue": "default",
-                            "options": {
-                                "endpointUrl": "data/indexes",
-                                "denyList": "^_.*$",
-                                "createSearchChoice": true
-                            },
-                            "required": true,
-                            "validators": [
-                                {
-                                    "type": "string",
-                                    "minLength": 1,
-                                    "maxLength": 80,
-                                    "errorMsg": "Length of index name should be between 1 and 80."
-                                }
-                            ]
-                        },
-                        {
-                            "type": "singleSelect",
-                            "label": "Account to use",
-                            "options": {
-                                "referenceName": "account"
-                            },
-                            "help": "Account to use for this input.",
-                            "field": "account",
-                            "required": true
-                        }
-                    ],
-                    "inputHelperModule": "chat_observations_helper",
-                    "title": "Chat Observations"
-                },
-                {
                     "name": "edges_trunks_metrics",
                     "entity": [
                         {
@@ -573,6 +508,74 @@
                             "defaultValue": "300"
                         },
                         {
+                            "type": "multipleSelect",
+                            "field": "direction",
+                            "label": "Direction",
+                            "help": "The direction of the communication (select at least one)",
+                            "required": true,
+                            "options": {
+                                "delimiter": "|",
+                                "items": [
+                                    {
+                                        "value": "inbound",
+                                        "label": "Inbound"
+                                    },
+                                    {
+                                        "value": "outbound",
+                                        "label": "Outbound"
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "type": "multipleSelect",
+                            "field": "media_types",
+                            "label": "Media Type(s)",
+                            "help": "The session media type(s) to ingest (select at least one)",
+                            "required": true,
+                            "options": {
+                                "delimiter": "|",
+                                "items": [
+                                    {
+                                        "value": "callback",
+                                        "label": "Callback"
+                                    },
+                                    {
+                                        "value": "chat",
+                                        "label": "Chat"
+                                    },
+                                    {
+                                        "value": "cobrowse",
+                                        "label": "Co-browse"
+                                    },
+                                    {
+                                        "value": "email",
+                                        "label": "Email"
+                                    },
+                                    {
+                                        "value": "internalmessage",
+                                        "label": "Internal Message"
+                                    },
+                                    {
+                                        "value": "message",
+                                        "label": "Message"
+                                    },
+                                    {
+                                        "value": "screenshare",
+                                        "label": "Screen Share"
+                                    },
+                                    {
+                                        "value": "video",
+                                        "label": "Video"
+                                    },
+                                    {
+                                        "value": "voice",
+                                        "label": "Voice"
+                                    }
+                                ]
+                            }
+                        },
+                        {
                             "type": "singleSelect",
                             "field": "index",
                             "label": "Index",
@@ -800,7 +803,6 @@
                     "groupTitle": "Analytics",
                     "groupServices": [
                         "queue_observations",
-                        "chat_observations",
                         "conversations_metrics",
                         "conversations_details"
                     ]

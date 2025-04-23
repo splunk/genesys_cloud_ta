@@ -60,11 +60,11 @@ class TestGenesysCloudTA(BaseTATest):
         """
         This test will check whether data was successfully indexed
         """
-        sourcetype = "genesyscloud:analytics:chat:metrics"
-        spl = f"search index={self.INDEX} sourcetype={sourcetype}"
+        sourcetype = "genesyscloud:analytics:flows:metrics"
+        source = "conversations_metrics://chat_observations"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
         results = self._search(search_query=spl)
-        assert len(results) == 10
-        assert results[0]["source"] == "chat_observations://chat_observations"
+        assert len(results) == 60
 
     def test_input_conversations_details(self):
         """
@@ -80,11 +80,11 @@ class TestGenesysCloudTA(BaseTATest):
         """
         This test will check whether data was successfully indexed
         """
-        sourcetype = "genesyscloud:analytics:flows:metric"
-        spl = f"search index={self.INDEX} sourcetype={sourcetype}"
+        sourcetype = "genesyscloud:analytics:flows:metrics"
+        source = "conversations_metrics://conversations_metrics"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
         results = self._search(search_query=spl)
-        assert len(results) == 4
-        assert results[0]["source"] == "conversations_metrics://conversations_metrics"
+        assert len(results) == 55
 
     def test_input_user_routing_status(self):
         """

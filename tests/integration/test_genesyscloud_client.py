@@ -92,25 +92,27 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         assert len(response) == 0
 
 
-    @pytest.mark.parametrize("api_name, func_name, model_name, expected_result, has_filter",
+    @pytest.mark.parametrize("api_name, func_name, model_name, expected_result, direction",
         [
-            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 4, False),
-            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 10, True),
-            ("ConversationsApi", "post_analytics_conversations_details_query", "ConversationQuery", 114, None),
+            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 4, "inbound,outbound"),
+            ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 10, "inbound"),
+            ("ConversationsApi", "post_analytics_conversations_details_query", "ConversationQuery", 114, ""),
         ],
     )
-    def test_POST_conversations(self, body_conversations, api_name, func_name, model_name, expected_result, has_filter):
+    def test_POST_conversations(self, body_conversations, api_name, func_name, model_name, expected_result, direction):
         """Test POST calls to query conversations data"""
         _filter = None
+        directions = direction.split(",")
+        directions = list(filter(None, directions))
+        predicates = [{"dimension": "direction", "value": d} for d in directions]
 
-        if has_filter:
+        if len(directions) > 0:
             _filter = {
                 "type": "and",
-                "predicates": [
+                "clauses": [
                     {
-                        "dimension": "mediaType",
-                        "operator": "matches",
-                        "value": "message"
+                        "type": "or",
+                        "predicates": predicates
                     }
                 ]
             }
