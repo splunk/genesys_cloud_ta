@@ -83,4 +83,4 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 | `direction`             |Direction                         |The direction of the communication.
 | `media_types`           |Media Type(s)                     |The session media type(s).
 
-Direction and Media Type(s) possible values are taken from [Genesys Cloud Specs](https://developer.genesys.cloud/analyticsdatamanagement/analytics/dimensions).
+Direction and Media Type(s) possible values are taken from [Genesys Cloud Specs](https://developer.genesys.cloud/analyticsdatamanagement/analytics/aggregate/conversation-query#dimensions).
