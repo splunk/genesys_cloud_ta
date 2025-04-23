@@ -565,10 +565,6 @@
                                         "label": "Screen Share"
                                     },
                                     {
-                                        "value": "unknown",
-                                        "label": "Unknown"
-                                    },
-                                    {
                                         "value": "video",
                                         "label": "Video"
                                     },
