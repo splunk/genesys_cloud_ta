@@ -89,27 +89,29 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 ]
             }
 
+            sourcetype = "genesyscloud:analytics:queues:observations"
             response = client.post(
                 "RoutingApi",
                 "post_analytics_queues_observations_query",
                 "QueueObservationQuery",
                 body
             )
-            results = response.to_dict().get("results", [])
-
             # Ensure data exists before processing
-            if results:
+            if response:
+                results = response.to_dict().get("results", [])
                 logger.debug("Indexing queue observations data")
-                sourcetype = "genesyscloud:analytics:queues:observations"
                 for item in results:
-                    event_writer.write_event(
-                        smi.Event(
-                            # Index time not needed?
-                            data=json.dumps(item),
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype
+                    for data_entry in item["data"]:
+                        data_entry["group"] = item["group"]
+                        event_writer.write_event(
+                            smi.Event(
+                                # Index time not needed?
+                                data=json.dumps(data_entry),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype
+                            )
                         )
-                    )
+
                 # Checkpointing not needed?
                 log.events_ingested(
                     logger,
