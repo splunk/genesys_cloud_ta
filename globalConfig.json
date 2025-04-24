@@ -144,6 +144,15 @@
                 },
                 {
                     "type": "loggingTab"
+                },
+                {
+                    "name": "custom_tab",
+                    "title": "Add More Data",
+                    "entity": [],
+                    "customTab": {
+                        "src": "custom_tab",
+                        "type": "external"
+                    }
                 }
             ],
             "title": "Configuration",
@@ -905,6 +914,7 @@
         "supportedThemes": [
             "light",
             "dark"
-        ]
+        ],
+        "defaultView": "inputs"
     }
 }
