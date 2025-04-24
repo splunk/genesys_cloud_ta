@@ -158,8 +158,9 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:analytics:queues:observations"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
         results = self._search(search_query=spl)
-        # Each id returns 7 events, one per each group type
-        assert len(results) == 7 * 157
+        # Each id returns 7 events, one per each group type. [before refactoring events before indexing]
+        # assert len(results) == 7 * 157
+        assert len(results) == 4082
         assert results[0]["source"] == "queue_observations://queue_observations"
         # Test data availability into lookups
         lookup_name = self.get_lookup_name("queue_observations")
