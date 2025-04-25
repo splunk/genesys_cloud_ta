@@ -50,7 +50,7 @@ nav:
     - Installation and configuration overview: 'InstallationOverview/index.md'
   - Installation:
     - Install: 'Install/index.md'
-    # - Upgrade: 'Upgrade/index.md'
+    - Upgrade: 'Upgrade/index.md'
   - Configuration:
     - Configure an integration application in Genesys Cloud: 'ConfigureGenesysCloud/index.md'
     - Configure an Account: 'ConfigureAccount/index.md'
@@ -58,6 +58,7 @@ nav:
     - Configure Operational Inputs: 'ConfigureOperationalInputs/index.md'
     - Configure Telephony Providers Edge Inputs: 'ConfigureTelephonyProvidersEdgeInputs/index.md'
     - Configure Users Inputs: 'ConfigureUsersInputs/index.md'
+    - Amazon EventBridge Integration: 'IntegrateEventBridge/index.md'
   - Troubleshoot:
     - Troubleshoot: 'Troubleshooting/index.md'
   # - Reference:
