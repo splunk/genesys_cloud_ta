@@ -94,7 +94,7 @@
                                     },
                                     {
                                         "value": "ap_northeast_1",
-                                        "label": "sia Pacific (Tokyo)"
+                                        "label": "Asia Pacific (Tokyo)"
                                     },
                                     {
                                         "value": "eu_central_1",
@@ -144,6 +144,15 @@
                 },
                 {
                     "type": "loggingTab"
+                },
+                {
+                    "name": "custom_tab",
+                    "title": "Add More Data",
+                    "entity": [],
+                    "customTab": {
+                        "src": "custom_tab",
+                        "type": "external"
+                    }
                 }
             ],
             "title": "Configuration",
@@ -899,12 +908,13 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.0.1",
+        "version": "0.1.0",
         "displayName": "Genesys Cloud Add-on",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
             "light",
             "dark"
-        ]
+        ],
+        "defaultView": "inputs"
     }
 }

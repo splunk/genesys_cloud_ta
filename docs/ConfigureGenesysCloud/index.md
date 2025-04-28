@@ -20,9 +20,12 @@ OAuth2 protocol, so that it can access and gather the data according to the serv
 
    | API/Permissions name | Scopes     | Description     | API Category              |
    |----------------------|------------|-----------------|---------------------------|
-   | analytics:queueObservation:view  | <ul><li>analytics<li>analytics:readonly</ul> | Read query observations and user aggregates for your organization. | Analytics |
-   | routing:queue:view | <ul><li>routing<li>routing:readonly</ul>   | Read queues for your organization. | Routing |
-   | telephony:plugin:all | <ul><li>telephony<li>telephony:readonly</ul>  | Read edges, trunks and their metrics as well as phones for your organization. | Telephony Providers Edge   |
+   | `analytics:conversationAggregate:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read conversation aggregates for your organization. | Analytics |
+   | `analytics:conversationDetail:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read conversation details for your organization. | Analytics |
+   | `analytics:queueObservation:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read query observations for your organization. | Analytics |
+   | `analytics:userAggregate:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read user aggregates for your organization. | Analytics |
+   | `routing:queue:view` | <ul><li>routing<li>routing:readonly</ul>   | Read queues for your organization. | Routing |
+   | `telephony:plugin:all` | <ul><li>telephony<li>telephony:readonly</ul>  | Read edges, trunks and their metrics as well as phones for your organization. | Telephony Providers Edge   |
 
 
 5. Click **Save** after you change permissions.

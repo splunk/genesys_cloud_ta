@@ -28,7 +28,7 @@ Configure your inputs using Splunk Web on the Splunk platform instance responsib
     sourcetype=genesyscloud:users:*
 ```
 
-If you do not see any events, check the **Troubleshooting** tab on your data collection node to verify that your accounts, forwarders, and inputs are all configured successfully.
+If you do not see any events, check the [Troubleshooting](../Troubleshooting/index.md) section.
 
 ## Configure inputs in the configuration files
 
@@ -60,7 +60,7 @@ interval = <value>
     sourcetype=genesyscloud:users:*
 ```
 
-If you do not see any events, check the **Troubleshooting** tab on your data collection node to verify that your accounts, forwarders, and inputs are all configured successfully.
+If you do not see any events, check the [Troubleshooting](../Troubleshooting/index.md) section.
 
 ## Input Parameters
 

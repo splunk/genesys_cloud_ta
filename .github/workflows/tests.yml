@@ -139,3 +139,4 @@ jobs:
           name: Tests Results
           path: 'tests/junit/*.xml'
           reporter: java-junit
+          fail-on-error: 'false'

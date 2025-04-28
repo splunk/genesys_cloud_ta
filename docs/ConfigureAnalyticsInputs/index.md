@@ -51,6 +51,8 @@ interval = <value>
 [conversations_metrics://<conversations_metrics_input_name>]
 account = <value>
 index = <value>
+direction = <value1|value2>
+media_types = <value1|value2|valueN>
 interval = <value>
 
 <!-- Conversations Details -->
