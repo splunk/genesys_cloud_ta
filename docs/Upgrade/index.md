@@ -10,3 +10,6 @@ Before releasing 1.0.0 the Genesys Cloud Add-on for Splunk is still in the devel
 4. Install the Genesys Cloud Add-on for Splunk across your deployment.
 5. [Configure](../ConfigureAccount/index.md) the Add-on.
 
+The analytic input **Chat Observations** was removed. Alternatively, users can now [configure an equivalent analytic **Conversations Metrics** input](../ConfigureAnalyticsInputs/index.md) with:
+* `direction = inbound`
+* `media_types = message`.
