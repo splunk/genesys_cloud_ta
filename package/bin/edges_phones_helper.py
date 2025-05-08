@@ -85,7 +85,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     **{"expand":"site,status"}
                 )
             )
-            # Max 10k results returned when filtering the results or sorting by a field other than the ID
+            # Max 10k results returned when filtering the results or sorting
+            # by a field other than the ID
 
             collection_name = "gc_phones"
 
@@ -96,15 +97,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 service.kvstore.create(collection_name)
 
             # Update collection
-            logger.debug(f"Saving data in lookup '{collection_name}'")
+            logger.debug(f"Saving phones data in lookup '{collection_name}'")
             collection = service.kvstore[collection_name]
             collection.data.batch_save(*p_model.phones)
 
-            logger.debug("Indexing phones statuses")
             statuses = p_model.statuses
-            logger.debug(f"Got '{len(statuses)}' statuses")
+            logger.debug(f"Fetched '{len(statuses)}' phone statuses")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
+            event_counter = 0
             for status_obj in statuses:
                 event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
                 if event_time_epoch > current_checkpoint:
@@ -116,18 +117,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             sourcetype=sourcetype,
                         )
                     )
+                    event_counter += 1
 
-            # Updating checkpoint if data was returned to avoid losing info
-            if statuses:
-                logger.debug("Updating checkpointer and leaving")
+            # Updating checkpoint if data was indexed to avoid losing info
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
                 new_checkpoint = datetime.utcnow().timestamp()
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(statuses),
+                event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
             )
