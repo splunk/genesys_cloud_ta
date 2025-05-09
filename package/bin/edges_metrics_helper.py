@@ -92,11 +92,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 service.kvstore.create(collection_name)
 
             # Update collection
-            logger.debug(f"Saving data in lookup '{collection_name}'")
+            logger.debug(f"Saving edges metrics in lookup '{collection_name}'")
             collection = service.kvstore[collection_name]
             collection.data.batch_save(*e_model.edges)
 
-            logger.debug("Indexing edges metrics")
             # Max 100 edgeids supported according to specs
             metrics = []
             cnt = 0
@@ -110,9 +109,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
                 metrics.extend(data)
                 cnt+=1
-            logger.debug(f"Got '{len(metrics)}' metrics")
+            logger.debug(f"Fetched '{len(metrics)}' metrics")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:metrics"
+            event_counter = 0
             for metric_obj in metrics:
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
@@ -125,18 +125,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             sourcetype=sourcetype,
                         )
                     )
+                    event_counter += 1
 
-            # Updating checkpoint if data was returned to avoid losing info
-            if metrics:
-                logger.debug("Updating checkpointer and leaving")
+            # Updating checkpoint if data was indexed to avoid losing info
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
                 new_checkpoint = datetime.utcnow().timestamp()
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(data),
+                event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
             )
