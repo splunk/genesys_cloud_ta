@@ -132,13 +132,17 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             sourcetype = "genesyscloud:users:users:aggregates"
             logger.debug("Indexing user aggregates data")
             for item in results:
-                event_writer.write_event(
-                    smi.Event(
-                        data=json.dumps(item, ensure_ascii=False, default=str),
-                        index=input_item.get("index"),
-                        sourcetype=sourcetype
-                    )
-                )
+                for data_entry in item["data"]:
+                    for metrics in data_entry["metrics"]:
+                        metrics["group"] = item["group"]
+                        metrics["interval"] = data_entry["interval"]
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype
+                            )
+                        )
             # Updating checkpoint if data was returned to avoid losing info
             if results:
                 logger.debug("Updating checkpointer and leaving")
