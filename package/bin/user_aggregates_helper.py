@@ -70,24 +70,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            # Initialize lookup
-            collection_name = "gc_users"
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
             # Getting data from API
             logger.info("Getting data from users endpoint")
             user_model = UserModel(
                 client.get("UsersApi", "get_users")
             )
-
-            # Updating lookup
-            logger.debug(f"Saving users in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*user_model.users)
 
             # Getting metrics
             interval = f"{last_checkpoint}/{new_checkpoint}"
@@ -134,7 +121,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             for item in results:
                 for data_entry in item["data"]:
                     for metrics in data_entry["metrics"]:
-                        metrics["group"] = item["group"]
+                        metrics["user"] = user_model.get_user(item["group"]["userId"])
                         metrics["interval"] = data_entry["interval"]
                         event_writer.write_event(
                             smi.Event(
