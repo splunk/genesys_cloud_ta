@@ -191,18 +191,6 @@ class UserModel(GCBaseModel):
         super().__init__(lst_users)
 
     @property
-    def users(self) -> List[dict]:
-        users = []
-        keys = ["id", "name", "chat", "email"]
-        nested_keys = ["id", "name"]
-        for idx, user in enumerate(self.data):
-            new_user = {key: user[key] for key in keys}
-            new_user.update(self.extract(idx, "division", nested_keys))
-            new_user["_key"] = new_user["id"]
-            users.append(new_user)
-        return users
-
-    @property
     def user_ids(self) -> List[str]:
         return [user["id"] for user in self.data]
 
@@ -212,3 +200,12 @@ class UserModel(GCBaseModel):
         remaining_users = abs(len(self.data) - factor)
         has_next_batch = remaining_users > self.MAX_USER_IDS
         return [user["id"] for user in self.data[factor:slice]], has_next_batch
+
+    def get_user(self, uid: str) -> dict:
+        ret_user = {}
+        required_keys = ["id", "name", "chat", "email", "division"]
+
+        user = [u for u in self.data if u["id"] == uid][0]
+        for key, value in user.items():
+            ret_user.update({k: user[k] for k in required_keys})
+        return ret_user
