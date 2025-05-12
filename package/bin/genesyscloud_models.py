@@ -55,27 +55,21 @@ class TrunkModel(GCBaseModel):
         super().__init__(lst_trunks)
 
     @property
-    def trunks(self) -> List[dict]:
-        trunks = []
-        keys = ["id", "name", "state", "trunk_type", "in_service", "enabled"]
-        nested_keys = ["id", "name"]
-        for idx, trunk in enumerate(self.data):
-            # new_trunk = {self.to_camelcase(key): trunk[key] for key in keys}
-            new_trunk = {key: trunk[key] for key in keys}
-            new_trunk["date_created"] = self.to_string(trunk["date_created"])
-            new_trunk["date_modified"] = self.to_string(trunk["date_modified"])
-            new_trunk.update(self.extract(idx, "trunk_base", nested_keys))
-            new_trunk.update(self.extract(idx, "edge", nested_keys))
-            if trunk["connected_status"]:
-                new_trunk["connected_status"] = trunk["connected_status"]["connected"]
-            # Adding a _key to avoid lookup duplicates
-            new_trunk["_key"] = new_trunk["id"]
-            trunks.append(new_trunk)
-        return trunks
-
-    @property
     def trunk_ids(self) -> List[str]:
         return [trunk["id"] for trunk in self.data]
+
+    def get_trunk(self, tid: str) -> dict:
+        ret_trunk = {}
+        required_keys = [
+            "id", "name", "date_created", "date_modified", "state",
+            "trunk_type", "edge", "trunk_base", "in_service", "enabled",
+            "connected_status", "ip_status"
+        ]
+
+        trunk = [t for t in self.data if t["id"] == tid][0]
+        for key, value in trunk.items():
+            ret_trunk.update({k: trunk[k] for k in required_keys})
+        return ret_trunk
 
 
 class EdgeModel(GCBaseModel):

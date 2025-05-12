@@ -83,19 +83,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
             )
 
-            collection_name = "gc_trunks"
-
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
-            # Update collection
-            logger.debug(f"Saving data in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*t_model.trunks)
-
             logger.debug("Indexing trunks metrics")
             data = client.get(
                 "TelephonyProvidersEdgeApi",
@@ -108,6 +95,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
                 metric["event_time"] = t_model.to_string(metric_obj.event_time)
+                metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
