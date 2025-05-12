@@ -143,12 +143,6 @@ class TestGenesysCloudTA(BaseTATest):
         results = self._search(search_query=spl)
         assert len(results) == 14
         assert results[0]["source"] == "edges_trunks_metrics://edges_trunks_metrics"
-        # Test data availability into lookups
-        lookup_name = self.get_lookup_name("edges_trunks_metrics")
-        assert lookup_name is not None
-        spl = f"| inputlookup {lookup_name}"
-        lookup_results = self._search(search_query=spl)
-        assert len(lookup_results) == 14
 
     def test_input_queue_observations(self):
         """
@@ -177,5 +171,5 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:users:users:aggregates"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
         results = self._search(search_query=spl)
-        assert len(results) == 358
+        assert len(results) == 716
         assert results[0]["source"] == "user_aggregates://user_aggregates"

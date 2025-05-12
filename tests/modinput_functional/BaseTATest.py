@@ -28,7 +28,6 @@ class BaseTATest():
     LOOKUPS_MAPPING = {
         "edges_phones": "gc_phones",
         "edges_metrics": "gc_edges",
-        "edges_trunks_metrics": "gc_trunks",
         "queue_observations": "gc_queues"
     }
 
