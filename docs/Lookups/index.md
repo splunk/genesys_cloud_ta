@@ -10,4 +10,3 @@ To get an overview of the available fields `| inputlookup <lookup_name>`.
 | `gc_trunks` | Trunks details                                              |
 | `gc_phones` | Phones details such as `id`, `name`, `state` and `site id`  |
 | `gc_queues` | Queues details such as `id` and `name`                      |
-| `gc_users`  | User details such as `id` and `email`                       |
