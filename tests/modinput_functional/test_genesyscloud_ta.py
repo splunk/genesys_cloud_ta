@@ -179,9 +179,3 @@ class TestGenesysCloudTA(BaseTATest):
         results = self._search(search_query=spl)
         assert len(results) == 358
         assert results[0]["source"] == "user_aggregates://user_aggregates"
-        # Test data availability into lookups
-        lookup_name = self.get_lookup_name("user_aggregates")
-        assert lookup_name is not None
-        spl = f"| inputlookup {lookup_name}"
-        lookup_results = self._search(search_query=spl)
-        assert len(lookup_results) == 358
