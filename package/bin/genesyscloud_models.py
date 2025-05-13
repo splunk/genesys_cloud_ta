@@ -81,42 +81,31 @@ class EdgeModel(GCBaseModel):
             lst_edges.append(e.to_dict())
         super().__init__(lst_edges)
 
-    def _parse_interfaces(self, interfaces: List[dict], targeted_key: str) -> str:
-        ret = ""
-        for interface in interfaces:
-            ret = f"{interface[targeted_key]},"
-        return ret[:-1]
-
-    @property
-    def edges(self) -> List[dict]:
-        edges = []
-        keys = [
-            "id", "name", "version", "description", "state", "online_status",
-            "serial_number", "physical_edge", "edge_deployment_type",
-            "conversation_count", "os_name"
-        ]
-        nested_keys = ["id", "name", "state"]
-        # Cannot find:
-        # - status as per ACTIVE, DISCONNECTED, media, lastConnectionTime, osVersion
-        for idx, edge in enumerate(self.data):
-            # new_edge = {self.to_camelcase(key): edge[key] for key in keys}
-            new_edge = {key: edge[key] for key in keys}
-            new_edge["date_created"] = self.to_string(edge["date_created"])
-            new_edge["date_modified"] = self.to_string(edge["date_modified"])
-            new_edge.update(self.extract(idx, "site", nested_keys))
-            new_edge["mac_address"] = self._parse_interfaces(edge["interfaces"], "mac_address")
-            new_edge["ip_address"] = self._parse_interfaces(edge["interfaces"], "ip_address")
-            # Adding a _key to avoid lookup duplicates
-            new_edge["_key"] = new_edge["id"]
-            edges.append(new_edge)
-        return edges
-
     def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_EDGE_IDS*batch
         slice = self.MAX_EDGE_IDS + factor
         remaining_edges = abs(len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
         return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+
+    def get_edge(self, eid: str) -> dict:
+        ret_edge = { "site": {} }
+        required_keys = [
+            "id", "name", "version", "description", "date_created", "date_modified",
+            "state", "interfaces", "online_status",
+            "serial_number", "physical_edge", "edge_deployment_type",
+            "conversation_count", "os_name"
+        ]
+
+        edge = [e for e in self.data if e["id"] == eid][0]
+        for key, value in edge.items():
+            ret_edge.update({k: edge[k] for k in required_keys})
+        # Avoid indexing a lot of "null" values added
+        # by the to_dict() SDK function for "site" data
+        for key, value in edge["site"].items():
+            if key in ["id", "name", "state"]:
+                ret_edge["site"][key] = value
+        return ret_edge
 
 
 class PhoneModel(GCBaseModel):
