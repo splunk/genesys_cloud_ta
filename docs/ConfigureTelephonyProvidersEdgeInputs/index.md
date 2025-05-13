@@ -6,8 +6,6 @@
 - Edges metrics,
 - Phones statuses.
 
-Collection of trunks, edges and phones details is enabled into [lookups](../Lookups/index.md).
-
 ## Pre-Requirements
 
 Before you enable inputs, complete the previous steps in the configuration process:
