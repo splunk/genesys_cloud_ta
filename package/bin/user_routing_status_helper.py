@@ -96,10 +96,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         )
                         rcounter += 1
 
-            # Updating checkpoint if data was returned to avoid losing info
+            # Updating checkpoint if data was indexed to avoid losing info
             if rcounter > 0:
-                logger.debug("Updating checkpointer and leaving")
+                logger.debug(f"Indexed '{rcounter}' events")
                 new_checkpoint = datetime.utcnow().timestamp()
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
