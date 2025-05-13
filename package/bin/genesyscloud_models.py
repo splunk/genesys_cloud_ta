@@ -115,22 +115,6 @@ class PhoneModel(GCBaseModel):
             lst_phones.append(phone.to_dict())
         super().__init__(lst_phones)
 
-    # @property
-    # def phones(self) -> List[dict]:
-    #     phones = []
-    #     keys = ["id", "name", "state"]
-    #     nested_keys = ["id", "name"]
-    #     for idx, phone in enumerate(self.data):
-    #         # new_phone = {self.to_camelcase(key): phone[key] for key in keys}
-    #         new_phone = {key: phone[key] for key in keys}
-    #         new_phone["date_created"] = self.to_string(phone["date_created"])
-    #         new_phone["date_modified"] = self.to_string(phone["date_modified"])
-    #         new_phone.update(self.extract(idx, "site", nested_keys))
-    #         # Adding a _key to avoid lookup duplicates
-    #         new_phone["_key"] = new_phone["id"]
-    #         phones.append(new_phone)
-    #     return phones
-
     @property
     def statuses(self) -> List[dict]:
         statuses = []
@@ -141,6 +125,7 @@ class PhoneModel(GCBaseModel):
 
     @property
     def extended_statuses(self) -> List[dict]:
+        """ Returning statuses augmented with phones info """
         statuses = []
         required_keys = ["name", "date_created", "date_modified", "state", "site"]
         for phone in self.data:
@@ -153,6 +138,8 @@ class PhoneModel(GCBaseModel):
 
 
 class QueueModel(GCBaseModel):
+    MAX_QUEUE_IDS: int = 200
+
     def __init__(self, queues: List[Queue]) -> None:
         lst_queues = []
         for queue in queues:
@@ -160,20 +147,24 @@ class QueueModel(GCBaseModel):
         super().__init__(lst_queues)
 
     @property
-    def queues(self) -> List[dict]:
-        queues = []
-        for queue in self.data:
-            new_queue = {
-                "id": queue["id"],
-                "name": queue["name"],
-                "_key": queue["id"]
-            }
-            queues.append(new_queue)
-        return queues
-
-    @property
     def queue_ids(self) -> List[str]:
         return [queue["id"] for queue in self.data]
+
+    def get_queue_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+        factor = self.MAX_QUEUE_IDS*batch
+        slice = self.MAX_QUEUE_IDS + factor
+        remaining_queues = abs(len(self.data) - factor)
+        has_next_batch = remaining_queues > self.MAX_QUEUE_IDS
+        return [queue["id"] for queue in self.data[factor:slice]], has_next_batch
+
+    def get_queue(self, qid: str) -> dict:
+        ret_queue = {}
+        required_keys = ["id", "name"]
+
+        queue = [q for q in self.data if q["id"] == qid][0]
+        for key, value in queue.items():
+            ret_queue.update({k: queue[k] for k in required_keys})
+        return ret_queue
 
 
 class UserModel(GCBaseModel):
