@@ -83,14 +83,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
             )
 
-            logger.debug("Indexing trunks metrics")
             data = client.get(
                 "TelephonyProvidersEdgeApi",
                 "get_telephony_providers_edges_trunks_metrics",
                 ','.join(t_model.trunk_ids)
             )
+            logger.debug(f"Fetched '{len(data)}' trunks metrics")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
+            event_counter = 0
             for metric_obj in data:
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
@@ -104,18 +105,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             sourcetype=sourcetype,
                         )
                     )
+                    event_counter += 1
 
-            # Updating checkpoint if data was returned to avoid losing info
-            if data:
-                logger.debug("Updating checkpointer and leaving")
+            # Updating checkpoint if data was indexed to avoid losing info
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
                 new_checkpoint = datetime.utcnow().timestamp()
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(data),
+                event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
             )

@@ -99,7 +99,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Ensure data exists before processing
             if response:
                 results = response.to_dict().get("results", [])
-                logger.debug("Indexing queue observations data")
+                event_counter = 0
                 for item in results:
                     for data_entry in item["data"]:
                         data_entry["group"] = item["group"]
@@ -111,13 +111,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 sourcetype=sourcetype
                             )
                         )
+                        event_counter += 1
 
                 # Checkpointing not needed?
+                logger.debug(f"Indexed '{event_counter}' events")
                 log.events_ingested(
                     logger,
                     input_name,
                     sourcetype,
-                    len(results),
+                    event_counter,
                     input_item.get("index"),
                     account = input_item.get("account")
                 )

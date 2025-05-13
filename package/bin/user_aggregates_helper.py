@@ -114,10 +114,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
                 results.extend(data.to_dict().get("results", []))
                 cnt+=1
-            logger.debug(f"Got '{len(results)}' aggregates")
+            logger.debug(f"Fetched '{len(results)}' user aggregates")
 
             sourcetype = "genesyscloud:users:users:aggregates"
-            logger.debug("Indexing user aggregates data")
+            event_counter = 0
             for item in results:
                 for data_entry in item["data"]:
                     for metrics in data_entry["metrics"]:
@@ -130,16 +130,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 sourcetype=sourcetype
                             )
                         )
-            # Updating checkpoint if data was returned to avoid losing info
-            if results:
-                logger.debug("Updating checkpointer and leaving")
+                        event_counter += 1
+
+            # Updating checkpoint if data was indexed to avoid losing info
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
                 sourcetype,
-                len(results),
+                event_counter,
                 input_item.get("index"),
                 account = input_item.get("account")
             )
