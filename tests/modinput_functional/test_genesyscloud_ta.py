@@ -42,8 +42,7 @@ class TestGenesysCloudTA(BaseTATest):
                 if not isinstance(result, dict):
                     # Diagnostic messages may be returned in the results
                     continue
-                str_result = json.dumps(result) if "lookup" in search_query else json.dumps(result["_raw"])
-                # self.logger.debug(f"Result: {result['_raw']}")
+                str_result = json.dumps(result["_raw"])
                 md5_hash = hashlib.md5(str_result.encode()).hexdigest()
                 if md5_hash not in hashes:
                     hashes.append(md5_hash)
@@ -160,7 +159,7 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
         for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
+            results = self._search(search_query=spl, run_counter=attempt, timeout=60)
             if len(results) > 0 or attempt == (self.RETRY - 1):
                 self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
                 break
@@ -175,14 +174,12 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:analytics:queues:observations"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
         for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
+            results = self._search(search_query=spl, run_counter=attempt, timeout=100)
             if len(results) > 0 or attempt == (self.RETRY - 1):
                 self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
                 break
             time.sleep(2)
 
-        # Each id returns 7 events, one per each group type. [before refactoring events before indexing]
-        # assert len(results) == 7 * 157
         assert len(results) == 4082
         assert results[0]["source"] == "queue_observations://queue_observations"
 
