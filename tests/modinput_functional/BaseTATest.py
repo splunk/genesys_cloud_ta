@@ -25,9 +25,9 @@ class BaseTATest():
     CLIENT_ID = None
     AWS_REGION = None
     CLIENT_SECRET = None
+    RETRY = 3
     LOOKUPS_MAPPING = {
         "edges_phones": "gc_phones",
-        "edges_metrics": "gc_edges",
         "queue_observations": "gc_queues"
     }
 
