@@ -115,21 +115,21 @@ class PhoneModel(GCBaseModel):
             lst_phones.append(phone.to_dict())
         super().__init__(lst_phones)
 
-    @property
-    def phones(self) -> List[dict]:
-        phones = []
-        keys = ["id", "name", "state"]
-        nested_keys = ["id", "name"]
-        for idx, phone in enumerate(self.data):
-            # new_phone = {self.to_camelcase(key): phone[key] for key in keys}
-            new_phone = {key: phone[key] for key in keys}
-            new_phone["date_created"] = self.to_string(phone["date_created"])
-            new_phone["date_modified"] = self.to_string(phone["date_modified"])
-            new_phone.update(self.extract(idx, "site", nested_keys))
-            # Adding a _key to avoid lookup duplicates
-            new_phone["_key"] = new_phone["id"]
-            phones.append(new_phone)
-        return phones
+    # @property
+    # def phones(self) -> List[dict]:
+    #     phones = []
+    #     keys = ["id", "name", "state"]
+    #     nested_keys = ["id", "name"]
+    #     for idx, phone in enumerate(self.data):
+    #         # new_phone = {self.to_camelcase(key): phone[key] for key in keys}
+    #         new_phone = {key: phone[key] for key in keys}
+    #         new_phone["date_created"] = self.to_string(phone["date_created"])
+    #         new_phone["date_modified"] = self.to_string(phone["date_modified"])
+    #         new_phone.update(self.extract(idx, "site", nested_keys))
+    #         # Adding a _key to avoid lookup duplicates
+    #         new_phone["_key"] = new_phone["id"]
+    #         phones.append(new_phone)
+    #     return phones
 
     @property
     def statuses(self) -> List[dict]:
@@ -137,6 +137,18 @@ class PhoneModel(GCBaseModel):
         for phone in self.data:
             statuses.append(phone["status"])
             statuses.append(phone["secondary_status"])
+        return statuses
+
+    @property
+    def extended_statuses(self) -> List[dict]:
+        statuses = []
+        required_keys = ["name", "date_created", "date_modified", "state", "site"]
+        for phone in self.data:
+            for s_type in ["status", "secondary_status"]:
+                new_status = phone[s_type]
+                for key, value in phone.items():
+                    new_status.update({k: phone[k] for k in required_keys})
+                statuses.append(new_status)
         return statuses
 
 
