@@ -6,6 +6,5 @@ To get an overview of the available fields `| inputlookup <lookup_name>`.
 
 | Lookup      | Description |
 |:-----------:|-------------|
-| `gc_edges`  | Edges details such as `id` and `name`                       |
 | `gc_phones` | Phones details such as `id`, `name`, `state` and `site id`  |
 | `gc_queues` | Queues details such as `id` and `name`                      |
