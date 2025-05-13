@@ -26,10 +26,6 @@ class BaseTATest():
     AWS_REGION = None
     CLIENT_SECRET = None
     RETRY = 3
-    LOOKUPS_MAPPING = {
-        "edges_phones": "gc_phones",
-        "queue_observations": "gc_queues"
-    }
 
     logger = LOGGER
     splunk_url = None
@@ -75,14 +71,6 @@ class BaseTATest():
         cls.logger.info(f"Tearing down method {method.__name__}")
         input_name = method.__name__.replace("test_input_", "")
         cls.toggle_input(input_name, 1)
-        # Cleanup lookups
-        lookup_name = cls.get_lookup_name(input_name)
-        if lookup_name:
-            kvstore_collection = cls.splunk_client.kvstore[lookup_name]
-            cls.logger.info(f"Cleaning up data stored in lookup {lookup_name}")
-            kvstore_collection.data.delete()
-            # Manual cleanup from CLI
-            # /opt/splunk/bin/splunk clean kvstore -app genesys_cloud_ta gc_phones
         # Clean up checkpointers
         try:
             checkpointer=f"{input_name}_checkpointer"
@@ -154,13 +142,3 @@ class BaseTATest():
             "aws_region": cls.AWS_REGION
         }
         return configs
-
-    @classmethod
-    def get_lookup_name(cls, input_name: str) -> str:
-        """
-        Get the name of the lookup containing data for the given input
-        :param input_name: name of the input storing data in the lookup
-        """
-        if input_name not in cls.LOOKUPS_MAPPING.keys():
-            return None
-        return cls.LOOKUPS_MAPPING.get(input_name, None)

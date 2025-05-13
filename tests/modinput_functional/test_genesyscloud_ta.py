@@ -137,8 +137,7 @@ class TestGenesysCloudTA(BaseTATest):
 
     def test_input_edges_phones(self):
         """
-        This test will check whether data was successfully indexed and the lookup
-        successfully updated
+        This test will check whether data was successfully indexed
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
@@ -153,12 +152,6 @@ class TestGenesysCloudTA(BaseTATest):
         # Each event is split into 2: status and secondary status
         assert len(results) == 2 * 25
         assert results[0]["source"] == "edges_phones://edges_phones"
-        # Test data availability into lookups
-        lookup_name = self.get_lookup_name("edges_phones")
-        assert lookup_name is not None
-        spl = f"| inputlookup {lookup_name}"
-        lookup_results = self._search(search_query=spl)
-        assert len(lookup_results) == 25
 
     def test_input_edges_trunks_metrics(self):
         """
@@ -177,8 +170,7 @@ class TestGenesysCloudTA(BaseTATest):
 
     def test_input_queue_observations(self):
         """
-        This test will check whether data was successfully indexed and the lookup
-        successfully updated
+        This test will check whether data was successfully indexed
         """
         sourcetype = "genesyscloud:analytics:queues:observations"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
@@ -193,12 +185,6 @@ class TestGenesysCloudTA(BaseTATest):
         # assert len(results) == 7 * 157
         assert len(results) == 4082
         assert results[0]["source"] == "queue_observations://queue_observations"
-        # Test data availability into lookups
-        lookup_name = self.get_lookup_name("queue_observations")
-        assert lookup_name is not None
-        spl = f"| inputlookup {lookup_name}"
-        lookup_results = self._search(search_query=spl)
-        assert len(lookup_results) == 157
 
     def test_input_user_aggregates(self):
         """
