@@ -5,23 +5,21 @@
         "id": {
             "group": null,
             "name": "genesys_cloud_ta",
-            "version": "0.1.0"
+            "version": "0.2.0"
         },
         "author": [
             {
-                "name": "",
-                "email": null,
-                "company": null
+                "name": "FDSE",
+                "email": "fdse@splunk.com",
+                "company": "Splunk, Inc."
             }
         ],
         "releaseDate": null,
-        "description": "Genesys Cloud Add-on",
+        "description": "Genesys Cloud Add-on for Splunk",
         "classification": {
-            "intendedAudience": "IT Professionals",
-            "categories": [
-                "Security, Fraud & Compliance"
-            ],
-            "developmentStatus": "Production/Stable"
+            "intendedAudience": null,
+            "categories": [],
+            "developmentStatus": null
         },
         "commonInformationModels": null,
         "license": {
@@ -35,9 +33,9 @@
             "uri": null
         },
         "releaseNotes": {
-            "name": "README",
-            "text": "README.txt",
-            "uri": ""
+            "name": "Genesys Cloud Add-On for Splunk Release Notes",
+            "text": null,
+            "uri": "https://github.com/splunk/genesys_cloud_ta/releases"
         }
     },
     "dependencies": null,
@@ -52,6 +50,6 @@
     ],
     "targetWorkloads": [
         "_search_heads",
-        "_indexers"
+        "_forwarders"
     ]
 }
