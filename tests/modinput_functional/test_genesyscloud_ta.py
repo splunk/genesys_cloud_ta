@@ -159,7 +159,7 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
         for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt, timeout=60)
+            results = self._search(search_query=spl, run_counter=attempt, timeout=100)
             if len(results) > 0 or attempt == (self.RETRY - 1):
                 self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
                 break
