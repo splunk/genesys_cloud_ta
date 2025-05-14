@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 from datetime import datetime, timedelta
@@ -112,7 +111,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "UserAggregationQuery",
                     body
                 )
-                results.extend(data.to_dict().get("results", []))
+                if data:
+                    res_dict = data.to_dict() or {}
+                results.extend(res_dict.get("results", []) or [])
                 cnt+=1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 

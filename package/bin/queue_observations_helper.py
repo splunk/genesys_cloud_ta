@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from splunklib import modularinput as smi
 
 from genesyscloud_client import GenesysCloudClient
@@ -88,7 +87,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "QueueObservationQuery",
                     body
                 )
-                results.extend(response.to_dict().get("results", []))
+                # Ensure data exists before processing
+                if response:
+                    res_dict = response.to_dict() or {}
+                    results.extend(res_dict.get("results", []) or [])
                 cnt += 1
             logger.debug(f"Fetched '{len(results)}' queues observations")
 
