@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
@@ -95,6 +94,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             sourcetype = "genesyscloud:analytics:conversations:details"
 
             if data:
+                event_counter = 0
                 for event in data:
                     # Adding conversation duration in milliseconds
                     duration = get_conversation_duration(event["conversation_start"], event["conversation_end"])
@@ -106,13 +106,18 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             sourcetype=sourcetype
                         )
                     )
-                # Update checkpoint
-                kvstore_checkpointer.update(checkpointer_key_name, end_time)
+                    event_counter += 1
+
+                if event_counter > 0:
+                    logger.debug(f"Indexed '{event_counter}' events")
+                    logger.debug(f"Updating checkpointer to {end_time}")
+                    kvstore_checkpointer.update(checkpointer_key_name, end_time)
+
                 log.events_ingested(
                     logger,
                     input_name,
                     sourcetype,
-                    len(data),
+                    event_counter,
                     input_item.get("index"),
                     account=input_item.get("account"),
                 )
