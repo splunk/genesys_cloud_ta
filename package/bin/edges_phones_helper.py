@@ -4,7 +4,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
@@ -87,21 +86,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             # Max 10k results returned when filtering the results or sorting
             # by a field other than the ID
-
-            collection_name = "gc_phones"
-
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
-            # Update collection
-            logger.debug(f"Saving phones data in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*p_model.phones)
-
-            statuses = p_model.statuses
+            statuses = p_model.extended_statuses
             logger.debug(f"Fetched '{len(statuses)}' phone statuses")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"

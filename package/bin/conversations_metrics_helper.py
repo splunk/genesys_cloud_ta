@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
@@ -114,7 +113,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 body
             )
             if response:
-                to_process_data = response.to_dict().get("results", [])
+                event_counter = 0
+                res_dict = response.to_dict() or {}
+                to_process_data = res_dict.get("results") or []
                 for event in to_process_data:
                     try:
                         for data_entry in event["data"]:
@@ -133,16 +134,21 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                         time=interval_start_time
                                     )
                                 )
+                                event_counter += 1
                     except Exception as e:
-                        logger.error(f"Failed to write event: {str(e)}")
+                        logger.error(f"Failed to write event. Error: {str(e)}")
 
-                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
+                if event_counter > 0:
+                    logger.debug(f"Indexed '{event_counter}' events")
+                    new_checkpoint = now.timestamp()
+                    logger.debug(f"Updating checkpointer to {new_checkpoint}")
+                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
                 log.events_ingested(
                     logger,
                     input_name,
                     sourcetype,
-                    len(to_process_data),
+                    event_counter,
                     input_item.get("index"),
                     account=input_item.get("account"),
                 )

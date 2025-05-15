@@ -55,27 +55,21 @@ class TrunkModel(GCBaseModel):
         super().__init__(lst_trunks)
 
     @property
-    def trunks(self) -> List[dict]:
-        trunks = []
-        keys = ["id", "name", "state", "trunk_type", "in_service", "enabled"]
-        nested_keys = ["id", "name"]
-        for idx, trunk in enumerate(self.data):
-            # new_trunk = {self.to_camelcase(key): trunk[key] for key in keys}
-            new_trunk = {key: trunk[key] for key in keys}
-            new_trunk["date_created"] = self.to_string(trunk["date_created"])
-            new_trunk["date_modified"] = self.to_string(trunk["date_modified"])
-            new_trunk.update(self.extract(idx, "trunk_base", nested_keys))
-            new_trunk.update(self.extract(idx, "edge", nested_keys))
-            if trunk["connected_status"]:
-                new_trunk["connected_status"] = trunk["connected_status"]["connected"]
-            # Adding a _key to avoid lookup duplicates
-            new_trunk["_key"] = new_trunk["id"]
-            trunks.append(new_trunk)
-        return trunks
-
-    @property
     def trunk_ids(self) -> List[str]:
         return [trunk["id"] for trunk in self.data]
+
+    def get_trunk(self, tid: str) -> dict:
+        ret_trunk = {}
+        required_keys = [
+            "id", "name", "date_created", "date_modified", "state",
+            "trunk_type", "edge", "trunk_base", "in_service", "enabled",
+            "connected_status", "ip_status"
+        ]
+
+        trunk = [t for t in self.data if t["id"] == tid][0]
+        for key, value in trunk.items():
+            ret_trunk.update({k: trunk[k] for k in required_keys})
+        return ret_trunk
 
 
 class EdgeModel(GCBaseModel):
@@ -87,42 +81,31 @@ class EdgeModel(GCBaseModel):
             lst_edges.append(e.to_dict())
         super().__init__(lst_edges)
 
-    def _parse_interfaces(self, interfaces: List[dict], targeted_key: str) -> str:
-        ret = ""
-        for interface in interfaces:
-            ret = f"{interface[targeted_key]},"
-        return ret[:-1]
-
-    @property
-    def edges(self) -> List[dict]:
-        edges = []
-        keys = [
-            "id", "name", "version", "description", "state", "online_status",
-            "serial_number", "physical_edge", "edge_deployment_type",
-            "conversation_count", "os_name"
-        ]
-        nested_keys = ["id", "name", "state"]
-        # Cannot find:
-        # - status as per ACTIVE, DISCONNECTED, media, lastConnectionTime, osVersion
-        for idx, edge in enumerate(self.data):
-            # new_edge = {self.to_camelcase(key): edge[key] for key in keys}
-            new_edge = {key: edge[key] for key in keys}
-            new_edge["date_created"] = self.to_string(edge["date_created"])
-            new_edge["date_modified"] = self.to_string(edge["date_modified"])
-            new_edge.update(self.extract(idx, "site", nested_keys))
-            new_edge["mac_address"] = self._parse_interfaces(edge["interfaces"], "mac_address")
-            new_edge["ip_address"] = self._parse_interfaces(edge["interfaces"], "ip_address")
-            # Adding a _key to avoid lookup duplicates
-            new_edge["_key"] = new_edge["id"]
-            edges.append(new_edge)
-        return edges
-
     def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_EDGE_IDS*batch
         slice = self.MAX_EDGE_IDS + factor
         remaining_edges = abs(len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
         return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+
+    def get_edge(self, eid: str) -> dict:
+        ret_edge = { "site": {} }
+        required_keys = [
+            "id", "name", "version", "description", "date_created", "date_modified",
+            "state", "interfaces", "online_status",
+            "serial_number", "physical_edge", "edge_deployment_type",
+            "conversation_count", "os_name"
+        ]
+
+        edge = [e for e in self.data if e["id"] == eid][0]
+        for key, value in edge.items():
+            ret_edge.update({k: edge[k] for k in required_keys})
+        # Avoid indexing a lot of "null" values added
+        # by the to_dict() SDK function for "site" data
+        for key, value in edge["site"].items():
+            if key in ["id", "name", "state"]:
+                ret_edge["site"][key] = value
+        return ret_edge
 
 
 class PhoneModel(GCBaseModel):
@@ -133,22 +116,6 @@ class PhoneModel(GCBaseModel):
         super().__init__(lst_phones)
 
     @property
-    def phones(self) -> List[dict]:
-        phones = []
-        keys = ["id", "name", "state"]
-        nested_keys = ["id", "name"]
-        for idx, phone in enumerate(self.data):
-            # new_phone = {self.to_camelcase(key): phone[key] for key in keys}
-            new_phone = {key: phone[key] for key in keys}
-            new_phone["date_created"] = self.to_string(phone["date_created"])
-            new_phone["date_modified"] = self.to_string(phone["date_modified"])
-            new_phone.update(self.extract(idx, "site", nested_keys))
-            # Adding a _key to avoid lookup duplicates
-            new_phone["_key"] = new_phone["id"]
-            phones.append(new_phone)
-        return phones
-
-    @property
     def statuses(self) -> List[dict]:
         statuses = []
         for phone in self.data:
@@ -156,8 +123,23 @@ class PhoneModel(GCBaseModel):
             statuses.append(phone["secondary_status"])
         return statuses
 
+    @property
+    def extended_statuses(self) -> List[dict]:
+        """ Returning statuses augmented with phones info """
+        statuses = []
+        required_keys = ["name", "date_created", "date_modified", "state", "site"]
+        for phone in self.data:
+            for s_type in ["status", "secondary_status"]:
+                new_status = phone[s_type]
+                for key, value in phone.items():
+                    new_status.update({k: phone[k] for k in required_keys})
+                statuses.append(new_status)
+        return statuses
+
 
 class QueueModel(GCBaseModel):
+    MAX_QUEUE_IDS: int = 200
+
     def __init__(self, queues: List[Queue]) -> None:
         lst_queues = []
         for queue in queues:
@@ -165,20 +147,24 @@ class QueueModel(GCBaseModel):
         super().__init__(lst_queues)
 
     @property
-    def queues(self) -> List[dict]:
-        queues = []
-        for queue in self.data:
-            new_queue = {
-                "id": queue["id"],
-                "name": queue["name"],
-                "_key": queue["id"]
-            }
-            queues.append(new_queue)
-        return queues
-
-    @property
     def queue_ids(self) -> List[str]:
         return [queue["id"] for queue in self.data]
+
+    def get_queue_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+        factor = self.MAX_QUEUE_IDS*batch
+        slice = self.MAX_QUEUE_IDS + factor
+        remaining_queues = abs(len(self.data) - factor)
+        has_next_batch = remaining_queues > self.MAX_QUEUE_IDS
+        return [queue["id"] for queue in self.data[factor:slice]], has_next_batch
+
+    def get_queue(self, qid: str) -> dict:
+        ret_queue = {}
+        required_keys = ["id", "name"]
+
+        queue = [q for q in self.data if q["id"] == qid][0]
+        for key, value in queue.items():
+            ret_queue.update({k: queue[k] for k in required_keys})
+        return ret_queue
 
 
 class UserModel(GCBaseModel):
@@ -191,18 +177,6 @@ class UserModel(GCBaseModel):
         super().__init__(lst_users)
 
     @property
-    def users(self) -> List[dict]:
-        users = []
-        keys = ["id", "name", "chat", "email"]
-        nested_keys = ["id", "name"]
-        for idx, user in enumerate(self.data):
-            new_user = {key: user[key] for key in keys}
-            new_user.update(self.extract(idx, "division", nested_keys))
-            new_user["_key"] = new_user["id"]
-            users.append(new_user)
-        return users
-
-    @property
     def user_ids(self) -> List[str]:
         return [user["id"] for user in self.data]
 
@@ -212,3 +186,12 @@ class UserModel(GCBaseModel):
         remaining_users = abs(len(self.data) - factor)
         has_next_batch = remaining_users > self.MAX_USER_IDS
         return [user["id"] for user in self.data[factor:slice]], has_next_batch
+
+    def get_user(self, uid: str) -> dict:
+        ret_user = {}
+        required_keys = ["id", "name", "chat", "email", "division"]
+
+        user = [u for u in self.data if u["id"] == uid][0]
+        for key, value in user.items():
+            ret_user.update({k: user[k] for k in required_keys})
+        return ret_user

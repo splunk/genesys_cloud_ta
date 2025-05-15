@@ -4,7 +4,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
@@ -83,19 +82,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges")
             )
 
-            collection_name = "gc_edges"
-
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
-            # Update collection
-            logger.debug(f"Saving edges metrics in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*e_model.edges)
-
             # Max 100 edgeids supported according to specs
             metrics = []
             cnt = 0
@@ -117,6 +103,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
                 metric["event_time"] = e_model.to_string(metric_obj.event_time)
+                metric["edge"] = e_model.get_edge(metric_obj.edge.id)
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(

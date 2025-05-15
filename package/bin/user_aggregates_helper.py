@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 from datetime import datetime, timedelta
@@ -70,24 +69,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            # Initialize lookup
-            collection_name = "gc_users"
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
             # Getting data from API
             logger.info("Getting data from users endpoint")
             user_model = UserModel(
                 client.get("UsersApi", "get_users")
             )
-
-            # Updating lookup
-            logger.debug(f"Saving users in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*user_model.users)
 
             # Getting metrics
             interval = f"{last_checkpoint}/{new_checkpoint}"
@@ -125,27 +111,33 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "UserAggregationQuery",
                     body
                 )
-                results.extend(data.to_dict().get("results", []))
+                if data:
+                    res_dict = data.to_dict() or {}
+                results.extend(res_dict.get("results", []) or [])
                 cnt+=1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 
             sourcetype = "genesyscloud:users:users:aggregates"
             event_counter = 0
             for item in results:
-                event_writer.write_event(
-                    smi.Event(
-                        data=json.dumps(item, ensure_ascii=False, default=str),
-                        index=input_item.get("index"),
-                        sourcetype=sourcetype
-                    )
-                )
-                event_counter += 1
+                for data_entry in item["data"]:
+                    for metrics in data_entry["metrics"]:
+                        metrics["user"] = user_model.get_user(item["group"]["userId"])
+                        metrics["interval"] = data_entry["interval"]
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype
+                            )
+                        )
+                        event_counter += 1
 
             # Updating checkpoint if data was indexed to avoid losing info
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
-                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,

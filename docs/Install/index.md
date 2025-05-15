@@ -28,6 +28,15 @@ may need to install the add-on in multiple places.
 | Heavy Forwarders | Yes | No | If installed on heavy forwarders, does not need to be installed on indexers. Select one node, either a search head or a heavy forwarder, to serve as the configuration server for this add-on, and disable visibility of the add-on in all other locations. |
 | Universal Forwarders | No | No | Universal forwarders are not supported for data collection, because the modular inputs require Python and the Splunk REST handler. |
 
+## Distributed deployment compatibility
+
+This table provides a quick reference for the compatibility of this add-on with Splunk distributed deployment features.
+
+| Distributed deployment feature | Supported | Comments |
+|----|----|----|
+| Search Head Clusters | Yes | Disable add-on visibility on search heads. |
+| Indexer Clusters | Yes |  |
+| Deployment Server | Yes | Supported for deploying the unconfigured add-on only. Configure this add-on using the add-on's configuration UI from one node only. |
 
 ## Installation walkthrough
 

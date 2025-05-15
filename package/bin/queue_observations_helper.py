@@ -3,7 +3,6 @@ import logging
 
 import import_declare_test
 from solnlib import conf_manager, log
-from solnlib import splunk_rest_client as rest_client
 from splunklib import modularinput as smi
 
 from genesyscloud_client import GenesysCloudClient
@@ -49,14 +48,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger, client_id, client_secret, account_region
             )
 
-            # Initializing lookup
-            collection_name = "gc_queues"
-            service = rest_client.SplunkRestClient(session_key, ADDON_NAME)
-            if collection_name not in service.kvstore:
-                # Create collection
-                logger.debug(f"Creating lookup '{collection_name}'")
-                service.kvstore.create(collection_name)
-
             # Getting data from API
             logger.info("Getting data from queues endpoint")
             queue_model = QueueModel(
@@ -64,65 +55,70 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "RoutingApi", "get_routing_queues"
                 )
             )
-            # Updating lookup
-            logger.debug(f"Saving routing queues in lookup '{collection_name}'")
-            collection = service.kvstore[collection_name]
-            collection.data.batch_save(*queue_model.queues)
 
             # Getting metrics
-            body = {
-                "filter": {
-                    "type": "or",
-                    "clauses": [],
-                    "predicates": [
-                        {
-                            "dimension": "queueId",
-                            "operator": "matches",
-                            "value": queue_id
-                        } for queue_id in queue_model.queue_ids
+            # Max 200 query predicates according to error received
+            results = []
+            cnt = 0
+            has_more = True
+            while has_more:
+                queue_ids, has_more = queue_model.get_queue_ids(cnt)
+                body = {
+                    "filter": {
+                        "type": "or",
+                        "clauses": [],
+                        "predicates": [
+                            {
+                                "dimension": "queueId",
+                                "operator": "matches",
+                                "value": queue_id
+                            } for queue_id in queue_ids
+                        ]
+                    },
+                    "metrics": [
+                        "oActiveUsers", "oAlerting", "oInteracting",
+                        "oMemberUsers", "oOffQueueUsers", "oOnQueueUsers",
+                        "oUserPresences", "oUserRoutingStatuses", "oWaiting"
                     ]
-                },
-                "metrics": [
-                    "oActiveUsers", "oAlerting", "oInteracting",
-                    "oMemberUsers", "oOffQueueUsers", "oOnQueueUsers",
-                    "oUserPresences", "oUserRoutingStatuses", "oWaiting"
-                ]
-            }
+                }
+                response = client.post(
+                    "RoutingApi",
+                    "post_analytics_queues_observations_query",
+                    "QueueObservationQuery",
+                    body
+                )
+                # Ensure data exists before processing
+                if response:
+                    res_dict = response.to_dict() or {}
+                    results.extend(res_dict.get("results", []) or [])
+                cnt += 1
+            logger.debug(f"Fetched '{len(results)}' queues observations")
 
             sourcetype = "genesyscloud:analytics:queues:observations"
-            response = client.post(
-                "RoutingApi",
-                "post_analytics_queues_observations_query",
-                "QueueObservationQuery",
-                body
-            )
-            # Ensure data exists before processing
-            if response:
-                results = response.to_dict().get("results", [])
-                event_counter = 0
-                for item in results:
-                    for data_entry in item["data"]:
-                        data_entry["group"] = item["group"]
-                        event_writer.write_event(
-                            smi.Event(
-                                # Index time not needed?
-                                data=json.dumps(data_entry),
-                                index=input_item.get("index"),
-                                sourcetype=sourcetype
-                            )
+            event_counter = 0
+            for item in results:
+                for data_entry in item["data"]:
+                    data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                    event_writer.write_event(
+                        smi.Event(
+                            # Index time not needed?
+                            data=json.dumps(data_entry),
+                            index=input_item.get("index"),
+                            sourcetype=sourcetype
                         )
-                        event_counter += 1
+                    )
+                    event_counter += 1
 
-                # Checkpointing not needed?
-                logger.debug(f"Indexed '{event_counter}' events")
-                log.events_ingested(
-                    logger,
-                    input_name,
-                    sourcetype,
-                    event_counter,
-                    input_item.get("index"),
-                    account = input_item.get("account")
-                )
+            # Checkpointing not needed?
+            logger.debug(f"Indexed '{event_counter}' events")
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                event_counter,
+                input_item.get("index"),
+                account = input_item.get("account")
+            )
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
             log.log_exception(
