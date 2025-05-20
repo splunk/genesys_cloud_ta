@@ -69,12 +69,9 @@ jobs:
       matrix:
         tags:
           - "cloud"
-          - "appapproval"
-          - "deprecated_feature"
-          - "developer_guidance"
-          - "future"
-          - "self-service"
-          - "splunk_appinspect"
+          - "private_app"
+          - "private_classic"
+          - "private_victoria"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -84,7 +81,7 @@ jobs:
         with:
           name: ${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}
           path: dist
-      - uses: splunk/appinspect-cli-action@v2.8
+      - uses: splunk/appinspect-cli-action@v2.10
         with:
           app_path: dist/${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}.tar.gz
           included_tags: ${{ matrix.tags }}
