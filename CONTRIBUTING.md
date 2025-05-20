@@ -95,6 +95,9 @@ $~ make run-functional-tests
 
 :point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
 
+## Release the Add-On
+A CI/CD workflow will automatically create a release when a tag is pushed to the `main` branch. Please note that **release notes shall be [manually added via UI](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#editing-a-release)** as soon as the workflow has completed.
+
 ## Documentation
 Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
 

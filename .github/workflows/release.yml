@@ -1,26 +1,25 @@
-name: Package Splunk Add-On and Run AppInspect
+name: Package and Upload Release
 
 on:
-  pull_request:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
     branches:
-      - main
-    types: [opened, reopened, synchronize]
-  # push:
-  #   paths:
-  #     - package/**
+      - "main"
+
+# Grants permission to create releases
+permissions:
+  contents: write
 
 jobs:
-  build:
-    name: Bundle the App
-    runs-on: ubuntu-22.04
-    outputs:
-      app_name: ${{ steps.app.outputs.name }}
-      app_version: ${{ steps.app.outputs.version }}
+  build-and-release:
+    name: Build and Upload Release
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -55,37 +54,11 @@ jobs:
           ucc-gen package --path output/${{ steps.app.outputs.name }}
         shell: bash
 
-      - uses: actions/upload-artifact@v4
+      # Release Notes to be added manually by editing the Release via UI!
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: ${{ steps.app.outputs.name }}-${{ steps.app.outputs.version }}
-          path: ${{ steps.app.outputs.name }}*.tar.gz
-
-  appinspect-cli:
-    name: appinspect-cli ${{ matrix.tags }}
-    runs-on: ubuntu-22.04
-    continue-on-error: true
-    needs: build
-    strategy:
-      matrix:
-        tags:
-          - "cloud"
-          - "private_app"
-          - "private_classic"
-          - "private_victoria"
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: 3.7
-      - uses: actions/download-artifact@v4
-        with:
-          name: ${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}
-          path: dist
-      - uses: splunk/appinspect-cli-action@v2.10
-        with:
-          app_path: dist/${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}.tar.gz
-          included_tags: ${{ matrix.tags }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: appinspect_result_${{ matrix.tags }}
-          path: appinspect_result.json
+          tag_name: ${{ github.ref_name }}
+          files: ${{ steps.app.outputs.name }}*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
