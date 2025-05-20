@@ -58,3 +58,5 @@ check_for_supported_tls:
   comment: 'Ok'
 check_for_remote_code_execution_in_javascript:
   comment: 'Ok'
+check_for_search_v1_endpoint:
+  comment: 'Ok'
