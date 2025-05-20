@@ -47,11 +47,6 @@ jobs:
           fi
         working-directory: ./package
 
-      - name: Add files to package
-        run: |
-          sed -i '/^!/d' README.md
-          cp README.md package/
-
       - name: Build and bundle TA
         run: |
           ucc-gen build --ta-version ${{ steps.app.outputs.version }}
