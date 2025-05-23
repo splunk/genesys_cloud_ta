@@ -15,6 +15,8 @@ run:
 
 package: build
 	# pandoc README.md -f markdown-implicit_figures -o output/$(APP_NAME)/README.pdf
+	chmod -R +r output
+	chmod -R go-w output
 	mkdir -p dist
 	ucc-gen package --path output/$(APP_NAME) -o dist
 
