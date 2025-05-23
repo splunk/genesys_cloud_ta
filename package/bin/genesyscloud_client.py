@@ -102,7 +102,8 @@ class GenesysCloudClient:
         """
         total_items = []
         for obj in response:
-            total_items.extend(obj.to_dict().get(key, []))
+            res_dict = obj.to_dict() or {}
+            total_items.extend(res_dict.get(key, []) or [])
         return total_items
 
     def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
