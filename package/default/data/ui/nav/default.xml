@@ -1,7 +1,8 @@
-<?xml version="1.0" ?>
 <nav>
     <view name="inputs" default="true"/>
     <view name="configuration"/>
     <view name="dashboard"/>
     <view name="search"/>
+    <a href="https://splunk.github.io/genesys_cloud_ta/" target="_blank">Documentation</a>
+    <a href="https://github.com/splunk/genesys_cloud_ta/issues" target="_blank">Report an issue</a>
 </nav>

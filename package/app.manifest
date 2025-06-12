@@ -1,7 +1,7 @@
 {
     "schemaVersion": "2.0.0",
     "info": {
-        "title": "Genesys Cloud Add-on",
+        "title": "Genesys Cloud Add-on for Splunk",
         "id": {
             "group": null,
             "name": "genesys_cloud_ta",
