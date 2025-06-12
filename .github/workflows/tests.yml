@@ -6,7 +6,8 @@ on:
       - main
     types: [opened, reopened, synchronize]
     paths:
-      - package/**
+      - package/bin/**
+      - package/lib/requirements.txt
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
