@@ -909,7 +909,7 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.2.0",
+        "version": "0.2.1",
         "displayName": "Genesys Cloud Add-on for Splunk",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
