@@ -74,7 +74,6 @@
                             "required": true,
                             "type": "singleSelect",
                             "options": {
-                                "disableSearch": true,
                                 "autoCompleteFields": [
                                     {
                                         "value": "us_east_1",
@@ -522,6 +521,7 @@
                             "label": "Direction",
                             "help": "The direction of the communication (select at least one)",
                             "required": true,
+                            "defaultValue": "inbound|outbound",
                             "options": {
                                 "delimiter": "|",
                                 "items": [
@@ -542,6 +542,7 @@
                             "label": "Media Type(s)",
                             "help": "The session media type(s) to ingest (select at least one)",
                             "required": true,
+                            "defaultValue": "callback|chat|cobrowse|email|internalmessage|message|screenshare|video|voice",
                             "options": {
                                 "delimiter": "|",
                                 "items": [
@@ -908,8 +909,8 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.2.0",
-        "displayName": "Genesys Cloud Add-on",
+        "version": "0.2.1",
+        "displayName": "Genesys Cloud Add-on for Splunk",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
             "light",

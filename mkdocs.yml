@@ -1,5 +1,9 @@
 site_name: Genesys Cloud Add-on for Splunk
 site_author: Splunk Community
+remote_branch: gh-pages
+
+repo_name: Genesys Cloud Add-on for Splunk
+repo_url: "https://github.com/splunk/genesys_cloud_ta"
 
 markdown_extensions:
   - toc:
