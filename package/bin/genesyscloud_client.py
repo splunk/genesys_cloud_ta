@@ -54,11 +54,15 @@ class GenesysCloudClient:
 
             if not enable_pagination:
                 break
-            if not api_response.next_uri:
-                break
-            else:
+            if hasattr(api_response, "next_uri") and api_response.next_uri:
                 page_number += 1
                 kwargs["page_number"] = page_number
+            elif hasattr(api_response, "cursor") and api_response.cursor:
+                cursor = api_response.cursor
+                kwargs["cursor"] = cursor
+            else:
+                break
+
         return items
 
     def get(self, api_instance_name: str, function_name: str, *args, **kwargs):

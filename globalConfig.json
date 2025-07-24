@@ -160,6 +160,136 @@
         "inputs": {
             "services": [
                 {
+                    "name": "actions_metrics",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "field": "name",
+                            "required": true,
+                            "help": "A unique name for the data input.",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores."
+                                },
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100,
+                                    "errorMsg": "Length of input name should be between 1 and 100"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "account",
+                            "label": "Account to use",
+                            "help": "Account to use for this input.",
+                            "required": true,
+                            "options": {
+                                "referenceName": "account"
+                            }
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "required": true,
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        }
+                    ],
+                    "inputHelperModule": "actions_metrics_helper",
+                    "title": "Actions Metrics"
+                },
+                {
+                    "name": "audit_query",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "field": "name",
+                            "required": true,
+                            "help": "A unique name for the data input.",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores."
+                                },
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100,
+                                    "errorMsg": "Length of input name should be between 1 and 100"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "account",
+                            "label": "Account to use",
+                            "help": "Account to use for this input.",
+                            "required": true,
+                            "options": {
+                                "referenceName": "account"
+                            }
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "required": true,
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        }
+                    ],
+                    "inputHelperModule": "audit_query_helper",
+                    "title": "Audit Query"
+                },
+                {
                     "name": "queue_observations",
                     "entity": [
                         {
@@ -814,15 +944,16 @@
                     "groupServices": [
                         "queue_observations",
                         "conversations_metrics",
-                        "conversations_details",
-                        "actions_metrics"
+                        "actions_metrics",
+                        "conversations_details"
                     ]
                 },
                 {
                     "groupName": "operational",
                     "groupTitle": "Operational",
                     "groupServices": [
-                        "status_page_metrics"
+                        "status_page_metrics",
+                        "audit_query"
                     ]
                 },
                 {
@@ -910,7 +1041,7 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.2.1+c7ed59c",
+        "version": "0.2.1",
         "displayName": "Genesys Cloud Add-on for Splunk",
         "schemaVersion": "0.0.9",
         "supportedThemes": [
