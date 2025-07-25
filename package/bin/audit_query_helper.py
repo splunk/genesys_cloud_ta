@@ -77,20 +77,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             body = {"interval": interval}
 
-            try:
-                response = client.post(
-                    "AuditApi",
-                    "post_audits_query",
-                    "AuditQueryRequest",
-                    body
-                )
-            except Exception as e:
-                logger.error(
-                    f"[GENESYS] Failed to retrieve audit query results.\n"
-                    f"Endpoint: AuditApi.post_audits_query\n"
-                    f"Payload: {body}\n"
-                    f"Error: {type(e).__name__} - {e}\n"
-                )
+            response = client.post(
+                "AuditApi",
+                "post_audits_query",
+                "AuditQueryRequest",
+                body
+            )
 
             if not response:
                 raise Exception("No se recibió respuesta del POST de auditoría")
