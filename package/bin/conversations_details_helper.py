@@ -38,6 +38,13 @@ def get_conversation_duration(start: datetime, end: datetime) -> int:
     return int(duration.total_seconds() * 1000)
 
 def validate_input(definition: smi.ValidationDefinition):
+    # Interval can be no greater than 7 days.
+    start_date = definition.parameters.get("start_date")
+    if start_date is not None:
+        input_date = datetime.strptime(start_date, "%Y-%m-%d")
+        threshold_date = datetime.now() - relativedelta(days=7)
+        if input_date < threshold_date:
+            raise Exception(f"Invalid start date {input_date}. Start date for data collection can be no greater than 7 days ago from now.")
     return
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
@@ -62,18 +69,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            # Setting a default start date of 7 days ago from now
+            now = datetime.now()
+            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            start_date = input_item.get("start_date")
+            if start_date is not None:
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
             checkpointer_key_name = input_name.split("/")[-1]
 
-            # Retrieve the last checkpoint or set it to 7 days in the past from today.
-            # Interval can be no greater than 7 days.
-            now = datetime.now()
+            # Retrieve the last checkpoint or set it to the fallback start date.
             start_time = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                or fallback_start
             )
             end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
             interval = f"{start_time}/{end_time}"
