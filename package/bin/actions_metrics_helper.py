@@ -84,20 +84,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "group_by": ["actionId"],
             }
 
-            try:
-                response = client.post(
-                    "AnalyticsApi",
-                    "post_analytics_actions_aggregates_query",
-                    "ActionAggregationQuery",
-                    body
-                )
-            except Exception as e:
-                logger.error(
-                    f"[GENESYS] Failed to retrieve analytics action aggregates. "
-                    f"Endpoint: AnalyticsApi.post_analytics_actions_aggregates_query | "
-                    f"Payload: {body} | "
-                    f"Error: {type(e).__name__} - {e}"
-                )
+            response = client.post(
+                "AnalyticsApi",
+                "post_analytics_actions_aggregates_query",
+                "ActionAggregationQuery",
+                body
+            )
 
             event_counter = 0
             res_dict = response.to_dict() or {}
