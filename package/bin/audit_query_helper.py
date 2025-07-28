@@ -115,19 +115,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             }
 
 
-            try:
-                results = client.get(
-                    "AuditApi",
-                    "get_audits_query_transaction_id_results",
-                    **params
-                )
-            except Exception as e:
-                logger.error(
-                    f"[GENESYS] Failed to retrieve audit transaction results.\n"
-                    f"Endpoint: AuditApi.get_audits_query_transaction_id_results\n"
-                    f"Params: {params}\n"
-                    f"Error: {type(e).__name__} - {e}\n"       
-                )
+            results = client.get(
+                "AuditApi",
+                "get_audits_query_transaction_id_results",
+                **params
+            )
 
             for entity in results:
                 event_writer.write_event(
