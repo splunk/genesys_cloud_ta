@@ -134,7 +134,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     smi.Event(
                         data=json.dumps(entity.to_dict(), ensure_ascii=False, default=str),
                         index=input_item.get("index"),
-                        sourcetype="genesyscloud:audit:query",
+                        sourcetype="genesyscloud:operational:audits",
                         time=entity.event_date.timestamp()
                     )
                 )
