@@ -98,7 +98,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
 
                 if not state_response:
-                    raise Exception("No se pudo obtener el estado del transaction_id")
+                    raise Exception(f"Failed retrieving status of audit query with transaction id {transaction_id}")
 
                 status = state_response[0].state
 
