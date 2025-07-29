@@ -87,9 +87,14 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            body = json.loads(e.body)
-            message = body["message"]
-            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
+            err_message = f"Exception when calling {api_instance_name}->{function_name}:"
+            try:
+                body = json.loads(e.body)
+                message = body["message"]
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {message}")
+            except ValueError as ve:
+                self.logger.warning(f"{err_message} {ve}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
 
         return []
 

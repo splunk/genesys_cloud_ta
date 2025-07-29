@@ -58,6 +58,7 @@ interval = <value>
 account = <value>
 index = <value>
 interval = <value>
+start_date = <value>
 ```
 
 3. (Optional) Configure a custom `index`.
@@ -82,5 +83,6 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code>.|
 | `direction`             |Direction                         |The direction of the communication.
 | `media_types`           |Media Type(s)                     |The session media type(s).
+| `start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days ago from now. Format: `YYYY-MM-DD`.
 
 Direction and Media Type(s) possible values are taken from [Genesys Cloud Specs](https://developer.genesys.cloud/analyticsdatamanagement/analytics/aggregate/conversation-query#dimensions).
