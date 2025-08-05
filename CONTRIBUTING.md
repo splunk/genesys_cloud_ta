@@ -87,6 +87,10 @@ Additional requirements to run these tests on your local environment:
 * Copy `etc/cicd/inputs.conf` in `$SPLUNK_HOME/etc/apps/genesys_cloud_ta/local`
     > Create `local` dir if it does not exist
 
+:raising_hand: Does your Splunk instance run in Docker? Then:
+* Use [ngrok](https://ngrok.com/) to expose the mock `ngrok http 3004`
+* In the container add in `/etc/environment` something like the following environment variable `export GENESYSCLOUD_HOST="https://<your-ngrok-id>.ngrok-free.app"`
+
 
 ```bash
 $~ cd genesys_cloud_ta

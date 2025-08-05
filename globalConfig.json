@@ -809,6 +809,21 @@
                             "help": "Account to use for this input.",
                             "field": "account",
                             "required": true
+                        },
+                        {
+                            "field": "start_date",
+                            "label": "Start Date",
+                            "help": "Start date for data collection. Default: 7 days ago. Format: YYYY-MM-DD",
+                            "required": false,
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "date"
+                                }
+                            ],
+                            "options": {
+                                "disableonEdit": true
+                            }
                         }
                     ],
                     "inputHelperModule": "conversations_details_helper",
