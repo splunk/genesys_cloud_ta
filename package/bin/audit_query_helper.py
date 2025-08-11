@@ -1,3 +1,4 @@
+```python
 import json
 import logging
 import time
@@ -8,6 +9,7 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime, timedelta, timezone, time as dt_time
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -59,23 +61,26 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            
+
             client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
 
+            # Interval handling: first run = last 7 days; subsequent runs use checkpoint
             now = datetime.now(timezone.utc)
-            today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0).timestamp()
+            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or today_start
+            # Optional manual override via input parameter 'start_date' (format: YYYY-MM-DD)
+            start_date = input_item.get("start_date")
+            if start_date is not None:
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
-            interval = (
-                f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/"
-                f"{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
-            )
-
+            # Retrieve last checkpoint (ISO8601 string) or use fallback_start
+            start_time = kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
+            end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+            interval = f"{start_time}/{end_time}"
             body = {"interval": interval}
+            logger.debug(f"Request body: {body}")
 
             response = client.post(
                 "AuditApi",
@@ -83,9 +88,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "AuditQueryRequest",
                 body
             )
-
             if not response:
-                raise Exception("No se recibió respuesta del POST de auditoría")
+                raise Exception("No response was received from the audit POST request. Please verify the request parameters and try again.")
 
             transaction_id = response.id
 
@@ -114,13 +118,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "page_size": 500
             }
 
-
             results = client.get(
                 "AuditApi",
                 "get_audits_query_transaction_id_results",
                 **params
             )
-
+            event_counter = 0
             for entity in results:
                 event_writer.write_event(
                     smi.Event(
@@ -130,8 +133,18 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         time=entity.event_date.timestamp()
                     )
                 )
+                event_counter += 1
 
-            kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
+            # Update checkpoint with the interval end in ISO8601 to keep next run contiguous
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
+                logger.debug(f"Updating checkpointer to {end_time}")
+                kvstore_checkpointer.update(checkpointer_key_name, end_time)
 
         except Exception as e:
-            logger.error(f"Error in input {normalized_input_name}: {str(e)}", exc_info=True)
+            log.log_exception(
+                logger,
+                e,
+                "IngestionError",
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+            )

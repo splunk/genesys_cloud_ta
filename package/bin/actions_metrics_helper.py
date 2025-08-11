@@ -58,7 +58,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_id = get_account_property(session_key, account, "client_id")
             client_secret = get_account_property(session_key, account, "client_secret")
 
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
+ 
 
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
