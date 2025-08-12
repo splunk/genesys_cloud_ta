@@ -7,10 +7,12 @@ Before releasing 1.0.0 the Genesys Cloud Add-on for Splunk is still in the devel
 ## Upgrade to version 0.2.x
 
 1. Disable all inputs.
-2. Download the latest version of Genesys Cloud Add-on for Splunk from its [repository](https://github.com/splunk/genesys_cloud_ta/releases).
-3. [Install](../Install/index.md) the Genesys Cloud Add-on for Splunk across your deployment.
+2. (When upgrading to **0.2.2**) Delete all **Conversations Details** inputs.
+3. Download the latest version of Genesys Cloud Add-on for Splunk from its [repository](https://github.com/splunk/genesys_cloud_ta/releases).
+4. [Install](../Install/index.md) the Genesys Cloud Add-on for Splunk across your deployment.
     > If installing via Splunk Web, select the `Upgrade app` checkbox.
-4. Enable the inputs.
+5. (When upgrading to **0.2.2**) [Configure new **Conversations Details**](../ConfigureAnalyticsInputs/index.md) inputs.
+6. Enable the inputs.
 
 
 Data that was previously stored into KV Store lookups is now added into indexed events. More fields will be available at search time as a consequence.
