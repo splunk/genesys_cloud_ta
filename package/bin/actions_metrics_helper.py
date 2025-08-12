@@ -63,15 +63,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
 
-            # Read interval from input (default to 300 seconds if missing)
             interval_seconds = int(input_item.get("interval", "300"))
 
-            # Load checkpoint or calculate backward if first run
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
             if current_checkpoint:
                 start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             else:
-                # First run: go back `interval_seconds` from now
                 start_time = now - timedelta(seconds=interval_seconds)
 
             end_time = now

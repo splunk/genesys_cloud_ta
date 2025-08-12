@@ -65,16 +65,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             checkpointer_key_name = normalized_input_name
 
-            # Interval handling: first run = last 7 days; subsequent runs use checkpoint
             now = datetime.now(timezone.utc)
             fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            # Optional manual override via input parameter 'start_date' (format: YYYY-MM-DD)
             start_date = input_item.get("start_date")
             if start_date is not None:
                 fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            # Retrieve last checkpoint (ISO8601 string) or use fallback_start
             start_time = kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
             interval = f"{start_time}/{end_time}"
