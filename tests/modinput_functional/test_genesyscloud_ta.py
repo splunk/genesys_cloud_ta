@@ -197,3 +197,38 @@ class TestGenesysCloudTA(BaseTATest):
             time.sleep(2)
         assert len(results) > 0 and len(results) <= 716
         assert results[0]["source"] == "user_aggregates://user_aggregates"
+
+    def test_input_actions_metrics(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:analytics:actions:metrics"
+        source = "actions_metrics://actions_metrics"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        for attempt in range(self.RETRY):
+            results = self._search(search_query=spl, run_counter=attempt, timeout=90)
+            if results or attempt == (self.RETRY - 1):
+                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
+                break
+            time.sleep(2)
+        assert len(results) > 0 and len(results) <= 1000
+        assert results[0]["source"] == source
+
+
+    def test_input_audit_query(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:operational:audits"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype}"
+        for attempt in range(self.RETRY):
+            results = self._search(search_query=spl, run_counter=attempt, timeout=120)
+            if len(results) > 0 or attempt == (self.RETRY - 1):
+                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
+                break
+            time.sleep(2)
+        # The mock returns ~5 entities -> ~5 events
+        assert len(results) > 0 and len(results) <= 50
+        # Note: we don't assert 'source' here because this modular input doesn't set it explicitly.
+
+            # Nota: no validamos 'source' porque tu modular input no lo establece explícitamente

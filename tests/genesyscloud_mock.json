@@ -1164,6 +1164,179 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
+    },
+    {
+      "uuid": "0d6c0a63-3d2a-4a6e-9d6b-a85f5cc3a9f0",
+      "type": "http",
+      "documentation": "Query for action aggregates",
+      "method": "post",
+      "endpoint": "api/v2/analytics/actions/aggregates/query",
+      "responses": [
+        {
+          "uuid": "7eacb8d4-0c4f-4d2f-9ba7-0b8a1b69d3c5",
+          "body": "{{setVar 'interval' (body 'interval')}}\n{{setVar 'group_by' (bodyRaw '$.groupBy')}}\n{{setVar 'metrics' (bodyRaw '$.metrics')}}\n\n{\n  \"results\": [\n    {{#repeat 5}}\n    {\n      \"group\": {\n        {{#if (array_includes @group_by \"actionId\")}}\n        \"actionId\": \"{{faker 'string.uuid'}}\"{{/if}}\n      },\n      \"data\": [\n        {\n          \"interval\": \"{{@interval}}\",\n          \"metrics\": [\n            {{#each @metrics}}\n            {\n              \"metric\": \"{{this}}\",\n              \"stats\": {\n                \"count\": 3,\n                \"min\": 120,\n                \"max\": 7800,\n                \"sum\": 45210\n              }\n            }{{#unless @last}},{{/unless}}\n            {{/each}}\n          ]\n        }\n      ]\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Success - aggregates by actionId",
+          "headers": [
+            { "key": "cache-control", "value": "no-cache, no-store, must-revalidate" },
+            { "key": "connection", "value": "close" },
+            { "key": "content-type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "rules": [
+            { "target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex" },
+            { "target": "header", "modifier": "Content-Type", "value": "application/json", "invert": false, "operator": "equals" },
+            { "target": "body", "modifier": "metrics", "value": "", "invert": true, "operator": "empty_array" }
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "3f1a5d7b-8e2c-4a9d-9edd-e2b7c5e0b4ce",
+          "body": "{\n  \"message\": \"Value [] is not valid for field type [ActionAggregationQuery].\",\n  \"code\": \"invalid.value\",\n  \"status\": 400,\n  \"contextId\": \"{{faker 'string.uuid'}}\",\n  \"details\": [],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 400,
+          "label": "Bad request - missing metrics or groupBy",
+          "headers": [
+            { "key": "content-type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "rules": [
+            { "target": "body", "modifier": "metrics", "value": "", "invert": false, "operator": "empty_array" },
+            { "target": "body", "modifier": "groupBy", "value": "", "invert": false, "operator": "empty_array" }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "a9c1d2e3-b4f5-4a6c-9d7e-8f0a1b2c3d4e",
+          "body": "{\n  \"message\": \"Invalid login credentials.\",\n  \"code\": \"bad.credentials\",\n  \"status\": 401,\n  \"contextId\": \"{{faker 'string.uuid'}}\",\n  \"details\": [],\n  \"errors\": []\n}",
+          "latency": 0,
+          "statusCode": 401,
+          "label": "Unauthorized - missing bearer",
+          "headers": [
+            { "key": "content-type", "value": "application/json" }
+          ],
+          "bodyType": "INLINE",
+          "rules": [
+            { "target": "header", "modifier": "Authorization", "value": "", "invert": false, "operator": "null" }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "7f6c6a6b-6f0f-4b01-9ad8-7a0c7f1a6f21",
+      "type": "http",
+      "documentation": "Create audit query execution",
+      "method": "post",
+      "endpoint": "api/v2/audits/query",
+      "responses": [
+        {
+          "uuid": "3f1bb696-0b56-4a9a-9d8d-8e2e2b6d1c11",
+          "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"state\": \"Queued\",\n  \"startDate\": \"2025-03-24T12:00:00.000Z\",\n  \"interval\": \"{{body 'interval'}}\",\n  \"serviceName\": \"platform.api\",\n  \"filters\": [],\n  \"sort\": []\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Accepted query",
+          "headers": [
+            {"key": "content-type", "value": "application/json"}
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Content-Type", "value": "application/json", "invert": false, "operator": "equals"},
+            {"target": "body", "modifier": "interval", "value": "", "invert": true, "operator": "null"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6c0a9d1e-2e7f-42e6-a9a9-9c2e7d1f3b10",
+      "type": "http",
+      "documentation": "Get status of audit query execution",
+      "method": "get",
+      "endpoint": "api/v2/audits/query/:transactionId",
+      "responses": [
+        {
+          "uuid": "d2c0f9a8-24a0-4f1a-9d8e-7b9a6c1e2f30",
+          "body": "{\n  \"id\": \"{{urlParam 'transactionId'}}\",\n  \"state\": \"Succeeded\",\n  \"startDate\": \"2025-03-24T12:00:05.000Z\",\n  \"interval\": \"2025-03-17T00:00:00Z/2025-03-24T12:00:00Z\",\n  \"serviceName\": \"platform.api\",\n  \"filters\": [],\n  \"sort\": []\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Status Succeeded",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "params", "modifier": "transactionId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "9b1f5b3c-72a7-45ac-bf3a-8d0d1b2f9c45",
+      "type": "http",
+      "documentation": "Get results of audit query",
+      "method": "get",
+      "endpoint": "api/v2/audits/query/:transactionId/results",
+      "responses": [
+        {
+          "uuid": "a4f2b3c1-5e6d-4b8f-9a0c-1d2e3f4a5b6c",
+          "body": "{\n  \"id\": \"{{urlParam 'transactionId'}}\",\n  \"pageSize\": 5,\n  \"cursor\": null,\n  \"entities\": [\n    {{#repeat 5}}\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"userHomeOrgId\": \"{{faker 'string.uuid'}}\",\n      \"user\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"{{firstName}} {{lastName}}\"},\n      \"client\": {\"id\": \"{{faker 'string.uuid'}}\"},\n      \"remoteIp\": [\"{{ipv4}}\"],\n      \"serviceName\": \"platform.api\",\n      \"level\": \"USER\",\n      \"eventDate\": \"2025-03-24T12:00:3{{int 0 9}}.000Z\",\n      \"message\": {\"localizableMessageCode\": \"audit.sample\", \"message\": \"Updated entity\"},\n      \"action\": \"Update\",\n      \"entity\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"TestEntity\"},\n      \"entityType\": \"User\",\n      \"status\": \"SUCCESS\",\n      \"application\": \"TestApp\",\n      \"initiatingAction\": {\"transactionId\": \"{{urlParam 'transactionId'}}\", \"action\": \"Update\"},\n      \"transactionId\": \"{{urlParam 'transactionId'}}\",\n      \"transactionInitiator\": true,\n      \"propertyChanges\": [\n        {\"property\": \"name\", \"oldValues\": [\"Old\"], \"newValues\": [\"New\"]}\n      ],\n      \"context\": {\"ip\": \"{{ipv4}}\"}\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Results page",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "params", "modifier": "transactionId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -1222,6 +1395,22 @@
     {
       "type": "route",
       "uuid": "51cfe0b5-16d9-4d44-9bfb-8f7d1ac4e756"
+    },
+    { 
+      "type": "route", 
+      "uuid": "0d6c0a63-3d2a-4a6e-9d6b-a85f5cc3a9f0" 
+    },
+    {
+      "type":"route",
+      "uuid":"7f6c6a6b-6f0f-4b01-9ad8-7a0c7f1a6f21"
+    },
+    {
+      "type":"route",
+      "uuid":"6c0a9d1e-2e7f-42e6-a9a9-9c2e7d1f3b10"
+    },
+    {
+      "type":"route",
+      "uuid":"9b1f5b3c-72a7-45ac-bf3a-8d0d1b2f9c45"
     }
   ],
   "proxyMode": false,
