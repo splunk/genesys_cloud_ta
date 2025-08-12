@@ -211,7 +211,7 @@ class TestGenesysCloudTA(BaseTATest):
                 self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
                 break
             time.sleep(2)
-        assert len(results) > 0 and len(results) <= 1000
+        assert len(results) > 0 and len(results) <= 5
         assert results[0]["source"] == source
 
 
@@ -229,6 +229,3 @@ class TestGenesysCloudTA(BaseTATest):
             time.sleep(2)
         # The mock returns ~5 entities -> ~5 events
         assert len(results) > 0 and len(results) <= 50
-        # Note: we don't assert 'source' here because this modular input doesn't set it explicitly.
-
-            # Nota: no validamos 'source' porque tu modular input no lo establece explícitamente
