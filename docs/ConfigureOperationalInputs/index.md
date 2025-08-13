@@ -3,6 +3,8 @@
 **Description:** Operational inputs enable collection of:
 
 - System Services Status.
+- Audit Logs (Audit Query).
+
 
 ## Pre-Requirements
 
@@ -18,7 +20,7 @@ Configure your inputs on the Splunk platform instance responsible for collecting
 Configure your inputs using Splunk Web on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder.
 
 1. In the Genesys Cloud Add-on for Splunk, click **Inputs > Create New Input > Operational**.
-2. Select the available input **System Services Status**.
+2. Select one of the available inputs among **System Services Status** and **Audit Logs (Audit Query)**.
 3. Enter the parameter values using information provided in the input parameter table below.
 4. Click **Add**.
 5. Verify that data is successfully arriving by running the following searches on your search head:
