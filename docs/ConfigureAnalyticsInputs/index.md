@@ -4,7 +4,8 @@
 
 - Queue Observations,
 - Conversations Metrics,
-- Conversations Details.
+- Conversations Details,
+- Actions Metrics.
 
 ## Pre-Requirements
 
@@ -20,7 +21,7 @@ Configure your inputs on the Splunk platform instance responsible for collecting
 Configure your inputs using Splunk Web on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder.
 
 1. In the Genesys Cloud Add-on for Splunk, click **Inputs > Create New Input > Analytics**.
-2. Select one of the available inputs among **Queue Observations**, **Conversations Metrics** and **Conversations Details**.
+2. Select one of the available inputs among **Queue Observations**, **Conversations Metrics**, **Actions Metrics** and **Conversations Details**.
 3. Enter the parameter values using information provided in the input parameter table below.
 4. Click **Add**.
 5. Verify that data is successfully arriving by running the following searches on your search head:
@@ -59,6 +60,13 @@ account = <value>
 index = <value>
 interval = <value>
 start_date = <value>
+
+<!-- Actions Metrics -->
+[audit_query://<audit_query_input_name>]
+account = <value>
+index = <value>
+interval = <value>
+
 ```
 
 3. (Optional) Configure a custom `index`.
