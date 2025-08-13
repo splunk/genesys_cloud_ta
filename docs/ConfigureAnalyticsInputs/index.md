@@ -62,7 +62,7 @@ interval = <value>
 start_date = <value>
 
 <!-- Actions Metrics -->
-[audit_query://<audit_query_input_name>]
+[actions_metrics://<actions_metrics_input_name>]
 account = <value>
 index = <value>
 interval = <value>
