@@ -89,22 +89,21 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             transaction_id = response.id
 
+            max_polls = int(input_item.get("max_poll_attempts", "10"))
+            poll_sleep = int(input_item.get("poll_interval_seconds", "2"))
+
             status = ""
-            for i in range(10):
-                state_response = client.get(
-                    "AuditApi",
-                    "get_audits_query_transaction_id",
-                    transaction_id
-                )
-
-                if not state_response:
-                    raise Exception(f"Failed retrieving status of audit query with transaction id {transaction_id}")
-
-                status = state_response[0].state
-
-                if status == "Succeeded":
+            for _ in range(max_polls):
+                state_resp = client.get("AuditApi","get_audits_query_transaction_id", transaction_id)
+                if not state_resp:
+                    raise Exception(f"Failed to get status for transaction {transaction_id}")
+                status = state_resp[0].state
+                if status in ("Succeeded", "Failed", "Cancelled"):
                     break
-                time.sleep(2)
+                time.sleep(poll_sleep)
+
+            if status != "Succeeded":
+                raise Exception(f"Audit did not complete successfully: {status}")
 
             if status != "Succeeded":
                 raise Exception(f"Audit has not been completed: {status}")
