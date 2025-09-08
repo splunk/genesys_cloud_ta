@@ -105,9 +105,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             if status != "Succeeded":
                 raise Exception(f"Audit did not complete successfully: {status}")
 
-            if status != "Succeeded":
-                raise Exception(f"Audit has not been completed: {status}")
-
             params = {
                 "transaction_id": transaction_id,
                 "page_size": 500

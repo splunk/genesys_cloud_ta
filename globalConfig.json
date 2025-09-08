@@ -266,21 +266,21 @@
                             }
                         },
                         {
-                            "type":"text", 
+                            "type": "text",
                             "field": "max_poll_attempts",
                             "label": "Max poll attempts",
                             "required": true,
                             "defaultValue": "10",
                             "help": "Maximum number of status checks (polls) performed for an audit query transaction before giving up. Increase for long-running queries; each attempt waits 'Poll interval (seconds)' between checks."
-                            },
-                            {
+                        },
+                        {
                             "type": "text",
                             "field": "poll_interval_seconds",
                             "label": "Poll interval (seconds)",
                             "required": true,
                             "defaultValue": "2",
                             "help": "Seconds to wait between status checks (polls) of the audit query transaction_id. Lower values respond faster but use more API calls; higher values reduce rate-limit pressure."
-                            },
+                        },
                         {
                             "type": "singleSelect",
                             "field": "index",
