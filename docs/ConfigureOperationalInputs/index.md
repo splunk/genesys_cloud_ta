@@ -49,6 +49,8 @@ interval = <value>
 account = <value>
 index = <value>
 interval = <value>
+poll_interval_seconds = <value>
+max_poll_attempts = <value>
 
 ```
 
