@@ -12,3 +12,5 @@ local.meta
 *.pdf
 dist/
 .pytest_cache
+tests/
+*.ipynb
