@@ -1079,6 +1079,6 @@
             "light",
             "dark"
         ],
-        "defaultView": "inputs",
+        "defaultView": "inputs"
     }
 }
