@@ -73,3 +73,5 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`input_name`             |Input Name                        |A unique name for your input.|
 |`index`                  |Index                             |The index in which the data should be stored. The default is <code>default</code>.|
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code>.|
+|`max_poll_attempts`      |Max Poll Attempts                 |Maximum number of status checks (polls) performed for an audit query transaction before giving up. The default value is <code>10</code>, to be increased for long-running queries.|
+|`poll_interval_seconds`  |Poll Interval (seconds)           |Seconds to wait between each status check of the audit query `transaction_id`. Lower values give quicker response but perform more API calls; higher values reduce rate-limit pressure. The default value is <code>2</code>.|
