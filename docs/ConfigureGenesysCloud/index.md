@@ -24,6 +24,8 @@ OAuth2 protocol, so that it can access and gather the data according to the serv
    | `analytics:conversationDetail:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read conversation details for your organization. | Analytics |
    | `analytics:queueObservation:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read query observations for your organization. | Analytics |
    | `analytics:userAggregate:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read user aggregates for your organization. | Analytics |
+   | Any of these: <ul><li>`integrations:action:view`<li>`bridge:actions:view`</ul>  | <ul><li>analytics<li>analytics:readonly</ul> | Read action aggregates for your organization. | Analytics |
+   | `audits:audit:view`  | <ul><li>audits:readonly</ul> | Read audit logs for your organization. | Audits |
    | `routing:queue:view` | <ul><li>routing<li>routing:readonly</ul>   | Read queues for your organization. | Routing |
    | `telephony:plugin:all` | <ul><li>telephony<li>telephony:readonly</ul>  | Read edges, trunks and their metrics as well as phones for your organization. | Telephony Providers Edge   |
 
