@@ -38,7 +38,7 @@ class CustomTab {
 
                 <p><b>
                     To automate the provisioning and the configuration of your resources, check this
-                    <a href="https://github.com/PierrickLozach/GenesysCloud-Audit-Events-To-Splunk" target="_blank" rel="noopener noreferrer">terraform automation</a>.
+                    <a href="https://splunk.github.io/terraform-genesyscloud-aws" target="_blank" rel="noopener noreferrer">terraform automation</a>.
                 </b></p>
             </div>
         `
