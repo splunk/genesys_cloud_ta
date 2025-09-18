@@ -160,6 +160,152 @@
         "inputs": {
             "services": [
                 {
+                    "name": "actions_metrics",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "field": "name",
+                            "required": true,
+                            "help": "A unique name for the data input.",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores."
+                                },
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100,
+                                    "errorMsg": "Length of input name should be between 1 and 100"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "account",
+                            "label": "Account to use",
+                            "help": "Account to use for this input.",
+                            "required": true,
+                            "options": {
+                                "referenceName": "account"
+                            }
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "required": true,
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        }
+                    ],
+                    "inputHelperModule": "actions_metrics_helper",
+                    "title": "Actions Metrics"
+                },
+                {
+                    "name": "audit_query",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "field": "name",
+                            "required": true,
+                            "help": "A unique name for the data input.",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores."
+                                },
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 100,
+                                    "errorMsg": "Length of input name should be between 1 and 100"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds.",
+                            "required": true,
+                            "defaultValue": "300"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "account",
+                            "label": "Account to use",
+                            "help": "Account to use for this input.",
+                            "required": true,
+                            "options": {
+                                "referenceName": "account"
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "field": "max_poll_attempts",
+                            "label": "Max poll attempts",
+                            "required": true,
+                            "defaultValue": "10",
+                            "help": "Maximum number of status checks (polls) performed for an audit query transaction before giving up. Increase for long-running queries; each attempt waits 'Poll interval (seconds)' between checks."
+                        },
+                        {
+                            "type": "text",
+                            "field": "poll_interval_seconds",
+                            "label": "Poll interval (seconds)",
+                            "required": true,
+                            "defaultValue": "2",
+                            "help": "Seconds to wait between status checks (polls) of the audit query transaction_id. Lower values respond faster but use more API calls; higher values reduce rate-limit pressure."
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "required": true,
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        }
+                    ],
+                    "inputHelperModule": "audit_query_helper",
+                    "title": "Audit Query"
+                },
+                {
                     "name": "queue_observations",
                     "entity": [
                         {
@@ -829,6 +975,7 @@
                     "groupServices": [
                         "queue_observations",
                         "conversations_metrics",
+                        "actions_metrics",
                         "conversations_details"
                     ]
                 },
@@ -836,7 +983,8 @@
                     "groupName": "operational",
                     "groupTitle": "Operational",
                     "groupServices": [
-                        "status_page_metrics"
+                        "status_page_metrics",
+                        "audit_query"
                     ]
                 },
                 {

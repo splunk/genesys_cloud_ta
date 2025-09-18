@@ -10,8 +10,9 @@ For complete information on how to install, configure, and manage an Amazon Even
 The Amazon EventBridge integration allows you to receive all events for high-level topics without having to manage subscriptions to a limited list of detailed topics. For more information, see [Available Topics](https://developer.genesys.cloud/notificationsalerts/notifications/available-topics).
 
 ### Automation
-To automate the provisioning and the configuration of the resources, DevOps engineers or system administrators can leverage this [terraform automation](https://github.com/PierrickLozach/GenesysCloud-Audit-Events-To-Splunk), which will:
+To automate the infrastructure provisioning and the resources configuration, DevOps engineers or system administrators can leverage this [terraform automation](https://splunk.github.io/terraform-genesyscloud-aws), which will:
 
-- Create a Genesys Cloud EventBridge integration,
-- Write audit events from the integration to a Kinesis Stream and an S3 bucket for backup purposes,
-- Provide instructions on how to configure Splunk to read events from the Kinesis stream.
+- Create a Genesys Cloud - AWS EventBridge integration,
+- Write events from Genesys Cloud to a Kinesis Stream through an AWS EventBridge bus,
+- Configure AWS Firehose to deliver the streamed events to an AWS S3 bucket or to Splunk via HEC.
+  > S3 bucket usage is **required** with a Splunk HEC data ingestion.

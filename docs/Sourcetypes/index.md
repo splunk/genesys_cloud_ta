@@ -4,12 +4,14 @@ The Genesys Cloud Add-on for Splunk provides the index-time and search-time know
 
 | Sourcetype | Description |
 |:---:|---|
-| `genesyscloud:telephonyprovidersedge:trunks:metrics` | All the metrics for trunks |
 | `genesyscloud:telephonyprovidersedge:edges:metrics`  | All the metrics for edges  |
 | `genesyscloud:telephonyprovidersedge:edges:phones`  | All phones statuses  |
-| `genesyscloud:analytics:queues:observations` | All the metrics for queue observations |
-| `genesyscloud:analytics:flows:metrics` | All the metrics for conversations |
+| `genesyscloud:telephonyprovidersedge:trunks:metrics` | All the metrics for trunks |
+| `genesyscloud:analytics:actions:metrics` | All the metrics for actions aggregated by `actionId` |
 | `genesyscloud:analytics:conversations:details` | All the score metrics for conversations, ex: MOS scores |
+| `genesyscloud:analytics:flows:metrics` | All the metrics for conversations |
+| `genesyscloud:analytics:queues:observations` | All the metrics for queue observations |
 | `genesyscloud:users:users:aggregates` | All the metrics for user aggregates |
 | `genesyscloud:users:users:routingstatus` | All the user routing status |
+| `genesyscloud:operational:audits` | All the audit events |
 | `genesyscloud:operational:system` | All Genesys Cloud system services status retrieved via [Status Page API](https://metastatuspage.com/api#summary) |
