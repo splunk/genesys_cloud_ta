@@ -2,7 +2,7 @@
 
 **Description:** Operational inputs enable collection of:
 
-- System Services Status.
+- System Services Status,
 - Audit Query.
 
 
