@@ -13,3 +13,4 @@ local.meta
 dist/
 .pytest_cache
 *.ipynb
+genesys_cloud_ta-*.tar.gz

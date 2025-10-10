@@ -9,6 +9,8 @@ from splunklib import modularinput as smi
 from datetime import datetime, timezone
 from genesyscloud_client import GenesysCloudClient
 
+# Permissions required : [403] Forbidden - Unable to perform the requested action. You must have at least one of the following permissions assigned: [integrations:action:view, bridge:actions:view]
+
 ADDON_NAME = "genesys_cloud_ta"
 
 def logger_for_input(input_name: str) -> logging.Logger:

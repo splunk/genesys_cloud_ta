@@ -7,7 +7,9 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
+
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -59,9 +61,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client = GenesysCloudClient(logger, client_id, client_secret, account_region)
 
             checkpointer_key_name = normalized_input_name
+            # An 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
             )
 
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)

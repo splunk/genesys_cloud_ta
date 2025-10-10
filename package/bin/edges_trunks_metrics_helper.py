@@ -8,9 +8,11 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import TrunkModel
 
+# TODO - validate event time stamps for this TA, seems to be extracting incorrect time using US format mm-dd-yyyy instead of dd-mm-yyyy
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -73,11 +75,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             checkpointer_key_name = input_name.split("/")[-1]
             # if we don't have any checkpoint, we default it to 1970
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
+                #or datetime(1970, 1, 1).timestamp()
             )
-
+            logger.info(f"Trunk Current checkpoint is: {current_checkpoint}")
             t_model = TrunkModel(client.get(
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
             )
@@ -87,7 +91,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "get_telephony_providers_edges_trunks_metrics",
                 ','.join(t_model.trunk_ids)
             )
-            logger.debug(f"Fetched '{len(data)}' trunks metrics")
+            logger.info(f"Fetched '{len(data)}' trunks metrics")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
             event_counter = 0
@@ -96,12 +100,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 metric = metric_obj.to_dict()
                 metric["event_time"] = t_model.to_string(metric_obj.event_time)
                 metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
-                if event_time_epoch > current_checkpoint:
+                logger.info(f"Trunk Metric Event Time: {metric['event_time']} (epoch: {event_time_epoch})")
+                # 1==1 because testing the event_time against the checkpoint fails is most cases because event_time is unique to the trunk
+                # but checkpoint is global to the input. So we are indexing all events and relying on Splunk to dedup them if needed
+                if event_time_epoch > current_checkpoint or 1==1:
                     event_writer.write_event(
                         smi.Event(
                             data=json.dumps(metric, ensure_ascii=False, default=str),
                             index=input_item.get("index"),
-                            sourcetype=sourcetype,
+                            sourcetype=sourcetype
                         )
                     )
                     event_counter += 1

@@ -10,6 +10,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 
+# TODO - remove start date in globalconfig.json, fix order of fields so they are consistent
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -71,7 +72,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             # Setting a default start date of 7 days ago from now
             now = datetime.now()
-            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
+            fallback_start = (now - relativedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
                 fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
