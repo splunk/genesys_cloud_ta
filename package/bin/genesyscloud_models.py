@@ -48,6 +48,8 @@ class GCBaseModel:
 
 
 class TrunkModel(GCBaseModel):
+    MAX_TRUNK_IDS: int = 100
+
     def __init__(self, trunks: List[Trunk]) -> None:
         lst_trunks = []
         for trunk in trunks:
@@ -57,6 +59,13 @@ class TrunkModel(GCBaseModel):
     @property
     def trunk_ids(self) -> List[str]:
         return [trunk["id"] for trunk in self.data]
+
+    def get_trunk_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+        factor = self.MAX_TRUNK_IDS * batch
+        slice = self.MAX_TRUNK_IDS + factor
+        remaining_trunks = abs(len(self.data) - factor)
+        has_next_batch = remaining_trunks > self.MAX_TRUNK_IDS
+        return [trunk["id"] for trunk in self.data[factor:slice]], has_next_batch
 
     def get_trunk(self, tid: str) -> dict:
         ret_trunk = {}
