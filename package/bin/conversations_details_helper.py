@@ -73,28 +73,27 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Setting a default start date of 7 days ago from now
             now = datetime.now()
             # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
-            fallback_start = (now - relativedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            fallback_start = (now - relativedelta(minutes=5))
             start_date = input_item.get("start_date")
             if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d")
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
             checkpointer_key_name = input_name.split("/")[-1]
 
-            # Retrieve the last checkpoint or set it to the fallback start date.
+            # Retrieve the last checkpoint or set it to the fallback start date, then format it
             start_time = (
                 kvstore_checkpointer.get(checkpointer_key_name)
                 or fallback_start
             )
-            end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-            interval = f"{start_time}/{end_time}"
-
+            interval = f'{start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}/{now.strftime("%Y-%m-%dT%H:%M:%SZ")}'
+            logger.debug(f"Fetching data for interval: {interval}")
             body = {
                 "interval": interval
             }
-            logger.debug(f"Request body: {body}")
+            logger.debug(f"xxx Request body: {body}")
 
             response = client.post(
                 "ConversationsApi",
@@ -123,8 +122,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
                 if event_counter > 0:
                     logger.debug(f"Indexed '{event_counter}' events")
-                    logger.debug(f"Updating checkpointer to {end_time}")
-                    kvstore_checkpointer.update(checkpointer_key_name, end_time)
+                    new_checkpoint = now.timestamp()
+                    logger.debug(f"Updating checkpointer to {new_checkpoint}")
+                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
                 log.events_ingested(
                     logger,
