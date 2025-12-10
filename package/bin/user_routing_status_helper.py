@@ -11,11 +11,6 @@ from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
-import sys, os
-sys.path.append(os.path.join(os.environ['SPLUNK_HOME'],'etc','apps','SA-VSCode','bin'))
-import splunk_debug as dbg
-dbg.enable_debugging(timeout=25)
-
 ADDON_NAME = "genesys_cloud_ta"
 
 def logger_for_input(input_name: str) -> logging.Logger:
