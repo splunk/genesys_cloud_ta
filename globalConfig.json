@@ -827,14 +827,20 @@
                             "required": true
                         },
                         {
-                            "field": "start_date",
-                            "label": "Start Date",
-                            "help": "Start date for data collection. Defaults to 5 mins ago",
+                            "field": "days_history",
+                            "label": "Days of History",
+                            "help": "Number of days in the past to start collecting from.",
                             "required": false,
                             "type": "text",
+                            "defaultValue": "0",
                             "validators": [
                                 {
-                                    "type": "date"
+                                    "type": "number",
+                                    "range": [
+                                        0,
+                                        30
+                                    ],
+                                    "isInteger": true
                                 }
                             ],
                             "options": {
