@@ -10,7 +10,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 
-# TODO - remove start date in globalconfig.json, fix order of fields so they are consistent
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -70,13 +69,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            # Setting a default start date of 7 days ago from now
-            now = datetime.now()
-            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
-            fallback_start = (now - relativedelta(minutes=5))
-            start_date = input_item.get("start_date")
-            if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d")
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
@@ -84,16 +76,23 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = input_name.split("/")[-1]
 
             # Retrieve the last checkpoint or set it to the fallback start date, then format it
-            start_time = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
-            )
+            now = datetime.now()
+            start_time = kvstore_checkpointer.get(checkpointer_key_name)
+            if start_time is None:
+                history = input_item.get("days_history")
+                if history is not None:
+                    start_time = now - relativedelta(days=int(history))
+                else:
+                    start_time =  now - relativedelta(mins=5)
+            else:
+                start_time = datetime.fromtimestamp(float(start_time))
+
             interval = f'{start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}/{now.strftime("%Y-%m-%dT%H:%M:%SZ")}'
             logger.debug(f"Fetching data for interval: {interval}")
             body = {
                 "interval": interval
             }
-            logger.debug(f"xxx Request body: {body}")
+            logger.debug(f"Request body: {body}")
 
             response = client.post(
                 "ConversationsApi",
