@@ -64,7 +64,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # An 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or (datetime.now() - relativedelta(minutes=5)).timestamp()
+                or (datetime.now() - timedelta(minutes=5)).timestamp()
             )
 
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
