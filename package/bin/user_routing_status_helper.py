@@ -7,9 +7,9 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
-
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -61,9 +61,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Initialize checkpointing
             checkpointer_key_name = input_name.split("/")[-1]
 
+            # if we don't have any checkpoint, we default it to 1970
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
+                #datetime(1970, 1, 1).timestamp()
             )
 
             # Getting user ids from API
@@ -81,7 +84,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 if (response[0].start_time):
                     event_time_epoch = response[0].start_time.timestamp()
 
-                    if event_time_epoch > current_checkpoint:
+                    # 1==1 bypasses checkpoint testing for this until we determine if its needed.
+                    if event_time_epoch > current_checkpoint or 1==1:
                         routing = response[0].to_dict()
                         routing["start_time"] = event_time_epoch
                         routing['user_id'] = uid

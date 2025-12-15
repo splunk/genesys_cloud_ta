@@ -11,6 +11,24 @@ from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
+import sys, os
+sys.path.append(os.path.join(os.environ['SPLUNK_HOME'],'etc','apps','SA-VSCode','bin'))
+import splunk_debug as dbg
+dbg.enable_debugging(timeout=25)
+
+'''
+******************
+WARNING: Dangerous Input
+******************
+This input will breach the fair usage limits if you have a lot of users
+There is 1 API call for every user plus some overhead for pagination, 1 call per 25 users to build the initial list
+The fair usage limit is system wide for the customner and if Splunk breaches it business critical systems may be affected.
+
+Consider limiting this input to a few users using the filter option in the input configuration
+call it infrequently, use A3S if available 
+or event bridge instead if you need near real time data.
+'''
+
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -63,9 +81,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = input_name.split("/")[-1]
             now = datetime.now()
             # No checkpoint? Default it to four years ago per API docs
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             last_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or (now - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
+                #(now - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
             )
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -77,7 +97,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Getting metrics
             interval = f"{last_checkpoint}/{new_checkpoint}"
-            logger.debug(f"Range interval: {interval}")
+            logger.info(f"Range interval: {interval}")
 
             # Max 100 userids supported according to specs (??)
             results = []

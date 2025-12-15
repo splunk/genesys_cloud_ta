@@ -1,4 +1,5 @@
 .PHONY: venv build run package
+SHELL := /bin/bash
 
 APP_VERSION := $$(cat globalConfig.json | jq -r '.meta.version')
 APP_NAME := $$(cat globalConfig.json | jq -r '.meta.name')

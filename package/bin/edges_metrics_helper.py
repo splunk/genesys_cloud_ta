@@ -8,6 +8,7 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import EdgeModel
 
@@ -73,9 +74,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             checkpointer_key_name = input_name.split("/")[-1]
             # if we don't have any checkpoint, we default it to 1970
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
             )
 
             e_model = EdgeModel(client.get(
@@ -104,7 +106,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 metric = metric_obj.to_dict()
                 metric["event_time"] = e_model.to_string(metric_obj.event_time)
                 metric["edge"] = e_model.get_edge(metric_obj.edge.id)
-                if event_time_epoch > current_checkpoint:
+                # always true for now until we determine if we need checkpointing here
+                if event_time_epoch > current_checkpoint or 1==1:
                     event_writer.write_event(
                         smi.Event(
                             data=json.dumps(metric, ensure_ascii=False, default=str),

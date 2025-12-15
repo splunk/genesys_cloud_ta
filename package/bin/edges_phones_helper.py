@@ -8,6 +8,7 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import PhoneModel
 
@@ -72,9 +73,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             checkpointer_key_name = input_name.split("/")[-1]
             # if we don't have any checkpoint, we default it to 1970
+            # AN 2025-10-14: Changed default start date to 5 minutes ago to reduce data volume on first run
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or (datetime.now() - relativedelta(minutes=5)).timestamp()
             )
 
             p_model = PhoneModel(
@@ -92,19 +94,38 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
             event_counter = 0
             for status_obj in statuses:
+                '''
+                This is failing in some situations on the following but for time sake I'm not debugging it further:
+
+                File "/home/splunk/genesys_cloud_ta/output/genesys_cloud_ta/bin/edges_phones_helper.py", line 97, in stream_events
                 event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
-                if event_time_epoch > current_checkpoint:
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(status_obj, ensure_ascii=False, default=str),
-                            time=event_time_epoch,
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype,
+                File "/home/splunk/genesys_cloud_ta/output/genesys_cloud_ta/bin/genesyscloud_models.py", line 29, in to_datetime
+                return datetime.datetime.strptime(dt_string, format)
+                File "/opt/splunk/lib/python3.9/_strptime.py", line 568, in _strptime_datetime
+                tt, fraction, gmtoff_fraction = _strptime(data_string, format)
+                File "/opt/splunk/lib/python3.9/_strptime.py", line 349, in _strptime
+                raise ValueError("time data %r does not match format %r" %
+                ValueError: time data '2025-10-09T02:04:58.285926652Z' does not match format '%Y-%m-%dT%H:%M:%S.%fZ'
+                '''
+
+                # AN removing the checkpointing (ie 1==1) and indexing regardless of time to avoid losing data
+                try:
+                    event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
+                    if event_time_epoch > current_checkpoint or 1==1:
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(status_obj, ensure_ascii=False, default=str),
+                                time=event_time_epoch,
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                            )
                         )
-                    )
-                    event_counter += 1
+                        event_counter += 1
+                except Exception as e:
+                    logger.error(f"Error processing status object: {e}. Object data: {status_obj}")
 
             # Updating checkpoint if data was indexed to avoid losing info
+            # this could introduce loss if events are written during processing, only msec delays but still possible
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
                 new_checkpoint = datetime.utcnow().timestamp()

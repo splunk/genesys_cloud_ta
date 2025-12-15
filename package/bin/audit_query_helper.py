@@ -11,6 +11,7 @@ from datetime import datetime, timedelta, timezone, time as dt_time
 from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 
+# Permissions issues: [403] Forbidden - Unable to perform the requested action. You are missing the following permission(s): [audits:audit:view]
 ADDON_NAME = "genesys_cloud_ta"
 
 

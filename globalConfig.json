@@ -827,14 +827,20 @@
                             "required": true
                         },
                         {
-                            "field": "start_date",
-                            "label": "Start Date",
-                            "help": "Start date for data collection. Default: 7 days ago. Format: YYYY-MM-DD",
+                            "field": "days_history",
+                            "label": "Days of History",
+                            "help": "Number of days in the past to start collecting from.",
                             "required": false,
                             "type": "text",
+                            "defaultValue": "0",
                             "validators": [
                                 {
-                                    "type": "date"
+                                    "type": "number",
+                                    "range": [
+                                        0,
+                                        30
+                                    ],
+                                    "isInteger": true
                                 }
                             ],
                             "options": {
@@ -1074,7 +1080,7 @@
         "restRoot": "genesys_cloud_ta",
         "version": "0.3.0",
         "displayName": "Genesys Cloud Add-on for Splunk",
-        "schemaVersion": "0.0.9",
+        "schemaVersion": "0.0.10",
         "supportedThemes": [
             "light",
             "dark"

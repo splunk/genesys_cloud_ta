@@ -69,26 +69,26 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            # Setting a default start date of 7 days ago from now
-            now = datetime.now()
-            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-            start_date = input_item.get("start_date")
-            if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region
             )
             checkpointer_key_name = input_name.split("/")[-1]
 
-            # Retrieve the last checkpoint or set it to the fallback start date.
-            start_time = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
-            )
-            end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
-            interval = f"{start_time}/{end_time}"
+            # Retrieve the last checkpoint or set it to the fallback start date, then format it
+            now = datetime.now()
+            start_time = kvstore_checkpointer.get(checkpointer_key_name)
+            if start_time is None:
+                history = input_item.get("days_history")
+                if history is not None:
+                    start_time = now - relativedelta(days=int(history))
+                else:
+                    start_time =  now - relativedelta(mins=5)
+            else:
+                start_time = datetime.fromtimestamp(float(start_time))
 
+            interval = f'{start_time.strftime("%Y-%m-%dT%H:%M:%SZ")}/{now.strftime("%Y-%m-%dT%H:%M:%SZ")}'
+            logger.debug(f"Fetching data for interval: {interval}")
             body = {
                 "interval": interval
             }
@@ -121,8 +121,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
                 if event_counter > 0:
                     logger.debug(f"Indexed '{event_counter}' events")
-                    logger.debug(f"Updating checkpointer to {end_time}")
-                    kvstore_checkpointer.update(checkpointer_key_name, end_time)
+                    new_checkpoint = now.timestamp()
+                    logger.debug(f"Updating checkpointer to {new_checkpoint}")
+                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
                 log.events_ingested(
                     logger,

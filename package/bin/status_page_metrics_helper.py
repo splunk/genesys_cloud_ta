@@ -86,6 +86,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger.debug(f"Component updated at timestamp: {component_updated_at}")
 
                 # Only process if newer than our checkpoint
+                '''
+                AN 2025-10-09 - this is so rarely the case its not worth indexing duplicates and we create
+                a few knowledge objects with CSVs/data models etc in splunk to track status history.
+                '''
                 if component_updated_at > status_page_checkpoint:
 
                     component["page"] = page

@@ -38,6 +38,7 @@ class GenesysCloudClient:
             raise AttributeError(f"{f_name} is not a callable function of the API instance")
 
         while True:
+            self.logger.debug(f"Calling {api_instance.__class__.__name__}.{f_name} with args={args}, kwargs={kwargs}")
             api_response = function(*args, **kwargs)
 
             if isinstance(api_response, list):
@@ -72,7 +73,7 @@ class GenesysCloudClient:
         :param api_instance_name: Name of the API instance e.g. TelephonyProvidersEdgeApi, RoutingApi, etc
         :param function_name: Name of the function to call in the API instance
         """
-        self.logger.info(f"Getting data from {api_instance_name}")
+        self.logger.info(f"Getting data from {api_instance_name}::{function_name}")
         # Get the API class dynamically
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name)
 
@@ -124,6 +125,7 @@ class GenesysCloudClient:
         :param model_name: Name of the data model corresponding to the request body.
         :param body: Dictionary representing the request body.
         """
+        self.logger.info(f"Posting data to {api_instance_name}::{function_name}, model::{model_name}")
         enable_pagination = False
         api_responses = []
         # Tipically 100 items per page is the max accepted
@@ -185,6 +187,7 @@ class GenesysCloudClient:
         try:
             # Call the function with the model instance and additional arguments
             while True:
+                self.logger.debug(f"Calling {api_instance_name}.{function_name} with pageNumber={page_number}, pageSize={page_size}")
                 api_response = function(model_instance, *args, **kwargs)
                 api_responses.append(api_response)
 
