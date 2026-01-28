@@ -82,12 +82,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
             )
 
-            data = client.get(
-                "TelephonyProvidersEdgeApi",
-                "get_telephony_providers_edges_trunks_metrics",
-                ','.join(t_model.trunk_ids)
-            )
-            logger.debug(f"Fetched '{len(data)}' trunks metrics")
+            # Max 100 trunkids supported
+            metrics = []
+            cnt = 0
+            has_more = True
+            while has_more:
+                trunk_ids, has_more = t_model.get_trunk_ids(cnt)
+                data = client.get(
+                    "TelephonyProvidersEdgeApi",
+                    "get_telephony_providers_edges_trunks_metrics",
+                    ','.join(trunk_ids)
+                )
+                metrics.extend(data)
+                cnt += 1
+            logger.debug(f"Fetched '{len(metrics)}' metrics")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
             event_counter = 0
