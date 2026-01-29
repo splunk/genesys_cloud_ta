@@ -100,7 +100,19 @@ $~ make run-functional-tests
 :point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
 
 ## Release the Add-On
-A CI/CD workflow will automatically create a release when a tag is pushed to the `main` branch. Please note that **release notes shall be [manually added via UI](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository#editing-a-release)** as soon as the workflow has completed.
+A CI/CD workflow will automatically create a release. To trigger it:
+
+- Bump the Add-On version according to [Semantic Versioning](http://semver.org/) in `package/app.manifest` and `globalConfig.json`
+- Update the `CHANGELOG` following [guidelines](#changelog)
+- Push to `main`
+
+On push to `main`, the following checks will be executed before releasing a new version of the Add-On:
+
+- **Build**: Creates app package
+- **Sanity Check**: Validates version consistency between the `CHANGELOG` file and the Add-On. They must match.
+
+### Changelog
+A `CHANGELOG.md` file is used to document changes between versions. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Documentation
 Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
