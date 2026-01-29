@@ -16,7 +16,7 @@ concurrency:
 jobs:
   splunk-test:
     name: Deploy and test the TA
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -63,6 +63,7 @@ jobs:
       - name: Start Splunk container
         env:
           SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
+          SPLUNK_GENERAL_TERMS: "--accept-sgt-current-at-splunk-com"
           SPLUNK_PASSWORD: password
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
