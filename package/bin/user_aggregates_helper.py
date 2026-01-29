@@ -11,11 +11,6 @@ from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
-import sys, os
-sys.path.append(os.path.join(os.environ['SPLUNK_HOME'],'etc','apps','SA-VSCode','bin'))
-import splunk_debug as dbg
-dbg.enable_debugging(timeout=25)
-
 '''
 ******************
 WARNING: Dangerous Input
