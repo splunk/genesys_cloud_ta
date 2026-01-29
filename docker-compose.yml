@@ -1,6 +1,6 @@
 services:
     splunk:
-        image: "splunk/splunk:latest"
+        image: "splunk/splunk:9.3.8"
         platform: "linux/amd64"
         container_name: genesyscloud
         volumes:
