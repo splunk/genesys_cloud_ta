@@ -70,6 +70,7 @@ jobs:
           docker run -d --name splunk \
             --network shared-net \
             -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
+            -e SPLUNK_GENERAL_TERMS=--accept-sgt-current-at-splunk-com
             -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
             -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
             -e SPLUNK_USER="root" \
@@ -196,7 +197,6 @@ jobs:
       - name: Start Splunk container
         env:
           SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
-          SPLUNK_GENERAL_TERMS: "--accept-sgt-current-at-splunk-com"
           SPLUNK_PASSWORD: password
           GENESYSCLOUD_HOST: http://mockoon:3004
         run: |
