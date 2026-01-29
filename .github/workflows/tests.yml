@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  splunk10-test:
+  splunk-10x:
     name: Deploy and test the TA
     runs-on: ubuntu-latest
     strategy:
@@ -83,9 +83,10 @@ jobs:
           value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
 
-      - name: Debug Splunk Logs
-        if: always()
-        run: docker logs $(docker ps -a -q --filter ancestor=splunk/splunk:10.2.0)
+      # Enable this to troubleshoot errors with the splunk docker
+      # - name: Debug Splunk Logs
+      #   if: always()
+      #   run: docker logs $(docker ps -a -q --filter ancestor=splunk/splunk:10.2.0)
 
       - name: Test mockoon is alive
         run: |
@@ -147,130 +148,130 @@ jobs:
           reporter: java-junit
           fail-on-error: 'false'
 
-  # splunk-test:
-  #   name: Deploy and test the TA
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       version: [9.4.1, 9.3.3, 9.2.5]
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - uses: actions/setup-python@v5
-  #       with:
-  #         python-version: 3.9
-  #     - name: Install dependencies
-  #       run: |
-  #         python -m pip install --upgrade pip
-  #         pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
+  splunk-9x:
+    name: Deploy and test the TA
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        version: [9.4.1, 9.3.3, 9.2.5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.9
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade splunk-packaging-toolkit splunk-add-on-ucc-framework
 
-  #     - name: Build TA
-  #       id: build
-  #       run: |
-  #         app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
-  #         echo "app_version=${app_version}" >> $GITHUB_OUTPUT
-  #         app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
-  #         echo "app_id=${app_id}" >> $GITHUB_OUTPUT
-  #         ucc-gen build --ta-version ${app_version}
-  #         mkdir -p output/${app_id}/local
-  #         cp etc/cicd/inputs.conf output/${app_id}/local
-  #         chmod -R +r output
-  #         chmod -R go-w output
-  #       shell: bash
+      - name: Build TA
+        id: build
+        run: |
+          app_version=$(cat "package/app.manifest" | jq -r '.info.id.version')
+          echo "app_version=${app_version}" >> $GITHUB_OUTPUT
+          app_id=$(cat "package/app.manifest" | jq -r '.info.id.name')
+          echo "app_id=${app_id}" >> $GITHUB_OUTPUT
+          ucc-gen build --ta-version ${app_version}
+          mkdir -p output/${app_id}/local
+          cp etc/cicd/inputs.conf output/${app_id}/local
+          chmod -R +r output
+          chmod -R go-w output
+        shell: bash
 
-  #     - run: docker network create shared-net
+      - run: docker network create shared-net
 
-  #     # NOTE:
-  #     # Not having services because of: connectivity and volumes mounting
-  #     - name: Start Mockoon container
-  #       run: |
-  #         docker run -d --name mockoon \
-  #           --network shared-net \
-  #           -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
-  #           -p 3004:3004 \
-  #           mockoon/cli:latest \
-  #           --data /data/mockoon.json --port 3004 --log-transaction
+      # NOTE:
+      # Not having services because of: connectivity and volumes mounting
+      - name: Start Mockoon container
+        run: |
+          docker run -d --name mockoon \
+            --network shared-net \
+            -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
+            -p 3004:3004 \
+            mockoon/cli:latest \
+            --data /data/mockoon.json --port 3004 --log-transaction
 
-  #     # NOTE:
-  #     # Splunk to be executed as root to avoid errors when toggling inputs states via REST
-  #     - name: Start Splunk container
-  #       env:
-  #         SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
-  #         SPLUNK_PASSWORD: password
-  #         GENESYSCLOUD_HOST: http://mockoon:3004
-  #       run: |
-  #         docker run -d --name splunk \
-  #           --network shared-net \
-  #           -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
-  #           -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
-  #           -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
-  #           -e SPLUNK_USER="root" \
-  #           -v ${{ github.workspace }}/etc/cicd/environment:/etc/environment \
-  #           -v ${{ github.workspace }}/output/${{ steps.build.outputs.app_id }}:/opt/splunk/etc/apps/${{ steps.build.outputs.app_id }} \
-  #           -p 8000:8000 \
-  #           -p 8089:8089 \
-  #           splunk/splunk:${{ matrix.version }}
-  #         # Wait for splunk to be up and running (~2min)
-  #         sleep 150
-  #         value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
-  #         echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
+      # NOTE:
+      # Splunk to be executed as root to avoid errors when toggling inputs states via REST
+      - name: Start Splunk container
+        env:
+          SPLUNK_START_ARGS: "--answer-yes --no-prompt --accept-license"
+          SPLUNK_PASSWORD: password
+          GENESYSCLOUD_HOST: http://mockoon:3004
+        run: |
+          docker run -d --name splunk \
+            --network shared-net \
+            -e SPLUNK_START_ARGS="$SPLUNK_START_ARGS" \
+            -e SPLUNK_PASSWORD="$SPLUNK_PASSWORD" \
+            -e GENESYSCLOUD_HOST="$GENESYSCLOUD_HOST" \
+            -e SPLUNK_USER="root" \
+            -v ${{ github.workspace }}/etc/cicd/environment:/etc/environment \
+            -v ${{ github.workspace }}/output/${{ steps.build.outputs.app_id }}:/opt/splunk/etc/apps/${{ steps.build.outputs.app_id }} \
+            -p 8000:8000 \
+            -p 8089:8089 \
+            splunk/splunk:${{ matrix.version }}
+          # Wait for splunk to be up and running (~2min)
+          sleep 150
+          value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
+          echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
 
-  #     - name: Test mockoon is alive
-  #       run: |
-  #         docker logs mockoon
-  #         for i in {1..30}; do
-  #           if curl --silent --fail http://localhost:3004/; then
-  #             echo "Mockoon is up!"
-  #             exit 0
-  #           fi
-  #           echo "Waiting for Mockoon..."
-  #           sleep 2
-  #         done
-  #         echo "Mockoon failed to start"
-  #         exit 1
+      - name: Test mockoon is alive
+        run: |
+          docker logs mockoon
+          for i in {1..30}; do
+            if curl --silent --fail http://localhost:3004/; then
+              echo "Mockoon is up!"
+              exit 0
+            fi
+            echo "Waiting for Mockoon..."
+            sleep 2
+          done
+          echo "Mockoon failed to start"
+          exit 1
 
-  #     - name: Test connectivity from Splunk to Mockoon
-  #       run: |
-  #         echo "Test whether Splunk is ready..."
-  #         EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
-  #         docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
-  #         echo "Test connectivity..."
-  #         docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
+      - name: Test connectivity from Splunk to Mockoon
+        run: |
+          echo "Test whether Splunk is ready..."
+          EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
+          docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
+          echo "Test connectivity..."
+          docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Mockoon from Splunk"
 
-  #     - name: Run integration tests
-  #       env:
-  #         GENESYSCLOUD_HOST: http://localhost:3004
-  #       run: |
-  #         pip install -r test-requirements.txt
-  #         mkdir -p junit
-  #         python -m pytest integration/* --junitxml=junit/integration-test-results-${{ matrix.version }}.xml
-  #       working-directory: ./tests
+      - name: Run integration tests
+        env:
+          GENESYSCLOUD_HOST: http://localhost:3004
+        run: |
+          pip install -r test-requirements.txt
+          mkdir -p junit
+          python -m pytest integration/* --junitxml=junit/integration-test-results-${{ matrix.version }}.xml
+        working-directory: ./tests
 
-  #     - name: Run functional tests
-  #       if: success()
-  #       env:
-  #         GENESYSCLOUD_HOST: ${{ env.GENESYSCLOUD_HOST }}
-  #       run: |
-  #         python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
-  #       working-directory: ./tests
+      - name: Run functional tests
+        if: success()
+        env:
+          GENESYSCLOUD_HOST: ${{ env.GENESYSCLOUD_HOST }}
+        run: |
+          python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
+        working-directory: ./tests
 
-  #     - name: Exporting Mockoon logs
-  #       if: always()
-  #       run: |
-  #         mkdir -p logs/
-  #         docker logs mockoon > ${{ github.workspace }}/logs/mockoon-${{ matrix.version }}.log 2>&1
+      - name: Exporting Mockoon logs
+        if: always()
+        run: |
+          mkdir -p logs/
+          docker logs mockoon > ${{ github.workspace }}/logs/mockoon-${{ matrix.version }}.log 2>&1
 
-  #     - name: Upload Mockoon logs
-  #       if: always()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: mockoon-logs-${{ matrix.version }}
-  #         path: logs/mockoon-${{ matrix.version }}.log
+      - name: Upload Mockoon logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mockoon-logs-${{ matrix.version }}
+          path: logs/mockoon-${{ matrix.version }}.log
 
-  #     - uses: dorny/test-reporter@v2
-  #       if: always()
-  #       with:
-  #         name: Tests Results
-  #         path: 'tests/junit/*.xml'
-  #         reporter: java-junit
-  #         fail-on-error: 'false'
+      - uses: dorny/test-reporter@v2
+        if: always()
+        with:
+          name: Tests Results
+          path: 'tests/junit/*.xml'
+          reporter: java-junit
+          fail-on-error: 'false'
