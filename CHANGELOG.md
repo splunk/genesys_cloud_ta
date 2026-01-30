@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [v0.3.1] - 2026-01-30
+
+### Added
+
+- Limit on the amount of trunks used to request metrics (max 100 trunk IDs per request) [#39](https://github.com/splunk/genesys_cloud_ta/pull/39)
+- Compatibility with Splunk 10.x [#41](https://github.com/splunk/genesys_cloud_ta/pull/41)
+
+
 ## [v0.3.0] - 2025-09-18
 
 ### Added
