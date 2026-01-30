@@ -8,8 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Limit on the amount of trunks used to request metrics (max 100 trunk IDs per request) [#39](https://github.com/splunk/genesys_cloud_ta/pull/39)
-- Compatibility with Splunk 10.x [#41](https://github.com/splunk/genesys_cloud_ta/pull/41)
+- Limit on the amount of trunks used to request metrics (max 100 trunk IDs per request) [#39](https://github.com/splunk/genesys_cloud_ta/pull/39).
+- Compatibility with Splunk 10.x [#41](https://github.com/splunk/genesys_cloud_ta/pull/41).
 
 
 ## [v0.3.0] - 2025-09-18
