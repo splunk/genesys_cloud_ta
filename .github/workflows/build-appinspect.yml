@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     name: Bundle the App
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     outputs:
       app_name: ${{ steps.app.outputs.name }}
       app_version: ${{ steps.app.outputs.version }}
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -62,7 +62,7 @@ jobs:
 
   appinspect-cli:
     name: appinspect-cli ${{ matrix.tags }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     continue-on-error: true
     needs: build
     strategy:
@@ -76,7 +76,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.7
+          python-version: 3.9
       - uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.app_name }}-${{ needs.build.outputs.app_version }}
