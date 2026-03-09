@@ -12,8 +12,6 @@ class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
-    client: ApiClient = None
-
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str):
         self.logger = logger
         if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
@@ -40,6 +38,7 @@ class GenesysCloudClient:
         if not callable(function):
             raise AttributeError(f"{f_name} is not a callable function of the API instance")
 
+        # FIXME add a max_pages safeguard to avoid unbounded pagination
         while True:
             api_response = function(*args, **kwargs)
 
@@ -87,10 +86,10 @@ class GenesysCloudClient:
         except AttributeError as e:
             self.logger.error(f"Error: {e}")
         except ApiException as e:
-            if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
+            if e.status == 429 and "Rate limit exceeded the maximum" in e.reason:
                     self.logger.warning("Rate limit exceeded. Refreshing token.")
                     self.client.handle_expired_access_token()
-            if e.status == 401 and e.reason.contains("expir"):
+            if e.status == 401 and "expir" in e.reason:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
@@ -129,7 +128,7 @@ class GenesysCloudClient:
         """
         enable_pagination = False
         api_responses = []
-        # Tipically 100 items per page is the max accepted
+        # Typically 100 items per page is the max accepted
         page_size = 100
         page_number = 1
         total_hits = 0
@@ -198,7 +197,8 @@ class GenesysCloudClient:
                         except Exception as e:
                             self.logger.error(f"Pagination enabled but neither 'total_hits' nor 'total' is returned: {api_response.attribute_map}")
                             return None
-                    total_hits = api_response.total_hits
+                    else:
+                        total_hits = api_response.total_hits
 
                     if total_hits - (page_size * page_number) > 0:
                         page_number += 1
@@ -212,14 +212,19 @@ class GenesysCloudClient:
             return api_responses
 
         except ApiException as e:
-            if e.status == 429 and e.reason.contains("Rate limit exceeded the maximum"):
+            if e.status == 429 and "Rate limit exceeded the maximum" in e.reason:
                     self.logger.warning("Rate limit exceeded. Refreshing token.")
                     self.client.handle_expired_access_token()
-            if e.status == 401 and e.reason.contains("expir"):
+            if e.status == 401 and "expir" in e.reason:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            body = json.loads(e.body)
-            message = body["message"]
-            self.logger.error(f"Exception when calling {api_instance_name}->{function_name}: [{e.status}] {e.reason} - {message}")
+            try:
+                body = json.loads(e.body)
+                message = body["message"]
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {message}")
+            except ValueError as ve:
+                self.logger.warning(f"{err_message} {ve}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
+
             return None
