@@ -117,7 +117,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
-                new_checkpoint = datetime.utcnow().timestamp()
+                new_checkpoint = datetime.now(timezone.utc)
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 

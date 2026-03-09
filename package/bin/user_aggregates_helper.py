@@ -61,7 +61,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Initialize checkpointing
             checkpointer_key_name = input_name.split("/")[-1]
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
             last_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)

@@ -70,7 +70,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             # Setting a default start date of 7 days ago from now
-            now = datetime.now()
+            now = datetime.now(timezone.utc)
             fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
