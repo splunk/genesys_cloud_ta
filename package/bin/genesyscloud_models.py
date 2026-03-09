@@ -12,8 +12,6 @@ from PureCloudPlatformClientV2.models import (
 )
 
 class GCBaseModel:
-    data: List[dict] = []
-
     def __init__(self, data: List[dict]) -> None:
         self.data = data
 
@@ -21,12 +19,12 @@ class GCBaseModel:
         return re.sub(r'(?!^)_([a-zA-Z])', lambda m: m.group(1).upper(), s)
 
     def to_string(self, dt: datetime) -> str:
-        format = "%d-%m-%YT%H:%M:%S.%f%z"
-        return dt.strftime(format)
+        formatting_str = "%d-%m-%YT%H:%M:%S.%f%z"
+        return dt.strftime(formatting_str)
 
     def to_datetime(self, dt_string: str) -> datetime:
-        format = "%Y-%m-%dT%H:%M:%S.%fZ"
-        return datetime.datetime.strptime(dt_string, format)
+        formatting_str = "%Y-%m-%dT%H:%M:%S.%fZ"
+        return datetime.datetime.strptime(dt_string, formatting_str)
 
     def extract(self, idx: int, sub_key: str, keys_to_extract: list, enable_camelcase: bool = False) -> dict:
         """
@@ -62,10 +60,10 @@ class TrunkModel(GCBaseModel):
 
     def get_trunk_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_TRUNK_IDS * batch
-        slice = self.MAX_TRUNK_IDS + factor
+        slice_limit = self.MAX_TRUNK_IDS + factor
         remaining_trunks = abs(len(self.data) - factor)
         has_next_batch = remaining_trunks > self.MAX_TRUNK_IDS
-        return [trunk["id"] for trunk in self.data[factor:slice]], has_next_batch
+        return [trunk["id"] for trunk in self.data[factor:slice_limit]], has_next_batch
 
     def get_trunk(self, tid: str) -> dict:
         ret_trunk = {}
@@ -75,9 +73,10 @@ class TrunkModel(GCBaseModel):
             "connected_status", "ip_status"
         ]
 
-        trunk = [t for t in self.data if t["id"] == tid][0]
-        for key, value in trunk.items():
-            ret_trunk.update({k: trunk[k] for k in required_keys})
+        trunk = next((t for t in self.data if t["id"] == tid), None)
+        if trunk is None:
+            raise ValueError(f"Trunk {tid} not found")
+        ret_trunk.update({k: trunk[k] for k in required_keys if k in trunk})
         return ret_trunk
 
 
@@ -92,10 +91,10 @@ class EdgeModel(GCBaseModel):
 
     def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_EDGE_IDS*batch
-        slice = self.MAX_EDGE_IDS + factor
+        slice_limit = self.MAX_EDGE_IDS + factor
         remaining_edges = abs(len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
-        return [edge["id"] for edge in self.data[factor:slice]], has_next_batch
+        return [edge["id"] for edge in self.data[factor:slice_limit]], has_next_batch
 
     def get_edge(self, eid: str) -> dict:
         ret_edge = { "site": {} }
@@ -106,9 +105,10 @@ class EdgeModel(GCBaseModel):
             "conversation_count", "os_name"
         ]
 
-        edge = [e for e in self.data if e["id"] == eid][0]
-        for key, value in edge.items():
-            ret_edge.update({k: edge[k] for k in required_keys})
+        edge = next((e for e in self.data if e["id"] == eid), None)
+        if edge is None:
+            raise ValueError(f"Edge {eid} not found")
+        ret_edge.update({k: edge[k] for k in required_keys if k in edge})
         # Avoid indexing a lot of "null" values added
         # by the to_dict() SDK function for "site" data
         for key, value in edge["site"].items():
@@ -161,18 +161,19 @@ class QueueModel(GCBaseModel):
 
     def get_queue_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_QUEUE_IDS*batch
-        slice = self.MAX_QUEUE_IDS + factor
+        slice_limit = self.MAX_QUEUE_IDS + factor
         remaining_queues = abs(len(self.data) - factor)
         has_next_batch = remaining_queues > self.MAX_QUEUE_IDS
-        return [queue["id"] for queue in self.data[factor:slice]], has_next_batch
+        return [queue["id"] for queue in self.data[factor:slice_limit]], has_next_batch
 
     def get_queue(self, qid: str) -> dict:
         ret_queue = {}
         required_keys = ["id", "name"]
 
-        queue = [q for q in self.data if q["id"] == qid][0]
-        for key, value in queue.items():
-            ret_queue.update({k: queue[k] for k in required_keys})
+        queue = next((q for q in self.data if q["id"] == qid), None)
+        if queue is None:
+            raise ValueError(f"Queue {qid} not found")
+        ret_queue.update({k: queue[k] for k in required_keys if k in queue})
         return ret_queue
 
 
@@ -191,16 +192,17 @@ class UserModel(GCBaseModel):
 
     def get_user_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_USER_IDS*batch
-        slice = self.MAX_USER_IDS + factor
+        slice_limit = self.MAX_USER_IDS + factor
         remaining_users = abs(len(self.data) - factor)
         has_next_batch = remaining_users > self.MAX_USER_IDS
-        return [user["id"] for user in self.data[factor:slice]], has_next_batch
+        return [user["id"] for user in self.data[factor:slice_limit]], has_next_batch
 
     def get_user(self, uid: str) -> dict:
         ret_user = {}
         required_keys = ["id", "name", "chat", "email", "division"]
 
-        user = [u for u in self.data if u["id"] == uid][0]
-        for key, value in user.items():
-            ret_user.update({k: user[k] for k in required_keys})
+        user = next((u for u in self.data if u["id"] == uid), None)
+        if user is None:
+            raise ValueError(f"User {uid} not found")
+        ret_user.update({k: user[k] for k in required_keys if k in user})
         return ret_user
