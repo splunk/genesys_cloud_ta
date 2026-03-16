@@ -94,7 +94,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             status = ""
             for _ in range(max_polls):
-                state_resp = client.get("AuditApi","get_audits_query_transaction_id", transaction_id)
+                state_resp = client.get("AuditApi", "get_audits_query_transaction_id", transaction_id)
                 if not state_resp:
                     raise Exception(f"Failed to get status for transaction {transaction_id}")
                 status = state_resp[0].state
@@ -116,12 +116,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 **params
             )
             event_counter = 0
+            sourcetype="genesyscloud:operational:audits"
+
             for entity in results:
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(entity.to_dict(), ensure_ascii=False, default=str),
                         index=input_item.get("index"),
-                        sourcetype="genesyscloud:operational:audits",
+                        sourcetype=sourcetype,
                         time=entity.event_date.timestamp()
                     )
                 )
@@ -133,6 +135,16 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger.debug(f"Updating checkpointer to {end_time}")
                 kvstore_checkpointer.update(checkpointer_key_name, end_time)
 
+            log.events_ingested(
+                    logger,
+                    input_name,
+                    sourcetype,
+                    event_counter,
+                    input_item.get("index"),
+                    account=input_item.get("account"),
+                )
+
+            log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
             log.log_exception(
                 logger,
