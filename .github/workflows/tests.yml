@@ -145,7 +145,7 @@ jobs:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
 
-      - uses: dorny/test-reporter@v2
+      - uses: dorny/test-reporter@v2.6.0
         if: always()
         with:
           name: Tests Results
@@ -277,7 +277,7 @@ jobs:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
 
-      - uses: dorny/test-reporter@v2
+      - uses: dorny/test-reporter@v2.6.0
         if: always()
         with:
           name: Tests Results
