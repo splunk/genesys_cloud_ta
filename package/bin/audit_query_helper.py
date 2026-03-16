@@ -66,16 +66,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = normalized_input_name
 
             now = datetime.now(timezone.utc)
-            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            # Setting a fallback start date of 7 days ago from now
+            start_date = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-            start_date = input_item.get("start_date")
-            if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
-
-            start_time = kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
+            start_time = kvstore_checkpointer.get(checkpointer_key_name) or start_date
             end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
             interval = f"{start_time}/{end_time}"
-            body = {"interval": interval}
+
+            body = { "interval": interval }
             logger.debug(f"Request body: {body}")
 
             response = client.post(
