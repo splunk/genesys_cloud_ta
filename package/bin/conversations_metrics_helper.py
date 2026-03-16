@@ -73,14 +73,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
                 "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
                 "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount",
-                "oMessageTurn", "oServiceLevel",
-                "oServiceTarget", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
+                "oMessageTurn", "oServiceLevel", "oServiceTarget",
+                "tWait", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
                 "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
                 "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
                 "tFirstDial", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
                 "tMonitoring", "tMonitoringComplete", "tNotResponding", "tPark", "tParkComplete",
-                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail",
-                "tWait", "nOffered"
+                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail"
             ]
             group_by = ["queueId"]
 
@@ -123,12 +122,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
                                 if event.get("data") else round(start_time.timestamp(), 3)
                             )
-                            for metrics in data_entry["metrics"]:
-                                metrics["group"] = event["group"]
-                                metrics["interval"] = data_entry["interval"]
+                            for metric in data_entry["metrics"]:
+                                metric["group"] = event["group"]
+                                metric["interval"] = data_entry["interval"]
                                 event_writer.write_event(
                                     smi.Event(
-                                        data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                        data=json.dumps(metric, ensure_ascii=False, default=str),
                                         index=input_item.get("index"),
                                         sourcetype=sourcetype,
                                         time=interval_start_time
