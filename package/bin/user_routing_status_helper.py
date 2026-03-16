@@ -72,13 +72,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 client.get("UsersApi", "get_users")
             )
 
-            #Getting user routing status
+            # Getting user routing status
             sourcetype = "genesyscloud:users:users:routingstatus"
             rcounter = 0
+            # CAREFUL! 300+ users = 300+ API calls. Most likely hit rate limits.
             for uid in user_model.user_ids:
                 response = client.get("UsersApi", "get_user_routingstatus", uid)
 
-                if (response[0].start_time):
+                if response and response[0].start_time:
                     event_time_epoch = response[0].start_time.timestamp()
 
                     if event_time_epoch > current_checkpoint:
