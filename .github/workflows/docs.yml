@@ -15,9 +15,10 @@ jobs:
       contents: write
       pages: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.12
+          cache: 'pip'
       - run: pip install mkdocs==1.6.0 mkdocs-material==9.5.32 mkdocs-print-site-plugin==2.6.0
       - run: mkdocs gh-deploy --force
