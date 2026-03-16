@@ -7,7 +7,7 @@ venv:
 	python3 -m venv .venv
 
 build: venv
-	source .venv/bin/activate;
+	source .venv/bin/activate && \
 	ucc-gen build --ta-version=$(APP_VERSION)
 
 run:
@@ -36,5 +36,5 @@ run-tests: install-tests
 	export GENESYSCLOUD_HOST="http://localhost:3004" && python -m pytest integration/*
 
 run-functional-tests: install-tests
-	cd tests;
+	cd tests && \
 	python -m pytest tests/modinput_functional/*
