@@ -1,11 +1,13 @@
 import json
 import logging
 import requests
-from datetime import datetime, timezone
 
+import import_declare_test
 from solnlib import conf_manager, log
 from splunklib import modularinput as smi
 from solnlib.modular_input import checkpointer
+
+from datetime import datetime, timezone
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -118,8 +120,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 input_name,
                 sourcetype,
                 events_count,
-                input_item.get("index"),
-                account=input_item.get("account")
+                input_item.get("index")
             )
 
             log.modular_input_end(logger, normalized_input_name)
