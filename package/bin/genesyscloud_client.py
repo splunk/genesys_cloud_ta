@@ -220,6 +220,7 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
+            err_message = f"Exception when calling {api_instance_name}->{function_name}:"
             try:
                 body = json.loads(e.body)
                 message = body["message"]
