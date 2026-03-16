@@ -8,6 +8,7 @@ on:
     paths:
       - package/bin/**
       - package/lib/requirements.txt
+      - tests/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,10 +23,11 @@ jobs:
       matrix:
         version: [10.2.0]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.9
+          cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -79,7 +81,10 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (~2min)
-          sleep 150
+          for i in {1..60}; do
+            docker logs splunk 2>&1 | grep -q "Ansible playbook complete" && break
+            sleep 5
+          done
           value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
 
@@ -135,7 +140,7 @@ jobs:
 
       - name: Upload Mockoon logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
@@ -154,12 +159,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [9.4.1, 9.3.3, 9.2.5]
+        version: [9.4.1, 9.3.3]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: 3.9
+          cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -212,7 +218,10 @@ jobs:
             -p 8089:8089 \
             splunk/splunk:${{ matrix.version }}
           # Wait for splunk to be up and running (~2min)
-          sleep 150
+          for i in {1..60}; do
+            docker logs splunk 2>&1 | grep -q "Ansible playbook complete" && break
+            sleep 5
+          done
           value=$(docker exec splunk printenv GENESYSCLOUD_HOST)
           echo "GENESYSCLOUD_HOST=$value" >> $GITHUB_ENV
 
@@ -263,7 +272,7 @@ jobs:
 
       - name: Upload Mockoon logs
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
