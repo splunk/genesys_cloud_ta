@@ -112,9 +112,10 @@ class GenesysCloudClient:
         :return: List of items to be ingested.
         """
         total_items = []
-        for obj in response:
-            res_dict = obj.to_dict() or {}
-            total_items.extend(res_dict.get(key, []) or [])
+        if response is not None:
+            for obj in response:
+                res_dict = obj.to_dict() or {}
+                total_items.extend(res_dict.get(key, []) or [])
         return total_items
 
     def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
