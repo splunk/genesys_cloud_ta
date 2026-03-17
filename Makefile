@@ -21,14 +21,14 @@ package: build
 	ucc-gen package --path output/$(APP_NAME) -o dist
 
 install-docs: venv
-	source .venv/bin/activate;
+	source .venv/bin/activate && \
 	pip install mkdocs==1.6.0 mkdocs-material==9.5.32 mkdocs-print-site-plugin==2.6.0
 
 run-docs: install-docs
 	mkdocs serve
 
 install-tests: venv
-	source .venv/bin/activate;
+	source .venv/bin/activate && \
 	pip install pytest==6.2.4 splunk-sdk
 
 run-tests: install-tests
@@ -37,4 +37,4 @@ run-tests: install-tests
 
 run-functional-tests: install-tests
 	cd tests && \
-	python -m pytest tests/modinput_functional/*
+	python -m pytest modinput_functional/*
