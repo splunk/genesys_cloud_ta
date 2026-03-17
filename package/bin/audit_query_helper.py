@@ -8,7 +8,6 @@ from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
 from datetime import datetime, timedelta, timezone, time as dt_time
-from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -67,7 +66,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             now = datetime.now(timezone.utc)
             # Setting a fallback start date of 7 days ago from now
-            start_date = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            start_date = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
             start_time = kvstore_checkpointer.get(checkpointer_key_name) or start_date
             end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")

@@ -6,8 +6,7 @@ from solnlib import conf_manager, log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone
-from dateutil.relativedelta import relativedelta
+from datetime import datetime, timezone, timedelta
 from genesyscloud_client import GenesysCloudClient
 
 
@@ -42,7 +41,7 @@ def validate_input(definition: smi.ValidationDefinition):
     start_date = definition.parameters.get("start_date")
     if start_date is not None:
         input_date = datetime.strptime(start_date, "%Y-%m-%d")
-        threshold_date = datetime.now() - relativedelta(days=7)
+        threshold_date = datetime.now() - timedelta(days=7)
         if input_date < threshold_date:
             raise Exception(f"Invalid start date {input_date}. Start date for data collection can be no greater than 7 days ago from now.")
     return
@@ -71,7 +70,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
-            fallback_start = (now - relativedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
                 fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
