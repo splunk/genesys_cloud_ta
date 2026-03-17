@@ -6,7 +6,7 @@ from solnlib import conf_manager, log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime
+from datetime import datetime, timezone
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
@@ -99,7 +99,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if rcounter > 0:
                 logger.debug(f"Indexed '{rcounter}' events")
-                new_checkpoint = datetime.now(timezone.utc)
+                new_checkpoint = datetime.now(timezone.utc).timestamp()
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
