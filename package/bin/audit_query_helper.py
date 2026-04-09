@@ -95,6 +95,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 if not state_resp:
                     raise Exception(f"Failed to get status for transaction {transaction_id}")
                 status = state_resp[0].state
+                # Allowed statuses:
+                # https://github.com/MyPureCloud/platform-client-sdk-python/blob/master/build/PureCloudPlatformClientV2/models/audit_query_execution_status_response.py#L126
                 if status in ("Succeeded", "Failed", "Cancelled"):
                     break
                 time.sleep(poll_sleep)
