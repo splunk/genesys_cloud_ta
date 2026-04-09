@@ -46,9 +46,9 @@ class GenesysCloudClient:
                 # A simple list (of strings) is returned as response
                 items.extend(api_response)
             else:
-                # An object such as EdgeEntityListing|RoutingStatus|etc is returned
+                # An object such as EdgeEntityListing|RoutingStatus|AuditQueryExecutionResultsResponse|etc is returned
                 enable_pagination = any(key in api_response.attribute_map for key in pagination_params)
-                if "entities" in api_response.attribute_map:
+                if hasattr(api_response, "entities") and api_response.entities:
                     for item in api_response.entities:
                         items.append(item)
                 else:
