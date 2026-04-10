@@ -7,7 +7,7 @@ venv:
 	python3 -m venv .venv
 
 build: venv
-	source .venv/bin/activate;
+	. .venv/bin/activate;
 	ucc-gen build --ta-version=$(APP_VERSION)
 
 run:

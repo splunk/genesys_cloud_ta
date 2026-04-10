@@ -26,11 +26,55 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
-def fetch_status_page_data(logger: logging.Logger):
+def get_account_proxy(logger, session_key: str):
+    try:
+        proxy_config = conf_manager.get_proxy_dict(
+            logger=logger,
+            session_key=session_key,
+            app_name=ADDON_NAME,
+            conf_name="genesys_cloud_ta_settings",
+        )
+    # Handle invalid port case
+    except InvalidPortError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    # Handle invalid hostname case
+    except InvalidHostnameError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    if not proxy_config or not proxy_config.get('proxy_enabled'):
+        logger.info('Proxy is not enabled')
+        return None
+
+    url = proxy_config.get('proxy_url')
+    port = proxy_config.get('proxy_port')
+    user = proxy_config.get('proxy_username')
+    password = proxy_config.get('proxy_password')
+
+    proxy_type = proxy_config.get('proxy_type')
+    proxy_type = proxy_type.lower() if proxy_type else 'http'
+
+    if not all((user, password)):
+        logger.info('Proxy has no credentials found')
+        user, password = None, None
+        proxy_url = f"{proxy_type}://{url}:{port}"
+    else:
+        proxy_url = f"{proxy_type}://{user}:{password}@{url}:{port}"
+
+    return proxy_url
+
+def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
     """Fetch status data from the Genesys Cloud Status Page API"""
     try:
         # Get status summary instead of incidents
-        summary_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/summary.json")
+        proxies = None
+        if proxy_url:
+            proxies = {
+                "http": proxy_url,
+                "https": proxy_url,
+            }
+            logger.info(f"Using proxy: {proxy_url}")
+        summary_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/summary.json", proxies=proxies)
         summary_response.raise_for_status()
         summary_data = summary_response.json()
 
@@ -72,7 +116,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
 
             # Fetch data from Status Page API
-            summary = fetch_status_page_data(logger)
+            proxy = get_account_proxy(logger=logger, session_key=session_key)
+            summary = fetch_status_page_data(logger, proxy_url=proxy)
 
             # Process summary data
             sourcetype = "genesyscloud:operational:system"
