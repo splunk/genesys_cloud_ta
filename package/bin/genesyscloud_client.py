@@ -12,7 +12,6 @@ class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
-    client: ApiClient = None
 
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str, proxy_url: str = None, proxy_username: str = None, proxy_password: str = None):
         self.logger = logger
