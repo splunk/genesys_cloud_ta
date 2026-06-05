@@ -47,7 +47,7 @@ def get_account_proxy(logger, session_key: str):
 
     if not proxy_config or not proxy_config.get('proxy_enabled'):
         logger.info('Proxy is not enabled')
-        return None
+        return None, None, None
 
     url = proxy_config.get('proxy_url')
     port = proxy_config.get('proxy_port')
@@ -89,11 +89,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             account_region = get_account_property(session_key, input_item.get("account"), "region")
 
-            proxy = get_account_proxy(logger=logger, session_key=session_key)
-            if (proxy):
-                proxy_url, proxy_username, proxy_password = proxy
-            else:
-                proxy_url, proxy_username, proxy_password = None, None, None
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_url=proxy_url, proxy_username=proxy_username, proxy_password=proxy_password

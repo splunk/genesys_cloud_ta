@@ -43,7 +43,7 @@ def get_account_proxy(logger, session_key: str):
 
     if not proxy_config or not proxy_config.get('proxy_enabled'):
         logger.info('Proxy is not enabled')
-        return None
+        return None, None, None
 
     url = proxy_config.get('proxy_url')
     port = proxy_config.get('proxy_port')
@@ -88,11 +88,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account = input_item.get("account")
             logger.info(f"Retrieving credentials for account: {account}")
 
-            proxy = get_account_proxy(logger=logger, session_key=session_key)
-            if (proxy):
-                proxy_url, proxy_username, proxy_password = proxy
-            else:
-                proxy_url, proxy_username, proxy_password = None, None, None
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
             account_region = get_account_property(session_key, account, "region")
             client_id = get_account_property(session_key, account, "client_id")
             client_secret = get_account_property(session_key, account, "client_secret")
