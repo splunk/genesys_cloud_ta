@@ -8,11 +8,11 @@ from PureCloudPlatformClientV2.rest import ApiException
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
 
+
 class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
-
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str, proxy_url: str = None, proxy_username: str = None, proxy_password: str = None):
         self.logger = logger
         if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
@@ -22,15 +22,18 @@ class GenesysCloudClient:
             self.logger.warning(f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable")
             self.host = os.environ.get("GENESYSCLOUD_HOST", None)
             # If host is none, default value will be "https://api.mypurecloud.com"
-        
-        #Proxy
+
+        # Singleton pattern. Configuration() is a globally shared object.
+        # Always set values to avoid data persistance from previous execution.
         config = Configuration()
         config.host = self.host
+        config.proxy = proxy_url
+        config.proxy_username = proxy_username
+        config.proxy_password = proxy_password
         if proxy_url:
             self.logger.info(f"Using proxy: {proxy_url}")
-            config.proxy = proxy_url
-            config.proxy_username = proxy_username
-            config.proxy_password = proxy_password
+
+        # Note that passing self.host to the client can be removed as per singleton behavior.
         self.client = ApiClient(self.host).get_client_credentials_token(
             client_id, client_secret
         )
