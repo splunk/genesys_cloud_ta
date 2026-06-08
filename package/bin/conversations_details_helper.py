@@ -24,6 +24,42 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+def get_account_proxy(logger, session_key: str):
+    try:
+        proxy_config = conf_manager.get_proxy_dict(
+            logger=logger,
+            session_key=session_key,
+            app_name=ADDON_NAME,
+            conf_name="genesys_cloud_ta_settings",
+        )
+    # Handle invalid port case
+    except InvalidPortError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    # Handle invalid hostname case
+    except InvalidHostnameError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    if not proxy_config or not proxy_config.get('proxy_enabled'):
+        logger.info('Proxy is not enabled')
+        return None, None, None
+
+    url = proxy_config.get('proxy_url')
+    port = proxy_config.get('proxy_port')
+    user = proxy_config.get('proxy_username')
+    password = proxy_config.get('proxy_password')
+
+    if not all((user, password)):
+        logger.info('Proxy has no credentials found')
+        user, password = None, None
+
+    proxy_type = proxy_config.get('proxy_type')
+    proxy_type = proxy_type.lower() if proxy_type else 'http'
+
+    proxy_url = f"{proxy_type}://{url}:{port}"
+
+    return proxy_url, user, password
+
 def get_conversation_duration(start: datetime, end: datetime) -> int:
     """
     Calculate conversation duration.
@@ -75,8 +111,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             if start_date is not None:
                 fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
 
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
             client = GenesysCloudClient(
-                logger, client_id, client_secret, account_region
+                logger, client_id, client_secret, account_region, proxy_url=proxy_url, proxy_username=proxy_username, proxy_password=proxy_password
             )
             checkpointer_key_name = input_name.split("/")[-1]
 
