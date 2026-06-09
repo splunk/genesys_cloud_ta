@@ -2,8 +2,10 @@ import PureCloudPlatformClientV2
 import logging
 import json
 import os
+import urllib3
 
 from typing import List
+from io import BytesIO
 from PureCloudPlatformClientV2.rest import ApiException
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
@@ -52,7 +54,28 @@ class GenesysCloudClient:
 
         # FIXME add a max_pages safeguard to avoid unbounded pagination
         while True:
-            api_response = function(*args, **kwargs)
+            try:
+                api_response = function(*args, **kwargs)
+            except ApiException as e:
+                if e.status in (301, 302, 303, 307, 308):
+                    # When getting audit query results API could return a redirect with downloadUrl.
+                    body = json.loads(e.body)
+                    if "downloadUrl" in body.keys():
+                        self.logger.warn(f"Got URL to download events from.")
+                        buf = self.download(body["downloadUrl"])
+                        for item in json.loads(buf.read()):
+                            items.append(item)
+
+                        if "cursor" in body.keys():
+                            cursor = body["cursor"]
+                            kwargs["cursor"] = cursor
+                            continue
+                        else:
+                            # Nothing else to be fetched
+                            break
+                    raise
+                else:
+                    raise
 
             if isinstance(api_response, list):
                 # A simple list (of strings) is returned as response
@@ -99,8 +122,8 @@ class GenesysCloudClient:
             self.logger.error(f"Error: {e}")
         except ApiException as e:
             if e.status == 429 and "Rate limit exceeded the maximum" in e.reason:
-                    self.logger.warning("Rate limit exceeded. Refreshing token.")
-                    self.client.handle_expired_access_token()
+                self.logger.warning("Rate limit exceeded. Refreshing token.")
+                self.client.handle_expired_access_token()
             if e.status == 401 and "expir" in e.reason:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
@@ -115,6 +138,35 @@ class GenesysCloudClient:
                 self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
 
         return []
+
+    def download(self, url: str, chunk_size: int = 8192) -> BytesIO:
+        """
+        Download a URL in chunks into an in-memory buffer.
+        :param url: URL to download events from.
+        :param chunk_size: Number of bytes to read per iteration.
+        :return: BytesIO buffer positioned at the start, containing the downloaded bytes.
+        """
+        config = Configuration()
+        if config.proxy:
+            headers = None
+            if config.proxy_username and config.proxy_password:
+                headers = urllib3.make_headers(
+                    proxy_basic_auth=f"{config.proxy_username}:{config.proxy_password}"
+                )
+            http = urllib3.ProxyManager(config.proxy, proxy_headers=headers)
+        else:
+            http = urllib3.PoolManager()
+
+        buffer = BytesIO()
+        with http.request("GET", url, preload_content=False) as response:
+            if response.status != 200:
+                raise urllib3.exceptions.HTTPError(f"Unexpected status: {response.status}")
+            for chunk in response.stream(chunk_size):
+                if chunk:
+                    buffer.write(chunk)
+
+        buffer.seek(0)  # rewind so the buffer can be read from the start
+        return buffer
 
     def convert_response(self, response: list, key: str) -> list:
         """
@@ -226,8 +278,8 @@ class GenesysCloudClient:
 
         except ApiException as e:
             if e.status == 429 and "Rate limit exceeded the maximum" in e.reason:
-                    self.logger.warning("Rate limit exceeded. Refreshing token.")
-                    self.client.handle_expired_access_token()
+                self.logger.warning("Rate limit exceeded. Refreshing token.")
+                self.client.handle_expired_access_token()
             if e.status == 401 and "expir" in e.reason:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
