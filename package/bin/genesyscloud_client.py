@@ -61,7 +61,7 @@ class GenesysCloudClient:
                     # When getting audit query results API could return a redirect with downloadUrl.
                     body = json.loads(e.body)
                     if "downloadUrl" in body.keys():
-                        self.logger.warn(f"Got URL to download events from.")
+                        self.logger.info(f"Got URL to download events from.")
                         buf = self.download(body["downloadUrl"])
                         for item in json.loads(buf.read()):
                             items.append(item)
@@ -109,7 +109,7 @@ class GenesysCloudClient:
         :param api_instance_name: Name of the API instance e.g. TelephonyProvidersEdgeApi, RoutingApi, etc
         :param function_name: Name of the function to call in the API instance
         """
-        self.logger.info(f"Getting data from {api_instance_name}")
+        self.logger.info(f"Getting data from {api_instance_name}->{function_name}")
         # Get the API class dynamically
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name)
 
