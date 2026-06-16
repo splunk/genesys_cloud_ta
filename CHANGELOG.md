@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [v0.4.0] - 2026-06-16
+
+### Added
+
+- Support to proxy ([#43](https://github.com/splunk/genesys_cloud_ta/pull/43)) ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- Enabled support to large amounts of data returning a download url for `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- Handle of error `[400] Bad Request - You must specify a search interval as part of your query that does not exceed 7 days` for the `conversation_details` as well as the `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+
+### Fixed
+
+- Pagination unexpected overwrite ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+
+### Changed
+
+- Errors handling for `None` or empty responses ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- General refactoring including:
+  - Improved alignment across inputs on UTC time and log messages ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+  - Updated variable names and removed unnecessary loops ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+
+
 ## [v0.3.1] - 2026-01-30
 
 ### Added
