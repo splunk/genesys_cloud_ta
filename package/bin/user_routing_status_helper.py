@@ -6,7 +6,7 @@ from solnlib import conf_manager, log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime
+from datetime import datetime, timezone
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
 
@@ -28,6 +28,42 @@ def get_account_property(session_key: str, account_name: str, property_name: str
 
 def validate_input(definition: smi.ValidationDefinition):
     return
+
+def get_account_proxy(logger, session_key: str):
+    try:
+        proxy_config = conf_manager.get_proxy_dict(
+            logger=logger,
+            session_key=session_key,
+            app_name=ADDON_NAME,
+            conf_name="genesys_cloud_ta_settings",
+        )
+    # Handle invalid port case
+    except InvalidPortError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    # Handle invalid hostname case
+    except InvalidHostnameError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    if not proxy_config or not proxy_config.get('proxy_enabled'):
+        logger.info('Proxy is not enabled')
+        return None, None, None
+
+    url = proxy_config.get('proxy_url')
+    port = proxy_config.get('proxy_port')
+    user = proxy_config.get('proxy_username')
+    password = proxy_config.get('proxy_password')
+
+    if not all((user, password)):
+        logger.info('Proxy has no credentials found')
+        user, password = None, None
+
+    proxy_type = proxy_config.get('proxy_type')
+    proxy_type = proxy_type.lower() if proxy_type else 'http'
+
+    proxy_url = f"{proxy_type}://{url}:{port}"
+
+    return proxy_url, user, password
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -53,9 +89,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             account_region = get_account_property(session_key, input_item.get("account"), "region")
 
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(
-                logger, client_id, client_secret, account_region
+                logger, client_id, client_secret, account_region, proxy_url=proxy_url, proxy_username=proxy_username, proxy_password=proxy_password
             )
 
             # Initialize checkpointing
@@ -72,13 +109,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 client.get("UsersApi", "get_users")
             )
 
-            #Getting user routing status
+            # Getting user routing status
             sourcetype = "genesyscloud:users:users:routingstatus"
             rcounter = 0
+            # CAREFUL! 300+ users = 300+ API calls. Most likely hit rate limits.
             for uid in user_model.user_ids:
                 response = client.get("UsersApi", "get_user_routingstatus", uid)
 
-                if (response[0].start_time):
+                if response and response[0].start_time:
                     event_time_epoch = response[0].start_time.timestamp()
 
                     if event_time_epoch > current_checkpoint:
@@ -98,7 +136,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if rcounter > 0:
                 logger.debug(f"Indexed '{rcounter}' events")
-                new_checkpoint = datetime.utcnow().timestamp()
+                new_checkpoint = datetime.now(timezone.utc).timestamp()
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 

@@ -6,7 +6,7 @@ from solnlib import conf_manager, log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -25,13 +25,47 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+def get_account_proxy(logger, session_key: str):
+    try:
+        proxy_config = conf_manager.get_proxy_dict(
+            logger=logger,
+            session_key=session_key,
+            app_name=ADDON_NAME,
+            conf_name="genesys_cloud_ta_settings",
+        )
+    # Handle invalid port case
+    except InvalidPortError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    # Handle invalid hostname case
+    except InvalidHostnameError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    if not proxy_config or not proxy_config.get('proxy_enabled'):
+        logger.info('Proxy is not enabled')
+        return None, None, None
+
+    url = proxy_config.get('proxy_url')
+    port = proxy_config.get('proxy_port')
+    user = proxy_config.get('proxy_username')
+    password = proxy_config.get('proxy_password')
+
+    if not all((user, password)):
+        logger.info('Proxy has no credentials found')
+        user, password = None, None
+
+    proxy_type = proxy_config.get('proxy_type')
+    proxy_type = proxy_type.lower() if proxy_type else 'http'
+
+    proxy_url = f"{proxy_type}://{url}:{port}"
+
+    return proxy_url, user, password
+
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
-    from datetime import datetime, timedelta, timezone
-
     for input_name, input_item in inputs.inputs.items():
         normalized_input_name = input_name.split("/")[-1]
         logger = logger_for_input(normalized_input_name)
@@ -54,11 +88,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account = input_item.get("account")
             logger.info(f"Retrieving credentials for account: {account}")
 
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
             account_region = get_account_property(session_key, account, "region")
             client_id = get_account_property(session_key, account, "client_id")
             client_secret = get_account_property(session_key, account, "client_secret")
 
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
+            client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_url=proxy_url, proxy_username=proxy_username, proxy_password=proxy_password)
 
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
@@ -87,47 +122,49 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "ActionAggregationQuery",
                 body
             )
+            sourcetype="genesyscloud:analytics:actions:metrics"
 
-            event_counter = 0
-            res_dict = response.to_dict() or {}
-            to_process_data = res_dict.get("results") or []
+            if response:
+                event_counter = 0
+                res_dict = response.to_dict() or {}
+                to_process_data = res_dict.get("results") or []
 
-            for event in to_process_data:
-                try:
-                    group_info = event.get("group", {}) or {}
-                    for data_entry in event.get("data", []):
-                        interval_str = data_entry.get("interval")
-                        interval_start_time = (
-                            datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
-                            if interval_str else round(start_time.timestamp(), 3)
-                        )
-
-                        for metric in data_entry.get("metrics", []):
-                            enriched_metric = {
-                                "metric": metric.get("metric"),
-                                "qualifier": metric.get("qualifier"),
-                                "stats": metric.get("stats", {}),
-                                "group": group_info,
-                                "interval": interval_str
-                            }
-
-                            event_writer.write_event(
-                                smi.Event(
-                                    data=json.dumps(enriched_metric, ensure_ascii=False, default=str),
-                                    index=input_item.get("index"),
-                                    sourcetype="genesyscloud:analytics:actions:metrics",
-                                    time=interval_start_time
-                                )
+                for event in to_process_data:
+                    try:
+                        group_info = event.get("group", {}) or {}
+                        for data_entry in event.get("data", []):
+                            interval_str = data_entry.get("interval")
+                            interval_start_time = (
+                                datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+                                if interval_str else round(start_time.timestamp(), 3)
                             )
-                            event_counter += 1
-                except Exception as e:
-                    logger.error(f"Failed to write event: {e}")
 
-            if event_counter > 0:
-                new_checkpoint = end_time.timestamp()
-                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+                            for metric in data_entry.get("metrics", []):
+                                enriched_metric = {
+                                    "metric": metric.get("metric"),
+                                    "qualifier": metric.get("qualifier"),
+                                    "stats": metric.get("stats", {}),
+                                    "group": group_info,
+                                    "interval": interval_str
+                                }
 
-            log.events_ingested(logger, input_name, "genesyscloud:analytics:actions:metrics", event_counter, input_item.get("index"), account=account)
+                                event_writer.write_event(
+                                    smi.Event(
+                                        data=json.dumps(enriched_metric, ensure_ascii=False, default=str),
+                                        index=input_item.get("index"),
+                                        sourcetype=sourcetype,
+                                        time=interval_start_time
+                                    )
+                                )
+                                event_counter += 1
+                    except Exception as e:
+                        logger.error(f"Failed to write event: {e}")
+
+                if event_counter > 0:
+                    new_checkpoint = end_time.timestamp()
+                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+
+                log.events_ingested(logger, input_name, sourcetype, event_counter, input_item.get("index"), account=account)
             log.modular_input_end(logger, normalized_input_name)
 
         except Exception as e:

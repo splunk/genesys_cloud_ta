@@ -1,10 +1,7 @@
 import pytest
 import logging
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 import splunklib.client as client
 
@@ -41,6 +38,7 @@ class BaseTATest():
         cls.splunk_client = client.connect(
             host=cls.splunk_url,
             port=cls.splunkd_port,
+            scheme="https",
             username=cls.username,
             password=cls.password,
             verify=False,
@@ -57,9 +55,12 @@ class BaseTATest():
     def teardown_class(cls):
         cls.delete_genesyscloud_accounts(f"{cls.TA_APP_NAME}_account")
         index = cls.splunk_client.indexes[cls.INDEX]
-        # Clean index before deleting (removes all events)
-        index.clean(timeout=300)
-        index.delete()
+        try:
+            # Clean index before deleting (removes all events).
+            # index.clean(timeout=300)
+            index.delete()
+        except Exception as e:
+            cls.logger.warning(f"Teardown failed: {e}")
 
         cls.splunk_client = None
 

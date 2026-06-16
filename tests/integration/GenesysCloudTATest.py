@@ -3,10 +3,7 @@ import sys
 import pytest
 import logging
 
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../package/bin")))
@@ -77,5 +74,5 @@ class GenesysCloudTATest():
             "client_secret": cls.CLIENT_SECRET,
             "aws_region": cls.AWS_REGION
         }
-        cls.logger.info(f"{configs}")
+        # cls.logger.info(f"{configs}")
         return configs

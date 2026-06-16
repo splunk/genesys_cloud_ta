@@ -25,6 +25,42 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+def get_account_proxy(logger, session_key: str):
+    try:
+        proxy_config = conf_manager.get_proxy_dict(
+            logger=logger,
+            session_key=session_key,
+            app_name=ADDON_NAME,
+            conf_name="genesys_cloud_ta_settings",
+        )
+    # Handle invalid port case
+    except InvalidPortError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    # Handle invalid hostname case
+    except InvalidHostnameError as e:
+        logger.error(f"Proxy configuration error: {e}")
+
+    if not proxy_config or not proxy_config.get('proxy_enabled'):
+        logger.info('Proxy is not enabled')
+        return None, None, None
+
+    url = proxy_config.get('proxy_url')
+    port = proxy_config.get('proxy_port')
+    user = proxy_config.get('proxy_username')
+    password = proxy_config.get('proxy_password')
+
+    if not all((user, password)):
+        logger.info('Proxy has no credentials found')
+        user, password = None, None
+
+    proxy_type = proxy_config.get('proxy_type')
+    proxy_type = proxy_type.lower() if proxy_type else 'http'
+
+    proxy_url = f"{proxy_type}://{url}:{port}"
+
+    return proxy_url, user, password
+
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
@@ -55,8 +91,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             account_region = get_account_property(session_key, input_item.get("account"), "region")
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region)
+            proxy_url, proxy_username, proxy_password = get_account_proxy(logger=logger, session_key=session_key)
+            client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_url=proxy_url, proxy_username=proxy_username, proxy_password=proxy_password)
 
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
@@ -73,14 +109,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
                 "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
                 "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount",
-                "oMessageTurn", "oServiceLevel",
-                "oServiceTarget", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
+                "oMessageTurn", "oServiceLevel", "oServiceTarget",
+                "tWait", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
                 "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
                 "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
                 "tFirstDial", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
                 "tMonitoring", "tMonitoringComplete", "tNotResponding", "tPark", "tParkComplete",
-                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail",
-                "tWait", "nOffered"
+                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail"
             ]
             group_by = ["queueId"]
 
@@ -123,12 +158,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
                                 if event.get("data") else round(start_time.timestamp(), 3)
                             )
-                            for metrics in data_entry["metrics"]:
-                                metrics["group"] = event["group"]
-                                metrics["interval"] = data_entry["interval"]
+                            for metric in data_entry["metrics"]:
+                                metric["group"] = event["group"]
+                                metric["interval"] = data_entry["interval"]
                                 event_writer.write_event(
                                     smi.Event(
-                                        data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                        data=json.dumps(metric, ensure_ascii=False, default=str),
                                         index=input_item.get("index"),
                                         sourcetype=sourcetype,
                                         time=interval_start_time

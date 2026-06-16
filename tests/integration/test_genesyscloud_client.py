@@ -177,4 +177,4 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             model_name,
             body
         )
-        assert response == None
+        assert response is None
