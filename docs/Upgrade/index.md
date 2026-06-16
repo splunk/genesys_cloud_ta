@@ -4,7 +4,7 @@ Before releasing 1.0.0 the Genesys Cloud Add-on for Splunk is still in the devel
 
 [Release Notes](https://github.com/splunk/genesys_cloud_ta/releases)
 
-## Upgrade to version 0.3.x
+## Upgrade to version 0.3.x, 0.4.x
 
 1. Disable all inputs.
 2. Download the latest version of Genesys Cloud Add-On for Splunk from its [repository](https://github.com/splunk/genesys_cloud_ta/releases).
