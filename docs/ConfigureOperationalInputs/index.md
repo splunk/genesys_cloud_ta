@@ -76,4 +76,4 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code>.|
 |`max_poll_attempts`      |Max Poll Attempts                 |Maximum number of status checks (polls) performed for an audit query transaction before giving up. The default value is <code>10</code>, to be increased for long-running queries.|
 |`poll_interval_seconds`  |Poll Interval (seconds)           |Seconds to wait between each status check of the audit query `transaction_id`. Lower values give quicker response but perform more API calls; higher values reduce rate-limit pressure. The default value is <code>2</code>.|
-| `start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days from now. Format: `YYYY-MM-DD`.
+|`start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days ago. Format: `YYYY-MM-DD`.

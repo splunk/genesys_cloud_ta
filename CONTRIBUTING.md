@@ -1,5 +1,5 @@
 # Contributing
-For reporting unexpected behavior, documentation gaps, entirely new features, please open an [issue](https://github.com/splunk/genesys_cloud_ta/issues)
+For reporting unexpected behavior, documentation gaps, entirely new features, please open an [issue](https://github.com/splunk/genesys_cloud_ta/issues).
 
 Contributions via pull requests are also welcome:
 * Create a branch for the issue / new feature
@@ -16,7 +16,7 @@ $~ cd genesys_cloud_ta
 $~ make run
 ```
 * In a web browser, go to http://localhost:8000/
-* Login with `admin` and `changed!`
+* Log in with `admin` and `changed!`
 * To reload the front-end elements in cache, after you make local changes:
     * `https://localhost:8000/en-US/_bump`
     * `https://localhost:8000/en-US/debug/refresh` in case of new files added
@@ -47,7 +47,7 @@ $~ cp -R output/genesys_cloud_ta/ $SPLUNK_HOME/etc/apps/
 $~ cd genesys_cloud_ta
 $~ make build
 ```
-Copy / sync the `output/genesys_cloud_ta` folder with the remote splunk instance
+Copy / sync the `output/genesys_cloud_ta` folder with the remote Splunk instance
 > In the current environment this symlink is configured: `$SPLUNK_HOME/etc/apps/genesys_cloud_ta -> /home/splunker/genesys_cloud_ta/output/genesys_cloud_ta/`
 
 ## Tests
@@ -59,7 +59,7 @@ To execute tests on your local environment:
     > By default it will listen on `localhost:3004`
 
 ### Integration
-Scope is avoid introducing regressions in the `package/bin/genesyscloud_client.py`
+Scope is to avoid introducing regressions in the `package/bin/genesyscloud_client.py`
 
 ```bash
 $~ cd genesys_cloud_ta
@@ -99,7 +99,7 @@ $~ make run-functional-tests
 
 :point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
 
-## Release the Add-On
+## Release the Add-on
 A CI/CD workflow will automatically create a release. To trigger it:
 
 - Bump the Add-On version according to [Semantic Versioning](http://semver.org/) in `package/app.manifest` and `globalConfig.json`

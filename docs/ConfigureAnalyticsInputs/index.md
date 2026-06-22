@@ -89,8 +89,8 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`account`                |Account Name                      |The Genesys Cloud account from which you want to gather data.|
 |`index`                  |Index                             |The index in which the data should be stored. The default is <code>default</code>.|
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code>.|
-| `direction`             |Direction                         |The direction of the communication.
-| `media_types`           |Media Type(s)                     |The session media type(s).
-| `start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days from now. Format: `YYYY-MM-DD`.
+|`direction`             |Direction                         |The direction of the communication.
+|`media_types`           |Media Type(s)                     |The session media type(s).
+|`start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days ago. Format: `YYYY-MM-DD`.
 
 Direction and Media Type(s) possible values are taken from [Genesys Cloud Specs](https://developer.genesys.cloud/analyticsdatamanagement/analytics/aggregate/conversation-query#dimensions).
