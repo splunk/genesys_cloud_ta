@@ -113,7 +113,7 @@ class BaseTATest():
         Creates account using genesys_cloud_ta_accounts.conf
         """
         configs = cls.get_genesyscloud_accounts_configuration()
-        cls.logger.info("Create account with config %s", configs)
+        # cls.logger.info("Create account with config %s", configs)
         # Create account
         conf_filename = f"conf-{cls.TA_APP_NAME}_account"
         response = cls.splunk_client.post(

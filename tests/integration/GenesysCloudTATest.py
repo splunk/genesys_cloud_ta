@@ -50,7 +50,7 @@ class GenesysCloudTATest():
         Creates client using genesys_cloud_ta_accounts.conf
         """
         configs = cls.get_genesyscloud_accounts_configuration()
-        cls.logger.info("Create client with config %s", configs)
+        # cls.logger.info("Create client with config %s", configs)
         # Create client
         cls.gc_client = GenesysCloudClient(cls.logger, **configs)
 
