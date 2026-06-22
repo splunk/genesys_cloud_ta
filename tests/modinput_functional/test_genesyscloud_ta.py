@@ -2,7 +2,6 @@ import pytest
 import time
 import json
 import hashlib
-import sys
 import splunklib.results as results
 
 from .BaseTATest import BaseTATest
@@ -40,9 +39,9 @@ class TestGenesysCloudTA(BaseTATest):
             oneshot = self.splunk_client.jobs.export(search_query, **kwargs)
             reader = results.JSONResultsReader(oneshot)
             for result in reader:
-                # if isinstance(result, results.Message):
-                #     # ⚠️ Don't ignore these — they may explain why results are empty
-                #     self.logger.warning(f"[{result.type}] {result.message}")
+                if isinstance(result, results.Message):
+                    # ⚠️ Don't ignore these — they may explain why results are empty
+                    self.logger.warning(f"[{result.type}] {result.message}")
                 if not isinstance(result, dict):
                     # Diagnostic messages may be returned in the results
                     continue
