@@ -8,7 +8,7 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timedelta, timezone, time as dt_time
+from datetime import datetime, timedelta, timezone
 from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
