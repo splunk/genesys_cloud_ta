@@ -8,9 +8,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Support to proxy ([#43](https://github.com/splunk/genesys_cloud_ta/pull/43)) ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
-- Enabled support to large amounts of data returning a download url for `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
-- Handle of error `[400] Bad Request - You must specify a search interval as part of your query that does not exceed 7 days` for the `conversation_details` as well as the `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- Support for proxy ([#43](https://github.com/splunk/genesys_cloud_ta/pull/43)) ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- Enabled support to large amounts of data returning a download URL for `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
+- Handling of error `[400] Bad Request - You must specify a search interval as part of your query that does not exceed 7 days` for the `conversation_details` as well as the `audit_query` inputs ([#42](https://github.com/splunk/genesys_cloud_ta/pull/42)).
 
 ### Fixed
 
