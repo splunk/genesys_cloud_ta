@@ -109,29 +109,31 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Summary data: {summary}")
 
             for component in summary.get("components", []):
-                component_updated_at = datetime.fromisoformat(component.get("updated_at").replace("Z", "+00:00")).timestamp()
-                logger.debug(f"Component updated at timestamp: {component_updated_at}")
+                updated_at = component.get("updated_at", None)
+                if updated_at:
+                    component_updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00")).timestamp()
+                    logger.debug(f"Component updated at timestamp: {component_updated_at}")
 
-                # Only process if newer than our checkpoint
-                if component_updated_at > status_page_checkpoint:
+                    # Only process if newer than our checkpoint
+                    if component_updated_at > status_page_checkpoint:
 
-                    component["page"] = page
-                    # Delete page_id field if it exists
-                    if "page_id" in component:
-                        logger.debug(f"Removing page_id field from component")
-                        del component["page_id"]
-                    logger.debug(f"Event data: {component}")
+                        component["page"] = page
+                        # Delete page_id field if it exists
+                        if "page_id" in component:
+                            logger.debug(f"Removing page_id field from component")
+                            del component["page_id"]
+                        logger.debug(f"Event data: {component}")
 
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(component, ensure_ascii=False, default=str),
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype,
-                            time=component_updated_at
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(component, ensure_ascii=False, default=str),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                                time=component_updated_at
+                            )
                         )
-                    )
-                    logger.debug(f"Status summary event written")
-                    events_count += 1
+                        logger.debug(f"Status summary event written")
+                        events_count += 1
 
             # Update checkpoint if data was processed
             current_time = datetime.now(timezone.utc).timestamp()
