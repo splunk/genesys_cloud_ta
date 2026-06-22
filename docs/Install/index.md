@@ -24,7 +24,7 @@ may need to install the add-on in multiple places.
 | Splunk instance type | Supported | Required | Comments |
 |----|----|----|----|
 | Search Heads | Yes | Yes | Install this add-on to all search heads where Genesys Cloud knowledge management is required. Select one node, either a search head or a heavy forwarder, to serve as the configuration server for this add-on, and disable visibility of the add-on in all other locations. |
-| Indexers | No | No | Not required, This TA only supports mod input-based data collection which uses a heavy forwarder. |
+| Indexers | No | No | Not required. This TA only supports modular input-based data collection which uses a heavy forwarder. |
 | Heavy Forwarders | Yes | No | If installed on heavy forwarders, does not need to be installed on indexers. Select one node, either a search head or a heavy forwarder, to serve as the configuration server for this add-on, and disable visibility of the add-on in all other locations. |
 | Universal Forwarders | No | No | Universal forwarders are not supported for data collection, because the modular inputs require Python and the Splunk REST handler. |
 

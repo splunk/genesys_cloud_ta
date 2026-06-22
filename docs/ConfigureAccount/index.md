@@ -12,7 +12,7 @@ You must configure at least one Account in the Genesys Cloud Add-on for Splunk.
 1. Go to the Splunk Web home screen.
 2. Click on Genesys Cloud Add-on for Splunk in the left navigation banner.
 3. Click on the **Configuration** tab.
-4. Under the "Account" section, Click on "Add" and fill in the fields. Use the parameters you configured for the application in the Azure Active Directory, see [Configure an integration application in Genesys Cloud for the Genesys Cloud Add-on for Splunk](../ConfigureGenesysCloud/index.md) where:
+4. Under the "Account" section, click on "Add" and fill in the fields. Use the parameters you configured for the application in Genesys Cloud, see [Configure an integration application in Genesys Cloud for the Genesys Cloud Add-on for Splunk](../ConfigureGenesysCloud/index.md) where:
 
    - **Name** is the name given to the Account.
    - **Client ID** is the Client ID from the registered application within Genesys Cloud.
