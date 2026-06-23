@@ -1,5 +1,6 @@
 import pytest
 import time
+import os
 import json
 import hashlib
 import splunklib.results as results
@@ -24,6 +25,10 @@ class TestGenesysCloudTA(BaseTATest):
         :param sleep_interval: seconds to wait between search attempts
         :return: list of unique event results
         """
+        # CI runners are CPU-constrained, so indexing lags. Give searches more
+        # headroom there. GitHub Actions sets CI=true automatically.
+        ci_factor = 3 if os.getenv("CI", "").lower() == "true" else 1
+        effective_timeout = timeout * ci_factor
         hashes: set[str] = set()
         lst_results: list[dict] = []
         elapsed_time = 0
@@ -34,7 +39,7 @@ class TestGenesysCloudTA(BaseTATest):
             "count": 0
         }
         # +1min timeout for each retry
-        tot_timeout = timeout + (run_counter  * 60)
+        tot_timeout = effective_timeout + (run_counter  * 60)
 
         while elapsed_time <= tot_timeout:
             oneshot = self.splunk_client.jobs.export(search_query, **kwargs)
@@ -54,6 +59,8 @@ class TestGenesysCloudTA(BaseTATest):
                 if md5_hash not in hashes:
                     hashes.add(md5_hash)
                     lst_results.append(result)
+
+            self.logger.debug(f"_search() - Elapsed {elapsed_time}s / {tot_timeout}s, ci_factor={ci_factor}")
 
             # Avoid sleeping after the last attempt
             if elapsed_time + sleep_interval > tot_timeout:
