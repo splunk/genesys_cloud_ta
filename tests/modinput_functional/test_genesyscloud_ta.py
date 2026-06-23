@@ -16,15 +16,16 @@ class TestGenesysCloudTA(BaseTATest):
 
     def _search(self, search_query: str, run_counter: int=0, timeout: int=40, sleep_interval: int=5) -> list:
         """
-        Run search to verify data ingestion
+        Run search to verify data ingestion.
+
         :param search_query: SPL to be executed
-        :param run_counter: counter to keep track of retries and calculate timeout accordingly
-        :param timeout: total seconds waited to get the response streamed back
-        :param sleep_interval: inteval
-        :return: list of events
+        :param run_counter: retry counter used to extend the timeout (+60s per retry)
+        :param timeout: base seconds to wait for results to stream back
+        :param sleep_interval: seconds to wait between search attempts
+        :return: list of unique event results
         """
-        hashes = []
-        lst_results = []
+        hashes: set[str] = set()
+        lst_results: list[dict] = []
         elapsed_time = 0
         kwargs = {
             "earliest_time": 0,
@@ -32,24 +33,31 @@ class TestGenesysCloudTA(BaseTATest):
             "output_mode": "json",
             "count": 0
         }
-        # +1min timeout each retry
+        # +1min timeout for each retry
         tot_timeout = timeout + (run_counter  * 60)
 
-        while elapsed_time < tot_timeout:
+        while elapsed_time <= tot_timeout:
             oneshot = self.splunk_client.jobs.export(search_query, **kwargs)
             reader = results.JSONResultsReader(oneshot)
+
             for result in reader:
                 if isinstance(result, results.Message):
                     # ⚠️ Don't ignore these — they may explain why results are empty
                     self.logger.warning(f"[{result.type}] {result.message}")
+                    continue
                 if not isinstance(result, dict):
                     # Diagnostic messages may be returned in the results
                     continue
+
                 str_result = json.dumps(result["_raw"])
-                md5_hash = hashlib.md5(str_result.encode()).hexdigest()
+                md5_hash = hashlib.md5(str_result.encode(), usedforsecurity=False).hexdigest()
                 if md5_hash not in hashes:
-                    hashes.append(md5_hash)
+                    hashes.add(md5_hash)
                     lst_results.append(result)
+
+            # Avoid sleeping after the last attempt
+            if elapsed_time + sleep_interval > tot_timeout:
+                break
 
             time.sleep(sleep_interval)
             elapsed_time += sleep_interval
