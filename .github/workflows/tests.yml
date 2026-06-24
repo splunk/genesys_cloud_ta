@@ -200,7 +200,7 @@ jobs:
         run: |
           docker run -d --name mockoon \
             --network shared-net \
-            -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
+            -v ${{ github.workspace }}/tests/vendor/genesyscloud_mock.json:/data/mockoon.json \
             -p 3004:3004 \
             mockoon/cli:latest \
             --data /data/mockoon.json --port 3004 --log-transaction
