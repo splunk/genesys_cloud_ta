@@ -132,6 +132,18 @@ jobs:
           python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
         working-directory: ./tests
 
+      - name: Troubleshooting test Logs
+        if: always()
+        run: |
+          ls -la
+
+      - name: Upload Test Execution log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: conftest-${{ matrix.version }}
+          path: conftest-${{ matrix.version }}.log
+
       - name: Exporting Mockoon logs
         if: always()
         run: |
