@@ -29,7 +29,7 @@ run-docs: install-docs
 
 install-tests: venv
 	source .venv/bin/activate && \
-	pip install pytest==6.2.4 splunk-sdk
+	pip install -r tests/test-requirements.txt
 
 run-tests: install-tests
 	cd tests && \
