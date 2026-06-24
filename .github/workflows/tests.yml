@@ -135,7 +135,7 @@ jobs:
       - name: Troubleshooting test Logs
         if: always()
         run: |
-          ls -la
+          find "$GITHUB_WORKSPACE" -name conftest.log -printf '%p\n' 2>/dev/null
 
       - name: Upload Test Execution log
         if: always()
