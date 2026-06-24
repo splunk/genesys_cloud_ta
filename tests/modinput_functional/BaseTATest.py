@@ -22,7 +22,7 @@ class BaseTATest():
     CLIENT_ID = None
     AWS_REGION = None
     CLIENT_SECRET = None
-    RETRY = 3
+    MAX_RETRIES = 5
 
     logger = LOGGER
     splunk_url = None
@@ -81,14 +81,6 @@ class BaseTATest():
         except KeyError as err:
             # queue_observations does not use checkpointers
             cls.logger.warning(f"Skipping checkpointer cleanup: {checkpointer} not found - {err}")
-
-        # Clean up pending jobs to avoid accumulated state on the shared client
-        try:
-            for job in cls.splunk_client.jobs:
-                if job["dispatchState"] in ("RUNNING", "QUEUED"):
-                    job.cancel()
-        except Exception as exc:
-            cls.logger.warning(f"Failed to cancel job: {exc}")
 
     @classmethod
     def toggle_input(cls, input_name: str, new_state: int):
