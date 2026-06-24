@@ -1,8 +1,8 @@
 import pytest
 import time
-# import os
+import os
 import json
-import hashlib
+# import hashlib
 import splunklib.results as splk_results
 
 from .BaseTATest import BaseTATest
@@ -25,7 +25,8 @@ class TestGenesysCloudTA(BaseTATest):
         :return: list of unique event results.
         """
         results: list[dict] = []
-        # ci_factor = 3 if os.getenv("CI", "").lower() == "true" else 1
+        ci_factor = 3 if os.getenv("CI", "").lower() == "true" else 1
+        max_retries = self.MAX_RETRIES * ci_factor
         kwargs = {
             "earliest_time": 0,
             "latest_time": "now",
@@ -33,20 +34,19 @@ class TestGenesysCloudTA(BaseTATest):
             "count": 0
         }
 
-        for attempt in range(self.MAX_RETRIES):
+        for attempt in range(max_retries):
             oneshot = self.splunk_client.jobs.oneshot(search_query, **kwargs)
             reader = splk_results.JSONResultsReader(oneshot)
 
             for res in reader:
                 results.append(res)
 
-            if len(results) > 0 or attempt == (self.MAX_RETRIES - 1):
+            if len(results) > 0 or attempt == (max_retries - 1):
                 self.logger.debug(f"Attempt {attempt+1}, results {len(results)}")
                 break
 
             # Exponential backoff: base * 2^attempt, capped at timeout
             wait = min(base_sleep * (2 ** (attempt+1)), timeout)
-            # wait = min((3 * (attempt+1)) * ci_factor, timeout)
             self.logger.debug(f"Attempt {attempt+1}, waiting {wait}s")
             time.sleep(wait)
 
@@ -90,7 +90,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:users:users:routingstatus"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=100)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 358
         assert results[0]["source"] == "user_routing_status://user_routing_status"
 
@@ -113,7 +113,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=60)
+        results = self._search_oneshot(search_query=spl)
 
         # Each event is split into 2: status and secondary status
         assert len(results) > 0 and len(results) <= 2 * 25
@@ -125,7 +125,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=60)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 14
         assert results[0]["source"] == "edges_trunks_metrics://edges_trunks_metrics"
 
