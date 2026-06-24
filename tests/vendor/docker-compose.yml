@@ -1,0 +1,46 @@
+name: gc_test_env
+
+services:
+  mockoon:
+    container_name: mockoon
+    image: mockoon/cli:latest
+    command: -d data -t
+    ports:
+      - "3004:3004"
+    networks:
+      mockoon-network:
+    volumes:
+      - type: bind
+        source: ./genesyscloud_mock.json
+        target: /data
+
+  splunk:
+    image: "splunk/splunk:9.3.8"
+    platform: "linux/amd64"
+    container_name: gc_splunk
+    volumes:
+        - ../../output/${APP_NAME}:/opt/splunk/etc/apps/${APP_NAME}
+        - ../../etc/cicd/environment:/etc/environment
+    environment:
+        - SPLUNK_START_ARGS=--answer-yes --no-prompt --accept-license
+        - GENESYSCLOUD_HOST="http://mockoon:3004"
+        - SPLUNK_PASSWORD=password
+    ports:
+        # FDSE Weird mapping cause of other existing container on machine
+        - 8000:8000 # for web/browser access
+        - 8089:8089 # for REST API access
+    networks:
+      mockoon-network:
+    healthcheck:
+        # This tells Docker whether our Splunk container is healthy
+        test: ['CMD', 'curl', '-f', 'http://localhost:8000']
+        interval: 5s
+        timeout: 5s
+        retries: 20
+
+volumes:
+  mockoon_data:
+
+networks:
+  mockoon-network:
+    driver: bridge

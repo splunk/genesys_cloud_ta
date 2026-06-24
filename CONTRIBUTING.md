@@ -12,7 +12,6 @@ Thank you for your interest in this project! :heart: :rocket:
 ## Development Environment
 ### Splunk running in Docker
 ```bash
-$~ cd genesys_cloud_ta
 $~ make run
 ```
 * In a web browser, go to http://localhost:8000/
@@ -23,10 +22,8 @@ $~ make run
 
 ```bash
 # Build the TA
-$~ cd genesys_cloud_ta
 $~ make build
 # Package the TA for distribution
-$~ cd genesys_cloud_ta
 $~ make package
 ```
 
@@ -35,7 +32,6 @@ $~ make package
 ### Splunk running locally
 ```bash
 # Build the TA
-$~ cd genesys_cloud_ta
 $~ make build
 # Copy to Splunk Apps directory
 $~ cp -R output/genesys_cloud_ta/ $SPLUNK_HOME/etc/apps/
@@ -44,7 +40,6 @@ $~ cp -R output/genesys_cloud_ta/ $SPLUNK_HOME/etc/apps/
 ### Splunk running on a remote instance
 ```bash
 # Build the TA
-$~ cd genesys_cloud_ta
 $~ make build
 ```
 Copy / sync the `output/genesys_cloud_ta` folder with the remote Splunk instance
@@ -53,48 +48,47 @@ Copy / sync the `output/genesys_cloud_ta` folder with the remote Splunk instance
 ## Tests
 A CI/CD workflow will automatically perform tests when a PR is opened. The Genesys Cloud server is mocked using [Mockoon](https://mockoon.com/).
 
-To execute tests on your local environment:
-* Install Mockoon and import `tests/genesyscloud_mock.json`
-* Run the server
-    > By default it will listen on `localhost:3004`
-
 ### Integration
-Scope is to avoid introducing regressions in the `package/bin/genesyscloud_client.py`
+Scope is to avoid introducing regressions in the `package/bin/genesyscloud_client.py`, to run these tests in your **local environment** execute:
 
 ```bash
-$~ cd genesys_cloud_ta
 $~ make run-tests
 ```
 
 ### Functional
 Scope is testing the correct behaviour of the TA when executed in Splunk.
 
-Additional requirements to run these tests on your local environment:
-* Configure `tests/pytest.ini` to connect to your Splunk instance
-    ```bash
-        $~ cd tests
-        $~ python -m pytest --help
-            [...]
-            Splunk Options:
-                --splunk-url=SPLUNK_URL
-                    The url of splunk instance, defaults to localhost
-                --username=USERNAME   Splunk username, defaults to admin
-                --password=PASSWORD   Splunk password, defaults to password
-                --splunkd-port=SPLUNKD_PORT
-                    Splunk Management port, defaults to 8089
-    ```
-* Install the TA in your Splunk instance
-* Copy `etc/cicd/inputs.conf` in `$SPLUNK_HOME/etc/apps/genesys_cloud_ta/local`
-    > Create `local` dir if it does not exist
+**Requirements**
+- `Docker compose`, to spin up both Splunk and a Genesys Cloud Mock.
 
-:raising_hand: Does your Splunk instance run in Docker? Then:
-* Use [ngrok](https://ngrok.com/) to expose the mock `ngrok http 3004`
-* In the container add in `/etc/environment` something like the following environment variable `export GENESYSCLOUD_HOST="https://<your-ngrok-id>.ngrok-free.app"`
+Please download and install it as per [instructions](https://docs.docker.com/compose/install/) if you don't have it on your local machine.
 
+**Getting Started**
+
+To execute tests in your **local environment** follow these instructions:
 
 ```bash
-$~ cd genesys_cloud_ta
-$~ make run-functional-tests
+# 1. Build the TA -> will generate the 'output' folder
+$ make build
+
+# 2. Copy the configuration file
+#    !! Create 'local' dir if it does not exist !!
+$ cp ./etc/cicd/inputs.conf ./output/genesys_cloud_ta/local
+
+# 3. Spin up the test environment
+$ cd tests/vendor && \
+  export APP_NAME=genesys_cloud_ta && \
+  docker compose up -d
+
+# 4. Test whether Splunk is ready
+$ export EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
+$ docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
+
+# 5. Test connectivity between Splunk and Genesys Cloud Mock
+$ docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Genesys Cloud Mock from Splunk"
+
+# 6. Go back to the project root folder and run
+$ make run-functional-tests
 ```
 
 :point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
@@ -121,6 +115,5 @@ Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs
 
 ```bash
 # Preview your docs
-$~ cd genesys_cloud_ta
 $~ make run-docs
 ```
