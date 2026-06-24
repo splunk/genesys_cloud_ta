@@ -48,6 +48,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 conf_name="genesys_cloud_ta_settings",
             )
             logger.setLevel(log_level)
+            try:
+                proxy_config = conf_manager.get_proxy_dict(
+                    logger=logger,
+                    session_key=session_key,
+                    app_name=ADDON_NAME,
+                    conf_name="genesys_cloud_ta_settings",
+                )
+            # Handle invalid port case
+            except InvalidPortError as e:
+                logger.error(f"Proxy configuration error: {e}")
+
+            # Handle invalid hostname case
+            except InvalidHostnameError as e:
+                logger.error(f"Proxy configuration error: {e}")
             log.modular_input_start(logger, normalized_input_name)
 
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
