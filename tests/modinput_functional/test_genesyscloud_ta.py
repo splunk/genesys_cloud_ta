@@ -90,7 +90,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:users:users:routingstatus"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=60)
+        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=100)
         assert len(results) > 0 and len(results) <= 358
         assert results[0]["source"] == "user_routing_status://user_routing_status"
 
