@@ -1,5 +1,6 @@
 pytest==6.2.4
+pytest-repeat
 splunk-sdk
 solnlib
-PureCloudPlatformClientV2==221.0.0
-watchdog==3.0.0
+PureCloudPlatformClientV2==238.0.0
+# watchdog==3.0.0
