@@ -125,7 +125,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        results = self._search_oneshot(search_query=spl)
+        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=120)
         assert len(results) > 0 and len(results) <= 14
         assert results[0]["source"] == "edges_trunks_metrics://edges_trunks_metrics"
 
