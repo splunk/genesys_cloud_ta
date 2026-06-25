@@ -93,6 +93,16 @@ $ make run-functional-tests
 
 :point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
 
+**Repeat same test**
+
+To verify a single test stability and exclude errors caused by possible shared state / ordering / interference between tests, run such test in isolation as shown in the example below.
+
+```bash
+# Run 'test_input_user_routing_status' 50 times
+$ cd tests/
+$ python -m pytest modinput_functional/test_genesyscloud_ta.py::TestGenesysCloudTA::test_input_user_routing_status --count=50 -v
+```
+
 ## Release the Add-on
 A CI/CD workflow will automatically create a release. To trigger it:
 
