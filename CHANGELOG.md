@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [v0.4.1] - 2026-06-30
+
+### Fixed
+
+- Bug on data ingestion for `edges_trunks_metrics` inputs ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+- Missing import of dependencies ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+- Potential `null` error thrown in `status_page_metrics` inputs ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+
+### Removed
+
+- Support to Splunk 9.2.x ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+
+### Changed
+
+- Refactored proxy configuration ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+- Upgraded Genesys Cloud SDK to version 238.0.0, the last one supporting Python 3.9 ([#44](https://github.com/splunk/genesys_cloud_ta/pull/44)).
+
+
 ## [v0.4.0] - 2026-06-16
 
 ### Added
