@@ -22,7 +22,7 @@ class BaseTATest():
     CLIENT_ID = None
     AWS_REGION = None
     CLIENT_SECRET = None
-    RETRY = 3
+    MAX_RETRIES = 5
 
     logger = LOGGER
     splunk_url = None
@@ -82,7 +82,6 @@ class BaseTATest():
             # queue_observations does not use checkpointers
             cls.logger.warning(f"Skipping checkpointer cleanup: {checkpointer} not found - {err}")
 
-
     @classmethod
     def toggle_input(cls, input_name: str, new_state: int):
         """
@@ -113,7 +112,7 @@ class BaseTATest():
         Creates account using genesys_cloud_ta_accounts.conf
         """
         configs = cls.get_genesyscloud_accounts_configuration()
-        cls.logger.info("Create account with config %s", configs)
+        # cls.logger.info("Create account with config %s", configs)
         # Create account
         conf_filename = f"conf-{cls.TA_APP_NAME}_account"
         response = cls.splunk_client.post(

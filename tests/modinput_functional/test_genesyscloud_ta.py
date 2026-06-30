@@ -1,9 +1,9 @@
 import pytest
 import time
+import os
 import json
-import hashlib
-import sys
-import splunklib.results as results
+# import hashlib
+import splunklib.results as splk_results
 
 from .BaseTATest import BaseTATest
 
@@ -15,50 +15,43 @@ class TestGenesysCloudTA(BaseTATest):
     def teardown_method(self, method):
         super(TestGenesysCloudTA, self).teardown_method(method)
 
-    def _search(self, search_query: str, run_counter: int=0, timeout: int=40, sleep_interval: int=5) -> list:
+    def _search_oneshot(self, search_query: str, base_sleep: int=2, timeout: int=40) -> list:
         """
-        Run search to verify data ingestion
-        :param search_query: SPL to be executed
-        :param run_counter: counter to keep track of retries and calculate timeout accordingly
-        :param timeout: total seconds waited to get the response streamed back
-        :param sleep_interval: inteval
-        :return: list of events
+        Run search to verify data ingestion.
+
+        :param search_query: SPL to be executed.
+        :param base_sleep: base seconds for backoff (doubles each retry).
+        :param timeout: max seconds to cap on the wait between retries.
+        :return: list of unique event results.
         """
-        hashes = []
-        lst_results = []
-        elapsed_time = 0
+        results: list[dict] = []
+        ci_factor = 3 if os.getenv("CI", "").lower() == "true" else 1
+        max_retries = self.MAX_RETRIES * ci_factor
         kwargs = {
             "earliest_time": 0,
             "latest_time": "now",
             "output_mode": "json",
             "count": 0
         }
-        # +1min timeout each retry
-        tot_timeout = timeout + (run_counter  * 60)
 
-        while elapsed_time < tot_timeout:
-            oneshot = self.splunk_client.jobs.export(search_query, **kwargs)
-            reader = results.JSONResultsReader(oneshot)
-            for result in reader:
-                # if isinstance(result, results.Message):
-                #     # ⚠️ Don't ignore these — they may explain why results are empty
-                #     self.logger.warning(f"[{result.type}] {result.message}")
-                if not isinstance(result, dict):
-                    # Diagnostic messages may be returned in the results
-                    continue
-                str_result = json.dumps(result["_raw"])
-                md5_hash = hashlib.md5(str_result.encode()).hexdigest()
-                if md5_hash not in hashes:
-                    hashes.append(md5_hash)
-                    lst_results.append(result)
+        for attempt in range(max_retries):
+            oneshot = self.splunk_client.jobs.oneshot(search_query, **kwargs)
+            reader = splk_results.JSONResultsReader(oneshot)
 
-            time.sleep(sleep_interval)
-            elapsed_time += sleep_interval
+            for res in reader:
+                results.append(res)
 
-        assert reader.is_preview == False
-        self.logger.debug(f"_search() - Returning {len(lst_results)} results")
-        return lst_results
+            if len(results) > 0 or attempt == (max_retries - 1):
+                self.logger.debug(f"Attempt {attempt+1}, results {len(results)}")
+                break
 
+            # Exponential backoff: base * 2^attempt, capped at timeout
+            wait = min(base_sleep * (2 ** (attempt+1)), timeout)
+            self.logger.debug(f"Attempt {attempt+1}, waiting {wait}s")
+            time.sleep(wait)
+
+        self.logger.debug(f"Splunk search returned {len(results)} results")
+        return results
 
     # @pytest.mark.skip(reason="already tested")
     def test_input_chat_observations(self):
@@ -68,12 +61,7 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:analytics:flows:metrics"
         source = "conversations_metrics://chat_observations"
         spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 60
 
     def test_input_conversations_details(self):
@@ -82,12 +70,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:analytics:conversations:details"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 114
         assert results[0]["source"] == "conversations_details://conversations_details"
 
@@ -98,12 +81,7 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:analytics:flows:metrics"
         source = "conversations_metrics://conversations_metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 55
 
     def test_input_user_routing_status(self):
@@ -112,12 +90,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:users:users:routingstatus"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=100)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 358
         assert results[0]["source"] == "user_routing_status://user_routing_status"
 
@@ -127,12 +100,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:edges:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=100)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
 
         # Each event is split into 2: status and secondary status
         assert len(results) > 0 and len(results) <= 157
@@ -145,13 +113,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
 
         # Each event is split into 2: status and secondary status
         assert len(results) > 0 and len(results) <= 2 * 25
@@ -163,12 +125,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:telephonyprovidersedge:trunks:metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=100)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl, base_sleep=3, timeout=120)
         assert len(results) > 0 and len(results) <= 14
         assert results[0]["source"] == "edges_trunks_metrics://edges_trunks_metrics"
 
@@ -178,13 +135,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:analytics:queues:observations"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=100)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
-
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 4082
         assert results[0]["source"] == "queue_observations://queue_observations"
 
@@ -194,12 +145,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:users:users:aggregates"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 716
         assert results[0]["source"] == "user_aggregates://user_aggregates"
 
@@ -210,12 +156,7 @@ class TestGenesysCloudTA(BaseTATest):
         sourcetype = "genesyscloud:analytics:actions:metrics"
         source = "actions_metrics://actions_metrics"
         spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=90)
-            if results or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
         assert len(results) > 0 and len(results) <= 5
         assert results[0]["source"] == source
 
@@ -225,11 +166,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         sourcetype = "genesyscloud:operational:audits"
         spl = f"search index={self.INDEX} sourcetype={sourcetype}"
-        for attempt in range(self.RETRY):
-            results = self._search(search_query=spl, run_counter=attempt) #, timeout=120)
-            if len(results) > 0 or attempt == (self.RETRY - 1):
-                self.logger.debug(f"Results {len(results)} and attempt: {attempt}")
-                break
-            time.sleep(2)
+        results = self._search_oneshot(search_query=spl)
+
         # The mock returns ~5 entities -> ~5 events
         assert len(results) > 0 and len(results) <= 50

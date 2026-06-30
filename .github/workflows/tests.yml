@@ -55,7 +55,7 @@ jobs:
         run: |
           docker run -d --name mockoon \
             --network shared-net \
-            -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
+            -v ${{ github.workspace }}/tests/vendor/genesyscloud_mock.json:/data/mockoon.json \
             -p 3004:3004 \
             mockoon/cli:latest \
             --data /data/mockoon.json --port 3004 --log-transaction
@@ -132,6 +132,13 @@ jobs:
           python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
         working-directory: ./tests
 
+      - name: Upload Test Execution log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: conftest-${{ matrix.version }}.log
+          path: tests/conftest.log
+
       - name: Exporting Mockoon logs
         if: always()
         run: |
@@ -193,7 +200,7 @@ jobs:
         run: |
           docker run -d --name mockoon \
             --network shared-net \
-            -v ${{ github.workspace }}/tests/genesyscloud_mock.json:/data/mockoon.json \
+            -v ${{ github.workspace }}/tests/vendor/genesyscloud_mock.json:/data/mockoon.json \
             -p 3004:3004 \
             mockoon/cli:latest \
             --data /data/mockoon.json --port 3004 --log-transaction
@@ -263,6 +270,13 @@ jobs:
         run: |
           python -m pytest modinput_functional/* --junitxml=junit/test-results-${{ matrix.version }}.xml
         working-directory: ./tests
+
+      - name: Upload Test Execution log
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: conftest-${{ matrix.version }}.log
+          path: tests/conftest.log
 
       - name: Exporting Mockoon logs
         if: always()

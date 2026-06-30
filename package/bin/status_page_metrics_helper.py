@@ -4,10 +4,12 @@ import requests
 
 import import_declare_test
 from solnlib import conf_manager, log
+from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from splunklib import modularinput as smi
 from solnlib.modular_input import checkpointer
 
 from datetime import datetime, timezone
+from genesyscloud_client import ProxyHandler
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -28,42 +30,6 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
-def get_account_proxy(logger, session_key: str):
-    try:
-        proxy_config = conf_manager.get_proxy_dict(
-            logger=logger,
-            session_key=session_key,
-            app_name=ADDON_NAME,
-            conf_name="genesys_cloud_ta_settings",
-        )
-    # Handle invalid port case
-    except InvalidPortError as e:
-        logger.error(f"Proxy configuration error: {e}")
-
-    # Handle invalid hostname case
-    except InvalidHostnameError as e:
-        logger.error(f"Proxy configuration error: {e}")
-
-    if not proxy_config or not proxy_config.get('proxy_enabled'):
-        logger.info('Proxy is not enabled')
-        return None
-
-    url = proxy_config.get('proxy_url')
-    port = proxy_config.get('proxy_port')
-    user = proxy_config.get('proxy_username')
-    password = proxy_config.get('proxy_password')
-
-    proxy_type = proxy_config.get('proxy_type')
-    proxy_type = proxy_type.lower() if proxy_type else 'http'
-
-    if not all((user, password)):
-        logger.info('Proxy has no credentials found')
-        user, password = None, None
-        proxy_url = f"{proxy_type}://{url}:{port}"
-    else:
-        proxy_url = f"{proxy_type}://{user}:{password}@{url}:{port}"
-
-    return proxy_url
 
 def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
     """Fetch status data from the Genesys Cloud Status Page API"""
@@ -105,6 +71,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 conf_name="genesys_cloud_ta_settings",
             )
             logger.setLevel(log_level)
+            try:
+                proxy_config = conf_manager.get_proxy_dict(
+                    logger=logger,
+                    session_key=session_key,
+                    app_name=ADDON_NAME,
+                    conf_name="genesys_cloud_ta_settings",
+                )
+            # Handle invalid port case
+            except InvalidPortError as e:
+                logger.error(f"Proxy configuration error: {e}")
+
+            # Handle invalid hostname case
+            except InvalidHostnameError as e:
+                logger.error(f"Proxy configuration error: {e}")
             log.modular_input_start(logger, normalized_input_name)
 
             # Get checkpoints for incidents
@@ -117,9 +97,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
 
+            proxy = ProxyHandler(logger, proxy_config)
             # Fetch data from Status Page API
-            proxy = get_account_proxy(logger=logger, session_key=session_key)
-            summary = fetch_status_page_data(logger, proxy_url=proxy)
+            summary = fetch_status_page_data(logger, proxy_url=proxy.get_url_w_auth())
 
             # Process summary data
             sourcetype = "genesyscloud:operational:system"
@@ -129,29 +109,31 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             logger.debug(f"Summary data: {summary}")
 
             for component in summary.get("components", []):
-                component_updated_at = datetime.fromisoformat(component.get("updated_at").replace("Z", "+00:00")).timestamp()
-                logger.debug(f"Component updated at timestamp: {component_updated_at}")
+                updated_at = component.get("updated_at", None)
+                if updated_at:
+                    component_updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00")).timestamp()
+                    logger.debug(f"Component updated at timestamp: {component_updated_at}")
 
-                # Only process if newer than our checkpoint
-                if component_updated_at > status_page_checkpoint:
+                    # Only process if newer than our checkpoint
+                    if component_updated_at > status_page_checkpoint:
 
-                    component["page"] = page
-                    # Delete page_id field if it exists
-                    if "page_id" in component:
-                        logger.debug(f"Removing page_id field from component")
-                        del component["page_id"]
-                    logger.debug(f"Event data: {component}")
+                        component["page"] = page
+                        # Delete page_id field if it exists
+                        if "page_id" in component:
+                            logger.debug(f"Removing page_id field from component")
+                            del component["page_id"]
+                        logger.debug(f"Event data: {component}")
 
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(component, ensure_ascii=False, default=str),
-                            index=input_item.get("index"),
-                            sourcetype=sourcetype,
-                            time=component_updated_at
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(component, ensure_ascii=False, default=str),
+                                index=input_item.get("index"),
+                                sourcetype=sourcetype,
+                                time=component_updated_at
+                            )
                         )
-                    )
-                    logger.debug(f"Status summary event written")
-                    events_count += 1
+                        logger.debug(f"Status summary event written")
+                        events_count += 1
 
             # Update checkpoint if data was processed
             current_time = datetime.now(timezone.utc).timestamp()
