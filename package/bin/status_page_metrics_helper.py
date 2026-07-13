@@ -81,10 +81,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Handle invalid port case
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
 
             # Handle invalid hostname case
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             # Get checkpoints for incidents
