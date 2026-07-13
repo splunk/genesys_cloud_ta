@@ -104,7 +104,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 body = {
                     "interval": interval,
                     "granularity": "P1D",
-                    "groupBy": ["userId"],
+                    "group_by": ["userId"],
                     "metrics": [
                         "tAgentRoutingStatus",
                         "tOrganizationPresence",
