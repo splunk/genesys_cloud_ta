@@ -175,7 +175,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 else:
                     # Retrieved via download URL file
                     value = entity
-                    time_value = datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+                    time_value = datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(value, ensure_ascii=False, default=str),

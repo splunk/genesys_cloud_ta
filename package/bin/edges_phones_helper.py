@@ -8,7 +8,7 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import PhoneModel
 
@@ -86,11 +86,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger, client_id, client_secret, account_region, proxy_config
             )
 
-            checkpointer_key_name = input_name.split("/")[-1]
-            # if we don't have any checkpoint, we default it to 1970
+            # Setting a default start date of 7 days ago from now
+            now = datetime.now(timezone.utc)
+            fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            checkpointer_key_name = normalized_input_name
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or fallback_start
             )
 
             p_model = PhoneModel(

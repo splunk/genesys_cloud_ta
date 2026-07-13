@@ -112,7 +112,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         for data_entry in event.get("data", []):
                             interval_str = data_entry.get("interval")
                             interval_start_time = (
-                                datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+                                datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
                                 if interval_str else round(start_time.timestamp(), 3)
                             )
 

@@ -7,7 +7,7 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -71,10 +71,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
             client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_config)
 
+            # Setting a default start date of 7 days ago from now
+            now = datetime.now(timezone.utc)
+            fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or fallback_start
             )
 
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
@@ -132,7 +135,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     try:
                         for data_entry in event["data"]:
                             interval_start_time = (
-                                datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").timestamp()
+                                datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
                                 if event.get("data") else round(start_time.timestamp(), 3)
                             )
                             for metric in data_entry["metrics"]:
