@@ -69,7 +69,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     conf_name="genesys_cloud_ta_settings",
                 )
             # Handle invalid port case
-            except solnlib.soln_exceptions.InvalidPortError as e:
+            except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
 
             # Handle invalid hostname case
