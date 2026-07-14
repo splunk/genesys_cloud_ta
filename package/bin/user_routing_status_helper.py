@@ -78,7 +78,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
-            fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+            fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
@@ -118,7 +118,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if rcounter > 0:
                 logger.debug(f"Indexed '{rcounter}' events")
-                new_checkpoint = datetime.now(timezone.utc).timestamp()
+                new_checkpoint = now.timestamp()
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
