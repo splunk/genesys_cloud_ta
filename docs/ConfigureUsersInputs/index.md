@@ -14,6 +14,13 @@ Before you enable inputs, complete the previous steps in the configuration proce
 
 Configure your inputs on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder. You can configure inputs using Splunk Web (recommended) or using the configuration files.
 
+!!! warning "API rate consumption"
+
+    To avoid high API rate consumption, be aware that enabling **User Routing Statuses** collection can trigger millions of API calls depending on your organization's size.
+
+    To optimize performance and reduce API load, we recommend using AWS EventBridge configured to receive events via the `v2.users.{id}.routingStatus` topic. This event-driven approach is triggered only when a user's routing status changes, making it the most accurate and resource-efficient method for collecting this information.
+
+
 ## Configure inputs using Splunk Web
 
 Configure your inputs using Splunk Web on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder.
