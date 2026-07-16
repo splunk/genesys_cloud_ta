@@ -18,7 +18,7 @@ Configure your inputs on the Splunk platform instance responsible for collecting
 
     To avoid high API rate consumption, be aware that enabling **User Routing Statuses** collection can trigger millions of API calls depending on your organization's size.
 
-    To optimize performance and reduce API load, we recommend using AWS EventBridge configured to receive events via the `v2.users.{id}.routingStatus` topic. This event-driven approach is triggered only when a user's routing status changes, making it the most accurate and resource-efficient method for collecting this information.
+    To optimize performance and reduce API load, we recommend using AWS EventBridge configured to receive events via the `v2.users.{id}.routingStatus` topic, as described [here](../IntegrateEventBridge/index.md). This event-driven approach is triggered only when a user's routing status changes, making it the most accurate and resource-efficient method for collecting this information.
 
 
 ## Configure inputs using Splunk Web
