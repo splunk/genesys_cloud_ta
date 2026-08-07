@@ -1071,6 +1071,343 @@
                     ],
                     "inputHelperModule": "status_page_metrics_helper",
                     "title": "System Services Status"
+                },
+                {
+                    "name": "users_directory",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds. Recommended: 86400 (daily).",
+                            "required": true,
+                            "defaultValue": "86400"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "users_directory_helper",
+                    "title": "Users Directory",
+                    "description": "Ingest Genesys Cloud user directory snapshots (GET /api/v2/users). Requires OAuth scope: users:readonly."
+                },
+                {
+                    "name": "queues_directory",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds. Recommended: 86400 (daily).",
+                            "required": true,
+                            "defaultValue": "86400"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "queues_directory_helper",
+                    "title": "Queues Directory",
+                    "description": "Ingest Genesys Cloud queue directory snapshots (GET /api/v2/routing/queues). Requires OAuth scope: routing:readonly."
+                },
+                {
+                    "name": "usage_events",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds. Recommended: 86400 (daily).",
+                            "required": true,
+                            "defaultValue": "86400"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "usage_events_helper",
+                    "title": "Usage Events",
+                    "description": "Ingest API usage event records (POST /api/v2/usage/events/query). Replaces deprecated usage endpoint. Requires OAuth scope: usage:readonly."
+                },
+                {
+                    "name": "org_usage",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds. Recommended: 86400 (daily).",
+                            "required": true,
+                            "defaultValue": "86400"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        }
+                    ],
+                    "inputHelperModule": "org_usage_helper",
+                    "title": "Organization Usage",
+                    "description": "Ingest organization-level usage aggregates (POST /api/v2/usage/aggregates/query/jobs). Replaces deprecated usage endpoint. Requires OAuth scope: usage:readonly."
+                },
+                {
+                    "name": "oauth_client_usage",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Name",
+                            "validators": [
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "errorMsg": "Length of input name should be between 1 and 100",
+                                    "minLength": 1,
+                                    "maxLength": 100
+                                }
+                            ],
+                            "field": "name",
+                            "help": "A unique name for the data input.",
+                            "required": true
+                        },
+                        {
+                            "type": "interval",
+                            "field": "interval",
+                            "label": "Interval",
+                            "help": "Time interval of the data input, in seconds. Recommended: 86400 (daily).",
+                            "required": true,
+                            "defaultValue": "86400"
+                        },
+                        {
+                            "type": "singleSelect",
+                            "field": "index",
+                            "label": "Index",
+                            "defaultValue": "default",
+                            "options": {
+                                "endpointUrl": "data/indexes",
+                                "denyList": "^_.*$",
+                                "createSearchChoice": true
+                            },
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "maxLength": 80,
+                                    "errorMsg": "Length of index name should be between 1 and 80."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Account to use",
+                            "options": {
+                                "referenceName": "account"
+                            },
+                            "help": "Account to use for this input.",
+                            "field": "account",
+                            "required": true
+                        },
+                        {
+                            "type": "text",
+                            "label": "OAuth Client ID",
+                            "field": "oauth_client_id",
+                            "help": "The OAuth client ID to query usage for. If empty, queries usage for all clients.",
+                            "required": false
+                        }
+                    ],
+                    "inputHelperModule": "oauth_client_usage_helper",
+                    "title": "OAuth Client Usage",
+                    "description": "Ingest per-OAuth-client usage aggregates (POST /api/v2/usage/client/{clientId}/aggregates/query/jobs). Requires OAuth scope: usage:readonly."
                 }
             ],
             "title": "Inputs",
