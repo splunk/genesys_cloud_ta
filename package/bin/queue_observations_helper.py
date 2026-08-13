@@ -49,10 +49,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Handle invalid port case
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
 
             # Handle invalid hostname case
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")

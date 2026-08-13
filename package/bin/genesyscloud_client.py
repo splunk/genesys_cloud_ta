@@ -124,6 +124,9 @@ class GenesysCloudClient:
                 enable_pagination = any(key in api_response.attribute_map for key in pagination_params)
                 if hasattr(api_response, "entities") and api_response.entities:
                     for item in api_response.entities:
+                        # Skip if empty/none list
+                        if not item:
+                            continue
                         items.append(item)
                 else:
                     items.append(api_response)
@@ -174,6 +177,12 @@ class GenesysCloudClient:
                 self.logger.error(f"{err_message} [{e.status}] {e.reason} - {message}")
             except ValueError as ve:
                 self.logger.warning(f"{err_message} {ve}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
+            except TypeError as te:
+                self.logger.warning(f"{err_message} {te}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
+            except KeyError as ke:
+                self.logger.warning(f"{err_message} {ke}")
                 self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
 
         return []
@@ -330,6 +339,12 @@ class GenesysCloudClient:
                 self.logger.error(f"{err_message} [{e.status}] {e.reason} - {message}")
             except ValueError as ve:
                 self.logger.warning(f"{err_message} {ve}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
+            except TypeError as te:
+                self.logger.warning(f"{err_message} {te}")
+                self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
+            except KeyError as ke:
+                self.logger.warning(f"{err_message} {ke}")
                 self.logger.error(f"{err_message} [{e.status}] {e.reason} - {e.body}")
 
             return None

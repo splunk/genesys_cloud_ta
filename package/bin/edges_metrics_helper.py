@@ -8,7 +8,7 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import EdgeModel
 
@@ -72,10 +72,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Handle invalid port case
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
 
             # Handle invalid hostname case
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             account_region = get_account_property(session_key, input_item.get("account"), "region")
@@ -87,11 +90,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger, client_id, client_secret, account_region, proxy_config
             )
 
-            checkpointer_key_name = input_name.split("/")[-1]
-            # if we don't have any checkpoint, we default it to 1970
+            # Setting a default start date of 7 days ago from now
+            now = datetime.now(timezone.utc)
+            fallback_start = (now - timedelta(days=7)).timestamp()
+            checkpointer_key_name = normalized_input_name
             current_checkpoint = (
                 kvstore_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or fallback_start
             )
 
             e_model = EdgeModel(client.get(
@@ -133,7 +138,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
-                new_checkpoint = datetime.now(timezone.utc).timestamp()
+                new_checkpoint = now.timestamp()
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
