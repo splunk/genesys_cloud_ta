@@ -84,10 +84,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Handle invalid port case
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
 
             # Handle invalid hostname case
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             account_region = get_account_property(session_key, input_item.get("account"), "region")
@@ -175,7 +178,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 else:
                     # Retrieved via download URL file
                     value = entity
-                    time_value = datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+                    time_value = datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(value, ensure_ascii=False, default=str),

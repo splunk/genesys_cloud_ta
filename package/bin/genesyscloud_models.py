@@ -24,7 +24,7 @@ class GCBaseModel:
 
     def to_datetime(self, dt_string: str) -> datetime:
         formatting_str = "%Y-%m-%dT%H:%M:%S.%fZ"
-        return datetime.datetime.strptime(dt_string, formatting_str)
+        return datetime.datetime.strptime(dt_string, formatting_str).replace(tzinfo=datetime.timezone.utc)
 
     def extract(self, idx: int, sub_key: str, keys_to_extract: list, enable_camelcase: bool = False) -> dict:
         """

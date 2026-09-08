@@ -41,7 +41,7 @@ def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
                 "http": proxy_url,
                 "https": proxy_url,
             }
-            logger.info(f"Using proxy: {proxy_url}")
+            logger.info(f"Proxy enabled to fetch data.")
         summary_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/summary.json", proxies=proxies)
         summary_response.raise_for_status()
         summary_data = summary_response.json()
@@ -81,10 +81,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Handle invalid port case
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
 
             # Handle invalid hostname case
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             # Get checkpoints for incidents
