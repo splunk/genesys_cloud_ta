@@ -124,6 +124,16 @@ def body_users(request):
 
     return _body_users
 
+
+@pytest.fixture(scope="class")
+def body_usage(request):
+    def _body_usage(with_granularity: bool = True):
+        body = dict(request.getfixturevalue("body_basic"))
+        if with_granularity:
+            body["granularity"] = "Day"
+        return body
+    return _body_usage
+
 def pytest_configure(config):
     """
     Handles pytest configuration, runs before the session start.

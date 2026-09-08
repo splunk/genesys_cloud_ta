@@ -170,3 +170,53 @@ class TestGenesysCloudTA(BaseTATest):
 
         # The mock returns ~5 entities -> ~5 events
         assert len(results) > 0 and len(results) <= 50
+
+    def test_input_usage_events(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:operational:events"
+        source = "usage_events://usage_events"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        results = self._search_oneshot(search_query=spl)
+        assert len(results) > 0 and len(results) <= 50
+
+    def test_input_org_usage(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:operational:usage:api"
+        source = "org_usage://org_usage"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        results = self._search_oneshot(search_query=spl)
+        assert len(results) > 0 and len(results) <= 50
+
+    def test_input_oauth_client_usage(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:operational:usage:clients_api"
+        source = "oauth_client_usage://oauth_client_usage"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        results = self._search_oneshot(search_query=spl)
+        assert len(results) > 0 and len(results) <= 50
+
+    def test_input_users_directory(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:directory:users"
+        source = "users_directory://users_directory"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        results = self._search_oneshot(search_query=spl)
+        assert len(results) > 0 and len(results) <= 358
+
+    def test_input_queues_directory(self):
+        """
+        This test will check whether data was successfully indexed
+        """
+        sourcetype = "genesyscloud:directory:queues"
+        source = "queues_directory://queues_directory"
+        spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
+        results = self._search_oneshot(search_query=spl)
+        assert len(results) > 0 and len(results) <= 157

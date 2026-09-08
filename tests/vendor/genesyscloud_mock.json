@@ -1337,6 +1337,193 @@
       "responseMode": null,
       "streamingMode": null,
       "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000001",
+      "type": "http",
+      "documentation": "Submit organization API usage query (events)",
+      "method": "post",
+      "endpoint": "api/v2/usage/query",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000101",
+          "body": "{\n  \"executionId\": \"{{faker 'string.uuid'}}\",\n  \"resultsUri\": \"/api/v2/usage/query/results\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Accepted usage query",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"},
+            {"target": "body", "modifier": "interval", "value": "", "invert": true, "operator": "null"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000002",
+      "type": "http",
+      "documentation": "Get organization API usage query results (events)",
+      "method": "get",
+      "endpoint": "api/v2/usage/query/:executionId/results",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000102",
+          "body": "{\n  \"queryStatus\": \"COMPLETE\",\n  \"results\": [\n    {{#repeat 3}}\n    {\n      \"clientId\": \"{{faker 'string.uuid'}}\",\n      \"clientName\": \"TestClient\",\n      \"templateUri\": \"/api/v2/users\",\n      \"httpMethod\": \"GET\",\n      \"status200\": {{int 1 100}},\n      \"requests\": {{int 1 100}},\n      \"date\": \"2025-03-24T00:00:00.000Z\"\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ],\n  \"cursors\": {}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Usage query results",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "params", "modifier": "executionId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000003",
+      "type": "http",
+      "documentation": "Submit organization API usage aggregates query job",
+      "method": "post",
+      "endpoint": "api/v2/usage/aggregates/query/jobs",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000103",
+          "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"name\": \"orgUsageJob\",\n  \"resultsUri\": \"/api/v2/usage/aggregates/query/jobs/results\",\n  \"selfUri\": \"/api/v2/usage/aggregates/query/jobs\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Accepted org usage job",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"},
+            {"target": "body", "modifier": "interval", "value": "", "invert": true, "operator": "null"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000004",
+      "type": "http",
+      "documentation": "Get organization API usage aggregates query job results",
+      "method": "get",
+      "endpoint": "api/v2/usage/aggregates/query/jobs/:jobId",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000104",
+          "body": "{\n  \"queryStatus\": \"FULFILLED\",\n  \"selfUri\": \"/api/v2/usage/aggregates/query/jobs/{{urlParam 'jobId'}}\",\n  \"entities\": [\n    {{#repeat 3}}\n    {\n      \"clientId\": \"{{faker 'string.uuid'}}\",\n      \"clientName\": \"TestClient\",\n      \"organizationId\": \"{{faker 'string.uuid'}}\",\n      \"requests\": {{int 1 100}},\n      \"status200\": {{int 1 100}},\n      \"date\": \"2025-03-24T00:00:00.000Z\"\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Org usage job results",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "params", "modifier": "jobId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000005",
+      "type": "http",
+      "documentation": "Submit OAuth client API usage aggregates query job",
+      "method": "post",
+      "endpoint": "api/v2/usage/client/:clientId/aggregates/query/jobs",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000105",
+          "body": "{\n  \"id\": \"{{faker 'string.uuid'}}\",\n  \"name\": \"clientUsageJob\",\n  \"resultsUri\": \"/api/v2/usage/client/{{urlParam 'clientId'}}/aggregates/query/jobs/results\",\n  \"selfUri\": \"/api/v2/usage/client/{{urlParam 'clientId'}}/aggregates/query/jobs\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Accepted client usage job",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"},
+            {"target": "body", "modifier": "interval", "value": "", "invert": true, "operator": "null"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b1000001-0000-4000-8000-000000000006",
+      "type": "http",
+      "documentation": "Get OAuth client API usage aggregates query job results",
+      "method": "get",
+      "endpoint": "api/v2/usage/client/:clientId/aggregates/query/jobs/:jobId",
+      "responses": [
+        {
+          "uuid": "b1000001-0000-4000-8000-000000000106",
+          "body": "{\n  \"queryStatus\": \"FULFILLED\",\n  \"selfUri\": \"/api/v2/usage/client/{{urlParam 'clientId'}}/aggregates/query/jobs/{{urlParam 'jobId'}}\",\n  \"entities\": [\n    {{#repeat 3}}\n    {\n      \"clientId\": \"{{urlParam 'clientId'}}\",\n      \"clientName\": \"TestClient\",\n      \"requests\": {{int 1 100}},\n      \"status200\": {{int 1 100}},\n      \"date\": \"2025-03-24T00:00:00.000Z\"\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Client usage job results",
+          "headers": [{"key": "content-type", "value": "application/json"}],
+          "bodyType": "INLINE",
+          "rules": [
+            {"target": "params", "modifier": "clientId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "params", "modifier": "jobId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
+            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
+          ],
+          "rulesOperator": "AND",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
     }
   ],
   "rootChildren": [
@@ -1411,6 +1598,30 @@
     {
       "type":"route",
       "uuid":"9b1f5b3c-72a7-45ac-bf3a-8d0d1b2f9c45"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000001"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000002"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000003"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000004"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000005"
+    },
+    {
+      "type": "route",
+      "uuid": "b1000001-0000-4000-8000-000000000006"
     }
   ],
   "proxyMode": false,
