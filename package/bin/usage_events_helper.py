@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 
 import import_declare_test
 from solnlib import conf_manager, log
@@ -12,7 +13,10 @@ from genesyscloud_client import GenesysCloudClient
 
 
 ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:usage:events"
+SOURCETYPE = "genesyscloud:operational:events"
+
+DEFAULT_POLL_INTERVAL_SECONDS = "10"
+DEFAULT_MAX_POLL_ATTEMPTS = "30"
 
 
 def logger_for_input(input_name: str) -> logging.Logger:
@@ -60,10 +64,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
-                proxy_config = None
+                continue
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
-                proxy_config = None
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
@@ -82,33 +87,58 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-            logger.info(f"Fetching usage events from {last_checkpoint} to {new_checkpoint}")
+            max_polls = int(input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS))
+            poll_sleep = int(input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS))
+
+            logger.info(f"Submitting usage events query: {last_checkpoint} to {new_checkpoint}")
 
             body = {
                 "interval": f"{last_checkpoint}/{new_checkpoint}",
             }
-            response = client.post(
+            submit_response = client.post(
                 "UsageApi",
-                "post_usage_events_query",
-                "ApiUsageQuery",
+                "post_usage_query",
+                "ApiUsageOrganizationQuery",
                 body,
             )
 
-            event_counter = 0
-            if response is not None:
-                results = client.convert_response(
-                    [response] if not isinstance(response, list) else response,
-                    "results"
-                )
-                for item in results:
-                    event_writer.write_event(
-                        smi.Event(
-                            data=json.dumps(item, ensure_ascii=False, default=str),
-                            index=input_item.get("index"),
-                            sourcetype=SOURCETYPE,
+            results = []
+            if submit_response:
+                submit_dict = submit_response.to_dict() or {}
+                execution_id = None if not submit_dict else submit_dict.get("execution_id") or submit_dict.get("id")
+
+                if not execution_id:
+                    logger.error(f"No execution ID returned from usage events query: {submit_response}")
+                else:
+                    logger.info(f"Polling usage events execution {execution_id}")
+                    for attempt in range(max_polls):
+                        time.sleep(poll_sleep)
+                        result_response = client.get(
+                            "UsageApi",
+                            "get_usage_query_execution_id_results",
+                            execution_id,
                         )
+                        if result_response:
+                            results = client.convert_response(result_response, "results")
+                            if results:
+                                break
+                    else:
+                        logger.warning(
+                            f"Usage events execution {execution_id} did not complete within {max_polls * poll_sleep}s"
+                        )
+            else:
+                logger.error("Failed to submit usage events query")
+
+            event_counter = 0
+            for item in results:
+                event_writer.write_event(
+                    smi.Event(
+                        data=json.dumps(item, ensure_ascii=False, default=str),
+                        index=input_item.get("index"),
+                        sourcetype=SOURCETYPE,
                     )
-                    event_counter += 1
+                )
+                event_counter += 1
 
             if event_counter > 0:
                 logger.debug(f"Indexed {event_counter} usage event records")

@@ -13,10 +13,10 @@ from genesyscloud_client import GenesysCloudClient
 
 
 ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:usage:organization"
+SOURCETYPE = "genesyscloud:operational:usage:api"
 
-POLL_INTERVAL_SECONDS = 10
-MAX_POLL_ATTEMPTS = 30
+DEFAULT_POLL_INTERVAL_SECONDS = "10"
+DEFAULT_MAX_POLL_ATTEMPTS = "30"
 
 
 def logger_for_input(input_name: str) -> logging.Logger:
@@ -64,10 +64,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
             except InvalidPortError as e:
                 logger.error(f"Proxy configuration error: {e}")
-                proxy_config = None
+                continue
             except InvalidHostnameError as e:
                 logger.error(f"Proxy configuration error: {e}")
-                proxy_config = None
+                continue
+
             log.modular_input_start(logger, normalized_input_name)
 
             client_id = get_account_property(session_key, input_item.get("account"), "client_id")
@@ -86,56 +87,50 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
+            max_polls = int(input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS))
+            poll_sleep = int(input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS))
+
             logger.info(f"Submitting org usage aggregates query job: {last_checkpoint} to {new_checkpoint}")
 
             body = {
                 "interval": f"{last_checkpoint}/{new_checkpoint}",
-                "granularity": "P1D",
+                "granularity": "Day",
             }
 
             job_response = client.post(
                 "UsageApi",
                 "post_usage_aggregates_query_jobs",
-                "UsageAggregatesQueryRequest",
+                "OrganizationPublicApiUsageQueryRequest",
                 body,
             )
 
-            if job_response is None:
-                logger.error("Failed to submit org usage query job")
-                log.modular_input_end(logger, normalized_input_name)
-                continue
-
-            job_id = None
-            if hasattr(job_response, "to_dict"):
-                job_dict = job_response.to_dict()
-                job_id = job_dict.get("id") or job_dict.get("job_id")
-            elif isinstance(job_response, dict):
-                job_id = job_response.get("id") or job_response.get("job_id")
-
-            if not job_id:
-                logger.error(f"No job ID returned from query job submission: {job_response}")
-                log.modular_input_end(logger, normalized_input_name)
-                continue
-
-            logger.info(f"Polling org usage job {job_id}")
             results = []
-            for attempt in range(MAX_POLL_ATTEMPTS):
-                time.sleep(POLL_INTERVAL_SECONDS)
-                status_response = client.get(
-                    "UsageApi", "get_usage_aggregates_query_jobs_results",
-                    job_id=job_id,
-                )
-                if status_response:
-                    for item in status_response:
-                        if hasattr(item, "to_dict"):
-                            item_dict = item.to_dict()
-                        else:
-                            item_dict = item
-                        if item_dict.get("data"):
-                            results.extend(item_dict["data"])
-                    break
+            if job_response:
+                job_dict = job_response.to_dict() or {}
+                job_id = None if not job_dict else job_dict.get("id") or job_dict.get("job_id")
+
+                if not job_id:
+                    logger.error(f"No job ID returned from query job submission: {job_response}")
+                else:
+                    logger.info(f"Polling org usage job {job_id}")
+                    for attempt in range(max_polls):
+                        time.sleep(poll_sleep)
+                        entities = client.get(
+                            "UsageApi",
+                            "get_usage_aggregates_query_job",
+                            job_id,
+                        )
+                        if entities:
+                            for item in entities:
+                                item_dict = item.to_dict() if hasattr(item, "to_dict") else item
+                                results.append(item_dict)
+                            break
+                    else:
+                        logger.warning(
+                            f"Org usage job {job_id} did not complete within {max_polls * poll_sleep}s"
+                        )
             else:
-                logger.warning(f"Org usage job {job_id} did not complete within {MAX_POLL_ATTEMPTS * POLL_INTERVAL_SECONDS}s")
+                logger.error("Failed to submit org usage query job")
 
             event_counter = 0
             for item in results:

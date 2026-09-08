@@ -1264,11 +1264,27 @@
                             "help": "Account to use for this input.",
                             "field": "account",
                             "required": true
+                        },
+                        {
+                            "type": "text",
+                            "field": "max_poll_attempts",
+                            "label": "Max poll attempts",
+                            "required": false,
+                            "defaultValue": "30",
+                            "help": "Maximum number of status checks (polls) performed for the usage query before giving up. Increase for long-running queries; each attempt waits 'Poll interval (seconds)' between checks."
+                        },
+                        {
+                            "type": "text",
+                            "field": "poll_interval_seconds",
+                            "label": "Poll interval (seconds)",
+                            "required": false,
+                            "defaultValue": "10",
+                            "help": "Seconds to wait between status checks (polls) of the usage query. Lower values respond faster but use more API calls; higher values reduce rate-limit pressure."
                         }
                     ],
                     "inputHelperModule": "usage_events_helper",
-                    "title": "Usage Events",
-                    "description": "Ingest API usage event records (POST /api/v2/usage/events/query). Replaces deprecated usage endpoint. Requires OAuth scope: usage:readonly."
+                    "title": "Usage Operational Events",
+                    "description": "Ingest API usage operational events."
                 },
                 {
                     "name": "org_usage",
@@ -1330,11 +1346,27 @@
                             "help": "Account to use for this input.",
                             "field": "account",
                             "required": true
+                        },
+                        {
+                            "type": "text",
+                            "field": "max_poll_attempts",
+                            "label": "Max poll attempts",
+                            "required": false,
+                            "defaultValue": "30",
+                            "help": "Maximum number of status checks (polls) performed for the usage query before giving up. Increase for long-running queries; each attempt waits 'Poll interval (seconds)' between checks."
+                        },
+                        {
+                            "type": "text",
+                            "field": "poll_interval_seconds",
+                            "label": "Poll interval (seconds)",
+                            "required": false,
+                            "defaultValue": "10",
+                            "help": "Seconds to wait between status checks (polls) of the usage query. Lower values respond faster but use more API calls; higher values reduce rate-limit pressure."
                         }
                     ],
                     "inputHelperModule": "org_usage_helper",
-                    "title": "Organization Usage",
-                    "description": "Ingest organization-level usage aggregates (POST /api/v2/usage/aggregates/query/jobs). Replaces deprecated usage endpoint. Requires OAuth scope: usage:readonly."
+                    "title": "Organization API Usage",
+                    "description": "Ingest organization-level API usage aggregates."
                 },
                 {
                     "name": "oauth_client_usage",
@@ -1403,11 +1435,27 @@
                             "field": "oauth_client_id",
                             "help": "The OAuth client ID to query usage for. If empty, queries usage for all clients.",
                             "required": false
+                        },
+                        {
+                            "type": "text",
+                            "field": "max_poll_attempts",
+                            "label": "Max poll attempts",
+                            "required": false,
+                            "defaultValue": "30",
+                            "help": "Maximum number of status checks (polls) performed for the usage query before giving up. Increase for long-running queries; each attempt waits 'Poll interval (seconds)' between checks."
+                        },
+                        {
+                            "type": "text",
+                            "field": "poll_interval_seconds",
+                            "label": "Poll interval (seconds)",
+                            "required": false,
+                            "defaultValue": "10",
+                            "help": "Seconds to wait between status checks (polls) of the usage query. Lower values respond faster but use more API calls; higher values reduce rate-limit pressure."
                         }
                     ],
                     "inputHelperModule": "oauth_client_usage_helper",
-                    "title": "OAuth Client Usage",
-                    "description": "Ingest per-OAuth-client usage aggregates (POST /api/v2/usage/client/{clientId}/aggregates/query/jobs). Requires OAuth scope: usage:readonly."
+                    "title": "OAuth Client API Usage",
+                    "description": "Ingest OAuth clients API usage aggregates."
                 }
             ],
             "title": "Inputs",
@@ -1428,7 +1476,12 @@
                     "groupTitle": "Operational",
                     "groupServices": [
                         "status_page_metrics",
-                        "audit_query"
+                        "audit_query",
+                        "usage_events",
+                        "org_usage",
+                        "oauth_client_usage",
+                        "users_directory",
+                        "queues_directory"
                     ]
                 },
                 {
