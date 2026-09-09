@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [v0.4.2] - 2026-09-09
+
+### Fixed
+
+- Time alignment on UTC ([#47](https://github.com/splunk/genesys_cloud_ta/pull/47)).
+- Proxy configuration errors in case of failures ([#47](https://github.com/splunk/genesys_cloud_ta/pull/47)).
+
+### Changed
+
+- Documentation grammar review and typos ([#45](https://github.com/splunk/genesys_cloud_ta/pull/45)).
+- Fallback start date to 7 days ago to prevent too much data to be pulled in production environments ([#47](https://github.com/splunk/genesys_cloud_ta/pull/47)).
+
+
 ## [v0.4.1] - 2026-06-30
 
 ### Fixed
