@@ -9,6 +9,9 @@ The Genesys Cloud Add-on for Splunk integrates with Genesys Cloud to collect met
 
 Please check [Github Pages](https://splunk.github.io/genesys_cloud_ta/) for the full documentation.
 
+> [!NOTE]
+> Discover more on the Genesys Cloud integration with Splunk in this [new blog post](https://lantern.splunk.com/Industry_Use_Cases/Contact_Center/Integrating_Genesys_Cloud_with_the_Splunk_platform) on Splunk Lantern.
+
 ## Contributing
 See contributing [guidelines](CONTRIBUTING.md).
 
