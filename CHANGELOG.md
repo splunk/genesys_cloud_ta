@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 - Documentation grammar review and typos ([#45](https://github.com/splunk/genesys_cloud_ta/pull/45)).
 - Fallback start date to 7 days ago to prevent too much data to be pulled in production environments ([#47](https://github.com/splunk/genesys_cloud_ta/pull/47)).
+- App logo ([#49](https://github.com/splunk/genesys_cloud_ta/pull/49)).
 
 
 ## [v0.4.1] - 2026-06-30
