@@ -7,7 +7,8 @@
 
 The Genesys Cloud Add-on for Splunk integrates with Genesys Cloud to collect metrics, service statuses and operational events.
 
-Please check [Github Pages](https://splunk.github.io/genesys_cloud_ta/) for the full documentation.
+👉 **Download the Add-on** from the [release page](https://github.com/splunk/genesys_cloud_ta/releases) or from [Splunkbase](https://splunkbase.splunk.com/app/9730) and
+**read the [documentation](https://splunk.github.io/genesys_cloud_ta/) to start**. 👈
 
 > [!NOTE]
 > Discover more on the Genesys Cloud integration with Splunk in this [new blog post](https://lantern.splunk.com/Industry_Use_Cases/Contact_Center/Integrating_Genesys_Cloud_with_the_Splunk_platform) on Splunk Lantern.
