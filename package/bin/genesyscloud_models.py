@@ -61,7 +61,7 @@ class TrunkModel(GCBaseModel):
     def get_trunk_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_TRUNK_IDS * batch
         slice_limit = self.MAX_TRUNK_IDS + factor
-        remaining_trunks = abs(len(self.data) - factor)
+        remaining_trunks = max(0, len(self.data) - factor)
         has_next_batch = remaining_trunks > self.MAX_TRUNK_IDS
         return [trunk["id"] for trunk in self.data[factor:slice_limit]], has_next_batch
 
@@ -92,7 +92,7 @@ class EdgeModel(GCBaseModel):
     def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_EDGE_IDS*batch
         slice_limit = self.MAX_EDGE_IDS + factor
-        remaining_edges = abs(len(self.data) - factor)
+        remaining_edges = max(0, len(self.data) - factor)
         has_next_batch = remaining_edges > self.MAX_EDGE_IDS
         return [edge["id"] for edge in self.data[factor:slice_limit]], has_next_batch
 
@@ -162,7 +162,7 @@ class QueueModel(GCBaseModel):
     def get_queue_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_QUEUE_IDS*batch
         slice_limit = self.MAX_QUEUE_IDS + factor
-        remaining_queues = abs(len(self.data) - factor)
+        remaining_queues = max(0, len(self.data) - factor)
         has_next_batch = remaining_queues > self.MAX_QUEUE_IDS
         return [queue["id"] for queue in self.data[factor:slice_limit]], has_next_batch
 
@@ -193,7 +193,7 @@ class UserModel(GCBaseModel):
     def get_user_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_USER_IDS*batch
         slice_limit = self.MAX_USER_IDS + factor
-        remaining_users = abs(len(self.data) - factor)
+        remaining_users = max(0, len(self.data) - factor)
         has_next_batch = remaining_users > self.MAX_USER_IDS
         return [user["id"] for user in self.data[factor:slice_limit]], has_next_batch
 
