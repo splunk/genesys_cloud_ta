@@ -1,6 +1,5 @@
 import re
 import datetime
-import json
 
 from typing import List, Tuple
 from PureCloudPlatformClientV2.models import (
