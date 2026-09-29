@@ -82,10 +82,10 @@ $ cd tests/vendor && \
 
 # 4. Test whether Splunk is ready
 $ export EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
-$ docker logs splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
+$ docker logs gc_splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
 
 # 5. Test connectivity between Splunk and Genesys Cloud Mock
-$ docker exec splunk curl -v http://mockoon:3004/ || echo "Failed to reach Genesys Cloud Mock from Splunk"
+$ docker exec gc_splunk curl -v http://mockoon:3004/ || echo "Failed to reach Genesys Cloud Mock from Splunk"
 
 # 6. Go back to the project root folder and run
 $ make run-functional-tests
