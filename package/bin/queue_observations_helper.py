@@ -105,10 +105,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "QueueObservationQuery",
                     body
                 )
-                # Ensure data exists before processing
-                if response:
-                    res_dict = response.to_dict() or {}
-                    results.extend(res_dict.get("results", []) or [])
+                results.extend(client.convert_response(response))
                 cnt += 1
             logger.debug(f"Fetched '{len(results)}' queues observations")
 

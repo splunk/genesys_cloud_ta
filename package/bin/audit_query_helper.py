@@ -135,8 +135,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             if not response:
                 raise Exception("No response was received from the audit POST request. Please verify the request parameters and try again.")
+            if len(response) > 1:
+                logger.warning(f"AuditApi call returned too many responses: {len(response)}")
 
-            transaction_id = response.id
+            transaction_id = response[0].id
 
             max_polls = int(input_item.get("max_poll_attempts", "10"))
             poll_sleep = int(input_item.get("poll_interval_seconds", "2"))

@@ -130,9 +130,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "UserAggregationQuery",
                     body
                 )
-                if data:
-                    res_dict = data.to_dict() or {}
-                    results.extend(res_dict.get("results", []) or [])
+                results.extend(client.convert_response(data))
                 cnt+=1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 
