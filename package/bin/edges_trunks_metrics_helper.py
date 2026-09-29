@@ -108,12 +108,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             has_more = True
             while has_more:
                 trunk_ids, has_more = t_model.get_trunk_ids(cnt)
-                data = client.get(
-                    "TelephonyProvidersEdgeApi",
-                    "get_telephony_providers_edges_trunks_metrics",
-                    ','.join(trunk_ids)
-                )
-                metrics.extend(data)
+                if trunk_ids:
+                    data = client.get(
+                        "TelephonyProvidersEdgeApi",
+                        "get_telephony_providers_edges_trunks_metrics",
+                        ','.join(trunk_ids)
+                    )
+                    metrics.extend(data)
+                else:
+                    logger.info(f"{trunk_ids} trunk Ids found. Cannot fetch metrics. Skipping.")
                 cnt += 1
             logger.debug(f"Fetched '{len(metrics)}' metrics")
 
