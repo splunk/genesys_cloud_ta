@@ -55,6 +55,8 @@ class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
+    DEFAULT_REGION = "us_east_1"
+
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str, proxy_config: dict = None):
         self.logger = logger
         proxy_handler = ProxyHandler(logger, proxy_config)
@@ -64,7 +66,10 @@ class GenesysCloudClient:
         else:
             self.logger.warning(f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable")
             self.host = os.environ.get("GENESYSCLOUD_HOST", None)
-            # If host is none, default value will be "https://api.mypurecloud.com"
+            if not self.host:
+                self.logger.info(f"'GENESYSCLOUD_HOST' env variable not found: setting default '{self.DEFAULT_REGION}'")
+                region = PureCloudPlatformClientV2.PureCloudRegionHosts[self.DEFAULT_REGION]
+                self.host = region.get_api_host()
 
         # Singleton pattern. Configuration() is a globally shared object.
         # Always set values to avoid data persistance from previous execution.
