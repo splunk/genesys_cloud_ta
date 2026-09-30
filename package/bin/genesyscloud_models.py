@@ -48,10 +48,7 @@ class TrunkModel(GCBaseModel):
     MAX_TRUNK_IDS: int = 100
 
     def __init__(self, trunks: List[Trunk]) -> None:
-        lst_trunks = []
-        for trunk in trunks:
-            lst_trunks.append(trunk.to_dict())
-        super().__init__(lst_trunks)
+        super().__init__([trunk.to_dict() for trunk in trunks])
 
     @property
     def trunk_ids(self) -> List[str]:
@@ -83,10 +80,7 @@ class EdgeModel(GCBaseModel):
     MAX_EDGE_IDS: int = 100
 
     def __init__(self, edges: List[Edge]):
-        lst_edges = []
-        for e in edges:
-            lst_edges.append(e.to_dict())
-        super().__init__(lst_edges)
+        super().__init__([edge.to_dict() for edge in edges])
 
     def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
         factor = self.MAX_EDGE_IDS*batch
@@ -117,31 +111,31 @@ class EdgeModel(GCBaseModel):
 
 
 class PhoneModel(GCBaseModel):
+    STATUS_TYPES = ["status", "secondary_status"]
+
     def __init__(self, phones: List[Phone]) -> None:
-        lst_phones = []
-        for phone in phones:
-            lst_phones.append(phone.to_dict())
-        super().__init__(lst_phones)
+        super().__init__([phone.to_dict() for phone in phones])
 
     @property
     def statuses(self) -> List[dict]:
         statuses = []
         for phone in self.data:
-            statuses.append(phone["status"])
-            statuses.append(phone["secondary_status"])
+            for s_type in self.STATUS_TYPES:
+                statuses.append(phone.get(s_type))
         return statuses
 
     @property
     def extended_statuses(self) -> List[dict]:
         """ Returning statuses augmented with phones info """
-        statuses = []
         required_keys = ["name", "date_created", "date_modified", "state", "site"]
+        statuses = []
         for phone in self.data:
-            for s_type in ["status", "secondary_status"]:
-                new_status = phone[s_type]
-                for key, value in phone.items():
-                    new_status.update({k: phone[k] for k in required_keys})
-                statuses.append(new_status)
+            new_status = {k: phone[k] for k in required_keys if k in phone}
+            for s_type in self.STATUS_TYPES:
+                status = phone.get(s_type)
+                if not isinstance(status, dict):
+                    continue
+                statuses.append({**status, **new_status})
         return statuses
 
 
@@ -149,10 +143,7 @@ class QueueModel(GCBaseModel):
     MAX_QUEUE_IDS: int = 200
 
     def __init__(self, queues: List[Queue]) -> None:
-        lst_queues = []
-        for queue in queues:
-            lst_queues.append(queue.to_dict())
-        super().__init__(lst_queues)
+        super().__init__([queue.to_dict() for queue in queues])
 
     @property
     def queue_ids(self) -> List[str]:
@@ -180,10 +171,7 @@ class UserModel(GCBaseModel):
     MAX_USER_IDS: int = 100
 
     def __init__(self, users: List[User]) -> None:
-        lst_users = []
-        for user in users:
-            lst_users.append(user.to_dict())
-        super().__init__(lst_users)
+        super().__init__([user.to_dict() for user in users])
 
     @property
     def user_ids(self) -> List[str]:
