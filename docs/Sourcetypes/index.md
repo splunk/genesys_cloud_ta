@@ -15,3 +15,8 @@ The Genesys Cloud Add-on for Splunk provides the index-time and search-time know
 | `genesyscloud:users:users:routingstatus` | All the user routing statuses |
 | `genesyscloud:operational:audits` | All the audit events |
 | `genesyscloud:operational:system` | All Genesys Cloud system services status retrieved via [Status Page API](https://metastatuspage.com/api#summary) |
+| `genesyscloud:operational:events` | All API usage event records |
+| `genesyscloud:operational:usage:api` | All organization-level API usage aggregates |
+| `genesyscloud:operational:usage:clients_api` | All OAuth client API usage aggregates |
+| `genesyscloud:directory:users` | All Genesys Cloud user directory records |
+| `genesyscloud:directory:queues` | All Genesys Cloud queue directory records |
