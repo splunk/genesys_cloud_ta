@@ -74,6 +74,8 @@ jobs:
     name: Upload Release
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
     steps:
       - uses: actions/checkout@v6
       - uses: actions/download-artifact@v5
@@ -111,3 +113,41 @@ jobs:
               --notes "$RELEASE_NOTES" \
               dist/*.tar.gz
           fi
+
+  publish:
+    name: Publish to Splunkbase
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Fetch build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v${{ needs.release.outputs.version }} \
+            --pattern "*${{ needs.release.outputs.version }}.tar.gz" \
+            --output release.tar.gz
+      - name: Read .splunkbase
+        id: splunkbase
+        run: |
+          set -euo pipefail
+          source .splunkbase
+          echo "app_id=$SPLUNKBASE_ID" >> "$GITHUB_OUTPUT"
+          echo "splk_versions=$SPLUNKBASE_SPLUNK_VERSION" >> "$GITHUB_OUTPUT"
+          echo "splk_cim=$SPLUNKBASE_SPLUNK_CIM_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Publish
+        env:
+          APP_ID: ${{ steps.splunkbase.outputs.app_id }}
+          VERSIONS: ${{ steps.splunkbase.outputs.splk_versions }}
+          CIM_VERSIONS: ${{ steps.splunkbase.outputs.splk_cim }}
+        run: |
+          pip install splunk_add_on_ucc_framework
+          ucc-gen publish \
+              --app-id "$APP_ID" \
+              --package-path release.tar.gz \
+              --splunk-versions "$VERSIONS" \
+              --cim-versions "$CIM_VERSIONS" \
+              --username ${{ secrets.SPL_COM_USERNAME }} \
+              --password ${{ secrets.SPL_COM_PASSWORD }}
