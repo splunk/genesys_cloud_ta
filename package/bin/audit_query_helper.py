@@ -119,7 +119,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 if exceed_range(fallback_start, end_time):
                     # This case keeps the system running in case of too far away in time checkpoint.
                     reset_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                    logger.warn(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
+                    logger.warning(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
                     start_time = reset_start
 
             interval = f"{start_time}/{end_time}"
@@ -135,8 +135,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             if not response:
                 raise Exception("No response was received from the audit POST request. Please verify the request parameters and try again.")
+            if len(response) > 1:
+                logger.warning(f"AuditApi call returned too many responses: {len(response)}")
 
-            transaction_id = response.id
+            transaction_id = response[0].id
 
             max_polls = int(input_item.get("max_poll_attempts", "10"))
             poll_sleep = int(input_item.get("poll_interval_seconds", "2"))

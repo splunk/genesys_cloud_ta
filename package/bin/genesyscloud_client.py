@@ -4,7 +4,6 @@ import json
 import os
 import urllib3
 
-from typing import List
 from io import BytesIO
 from solnlib.utils import is_true
 from PureCloudPlatformClientV2.rest import ApiException
@@ -55,6 +54,8 @@ class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
+    DEFAULT_REGION = "us_east_1"
+
     def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str, proxy_config: dict = None):
         self.logger = logger
         proxy_handler = ProxyHandler(logger, proxy_config)
@@ -64,7 +65,10 @@ class GenesysCloudClient:
         else:
             self.logger.warning(f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable")
             self.host = os.environ.get("GENESYSCLOUD_HOST", None)
-            # If host is none, default value will be "https://api.mypurecloud.com"
+            if not self.host:
+                self.logger.info(f"'GENESYSCLOUD_HOST' env variable not found: setting default '{self.DEFAULT_REGION}'")
+                region = PureCloudPlatformClientV2.PureCloudRegionHosts[self.DEFAULT_REGION]
+                self.host = region.get_api_host()
 
         # Singleton pattern. Configuration() is a globally shared object.
         # Always set values to avoid data persistance from previous execution.
@@ -146,7 +150,7 @@ class GenesysCloudClient:
 
     def get(self, api_instance_name: str, function_name: str, *args, **kwargs):
         """
-        GET data from Genesys Cloud API
+        GET data from Genesys Cloud API.
 
         :param api_instance_name: Name of the API instance e.g. TelephonyProvidersEdgeApi, RoutingApi, etc
         :param function_name: Name of the function to call in the API instance
@@ -190,6 +194,7 @@ class GenesysCloudClient:
     def download(self, url: str, chunk_size: int = 8192) -> BytesIO:
         """
         Download a URL in chunks into an in-memory buffer.
+
         :param url: URL to download events from.
         :param chunk_size: Number of bytes to read per iteration.
         :return: BytesIO buffer positioned at the start, containing the downloaded bytes.
@@ -216,12 +221,13 @@ class GenesysCloudClient:
         buffer.seek(0)  # rewind so the buffer can be read from the start
         return buffer
 
-    def convert_response(self, response: list, key: str) -> list:
+    def convert_response(self, response: list, key: str = "results") -> list:
         """
-        Convert data returned from paginating POST API.
+        Convert data returned from POST API.
+
         :param response: list of objects returned by the API.
-        :param key: key of the list of items to be returned (e.g. results, conversations).
-        :return: List of items to be ingested.
+        :param key: key of the list of items to be returned. Default is 'results'.
+        :return: List of items.
         """
         total_items = []
         if response is not None:
@@ -230,14 +236,15 @@ class GenesysCloudClient:
                 total_items.extend(res_dict.get(key, []) or [])
         return total_items
 
-    def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs):
+    def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs) -> list:
         """
-        Sends a POST request to the Genesys Cloud API.
+        Send a POST request to the Genesys Cloud API.
 
         :param api_instance_name: Name of the API instance, e.g., 'FlowsApi'.
         :param function_name: Name of the function to call in the API instance.
         :param model_name: Name of the data model corresponding to the request body.
         :param body: Dictionary representing the request body.
+        :return: List of objects.
         """
         enable_pagination = False
         api_responses = []
@@ -321,7 +328,7 @@ class GenesysCloudClient:
                             model_instance.page_number = page_number
                         continue
                     break
-                return api_response
+                break
             return api_responses
 
         except ApiException as e:
