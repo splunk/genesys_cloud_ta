@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [v0.4.3] - 2026-09-30
+
+### Added
+
+- `us_east_1` as default fallback region for client connections to Genesys Cloud ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Supported python versions ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+
+### Fixed
+
+- Negative remaining count batch mask ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Case of unknown ID aborting the whole ingestion and leading to duplicates for inputs `edges_metrics`, `edges_trunks_metrics`, `queue_observations` and `user_aggregates` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+
+### Changed
+
+- Genesys Cloud client `post()` return type normalization ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- General refactoring including:
+  - Unused import(s) and redundant loops ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+  - Replaced warning logs to avoid usage of deprecated `warn()` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+  - Avoid wasting an API call in the edge case of input `edges_trunks_metrics` with no trunk id ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+
+
 ## [v0.4.2] - 2026-09-09
 
 ### Fixed
