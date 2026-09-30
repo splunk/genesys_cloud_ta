@@ -18,7 +18,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Changed
 
-- Genesys Cloud client `post()` return type normalization ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- `post()` return type normalization in the Genesys Cloud client ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 - General refactoring including:
   - Unused import(s) and redundant loops ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
   - Replaced warning logs to avoid usage of deprecated `warn()` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
