@@ -14,7 +14,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Fixed
 
 - Negative remaining count batch mask ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
-- Case of unknown ID aborting the whole ingestion and leading to duplicates for inputs `edges_metrics`, `edges_trunks_metrics`, `queue_observations` and `user_aggregates` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Case of unknown ID aborting the whole ingestion and leading to duplicates for the inputs `edges_metrics`, `edges_trunks_metrics`, `queue_observations` and `user_aggregates` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 
 ### Changed
 
