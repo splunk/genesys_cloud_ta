@@ -127,6 +127,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release download v${{ needs.release.outputs.version }} \
+            --repo "${{ github.repository }}" \
             --pattern "*${{ needs.release.outputs.version }}.tar.gz" \
             --output release.tar.gz
       - name: Read .splunkbase
