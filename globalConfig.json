@@ -1569,12 +1569,16 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.4.1",
+        "version": "0.4.2",
         "displayName": "Genesys Cloud Add-on for Splunk",
         "schemaVersion": "0.0.10",
         "supportedThemes": [
             "light",
             "dark"
+        ],
+        "supportedPythonVersion": [
+            "3.9",
+            "3.13"
         ],
         "defaultView": "inputs"
     }

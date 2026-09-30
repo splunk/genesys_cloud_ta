@@ -39,6 +39,10 @@ class TestGenesysCloudTA(BaseTATest):
             reader = splk_results.JSONResultsReader(oneshot)
 
             for res in reader:
+                if isinstance(res, splk_results.Message):
+                    # Surface search-time diagnostics without breaking the test
+                    self.logger.debug(f"[splunk {res.type}] {res.message}")
+                    continue
                 results.append(res)
 
             if len(results) > 0 or attempt == (max_retries - 1):

@@ -126,7 +126,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 if exceed_range(fallback_start, end_time):
                     # This case keeps the system running in case of too far away in time checkpoint.
                     reset_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                    logger.warn(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
+                    logger.warning(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
                     start_time = reset_start
 
             interval = f"{start_time}/{end_time}"

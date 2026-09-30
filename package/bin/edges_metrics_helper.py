@@ -124,7 +124,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
                 metric["event_time"] = e_model.to_string(metric_obj.event_time)
-                metric["edge"] = e_model.get_edge(metric_obj.edge.id)
+                try:
+                    metric["edge"] = e_model.get_edge(metric_obj.edge.id)
+                except ValueError as ve:
+                    logger.warning(f"Could not get edge information - {ve}. Skipping.")
+                    metric["edge"] = {}
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(

@@ -125,12 +125,12 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             model_name,
             body_conversations(basic, _filter)
         )
-        if isinstance(response, list):
+        if not direction:
             lst_response = self.gc_client.convert_response(response, "conversations")
             assert len(lst_response) == expected_result
         else:
-            results = response.to_dict().get("results", [])
-            assert len(results) == expected_result
+            lst_response = self.gc_client.convert_response(response)
+            assert len(lst_response) == expected_result
 
 
     @pytest.mark.parametrize("api_name, func_name, model_name",
@@ -155,7 +155,8 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             model_name,
             body
         )
-        assert len(response.to_dict().get("results", [])) == expected_result
+        lst_response = self.gc_client.convert_response(response)
+        assert len(lst_response) == expected_result
 
 
     @pytest.mark.parametrize("api_name, func_name, model_name",

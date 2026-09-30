@@ -15,8 +15,8 @@ LOGGER.info("Conftest [integration] - Entering")
 
 @pytest.fixture(scope="class")
 def body_basic():
-    end_time = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S.%f')
-    start_time = (datetime.datetime.utcnow() - datetime.timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%f')
+    end_time = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')
+    start_time = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%f')
     return {
         "interval": f"{start_time[:-3]}Z/{end_time[:-3]}Z",
     }

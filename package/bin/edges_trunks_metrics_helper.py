@@ -108,12 +108,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             has_more = True
             while has_more:
                 trunk_ids, has_more = t_model.get_trunk_ids(cnt)
-                data = client.get(
-                    "TelephonyProvidersEdgeApi",
-                    "get_telephony_providers_edges_trunks_metrics",
-                    ','.join(trunk_ids)
-                )
-                metrics.extend(data)
+                if trunk_ids:
+                    data = client.get(
+                        "TelephonyProvidersEdgeApi",
+                        "get_telephony_providers_edges_trunks_metrics",
+                        ','.join(trunk_ids)
+                    )
+                    metrics.extend(data)
+                else:
+                    logger.info(f"{trunk_ids} trunk Ids found. Cannot fetch metrics. Skipping.")
                 cnt += 1
             logger.debug(f"Fetched '{len(metrics)}' metrics")
 
@@ -123,7 +126,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
                 metric["event_time"] = t_model.to_string(metric_obj.event_time)
-                metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
+                try:
+                    metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
+                except ValueError as ve:
+                    self.logger.warning(f"Could not get trunk information - {ve}. Skipping it.")
+                    metric["trunk"] = {}
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
