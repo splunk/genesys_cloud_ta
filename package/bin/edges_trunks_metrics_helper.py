@@ -126,7 +126,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_time_epoch = metric_obj.event_time.timestamp()
                 metric = metric_obj.to_dict()
                 metric["event_time"] = t_model.to_string(metric_obj.event_time)
-                metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
+                try:
+                    metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
+                except ValueError as ve:
+                    self.logger.warning(f"Could not get trunk information - {ve}. Skipping it.")
+                    metric["trunk"] = {}
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(

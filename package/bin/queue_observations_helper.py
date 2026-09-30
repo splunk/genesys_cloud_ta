@@ -113,7 +113,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             event_counter = 0
             for item in results:
                 for data_entry in item["data"]:
-                    data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                    try:
+                        data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                    except ValueError as ve:
+                        logger.warning(f"Could not get queue information - {ve}. Skipping.")
+                        data_entry["queue"] = {}
                     event_writer.write_event(
                         smi.Event(
                             # Index time not needed?
