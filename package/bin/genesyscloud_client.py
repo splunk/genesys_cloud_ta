@@ -328,7 +328,6 @@ class GenesysCloudClient:
                             model_instance.page_number = page_number
                         continue
                     break
-                # return api_response
                 break
             return api_responses
 
