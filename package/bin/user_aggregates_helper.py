@@ -130,9 +130,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "UserAggregationQuery",
                     body
                 )
-                if data:
-                    res_dict = data.to_dict() or {}
-                    results.extend(res_dict.get("results", []) or [])
+                results.extend(client.convert_response(data))
                 cnt+=1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 
@@ -141,7 +139,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             for item in results:
                 for data_entry in item["data"]:
                     for metrics in data_entry["metrics"]:
-                        metrics["user"] = user_model.get_user(item["group"]["userId"])
+                        try:
+                            metrics["user"] = user_model.get_user(item["group"]["userId"])
+                        except ValueError as ve:
+                            logger.warning(f"Could not get user information - {ve}. Skipping.")
+                            metrics["user"] = {}
                         metrics["interval"] = data_entry["interval"]
                         event_writer.write_event(
                             smi.Event(

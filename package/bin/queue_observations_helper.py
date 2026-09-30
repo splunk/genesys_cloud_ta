@@ -105,10 +105,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "QueueObservationQuery",
                     body
                 )
-                # Ensure data exists before processing
-                if response:
-                    res_dict = response.to_dict() or {}
-                    results.extend(res_dict.get("results", []) or [])
+                results.extend(client.convert_response(response))
                 cnt += 1
             logger.debug(f"Fetched '{len(results)}' queues observations")
 
@@ -116,7 +113,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             event_counter = 0
             for item in results:
                 for data_entry in item["data"]:
-                    data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                    try:
+                        data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                    except ValueError as ve:
+                        logger.warning(f"Could not get queue information - {ve}. Skipping.")
+                        data_entry["queue"] = {}
                     event_writer.write_event(
                         smi.Event(
                             # Index time not needed?

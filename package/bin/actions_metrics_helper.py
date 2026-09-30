@@ -104,47 +104,44 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             sourcetype="genesyscloud:analytics:actions:metrics"
 
-            if response:
-                event_counter = 0
-                res_dict = response.to_dict() or {}
-                to_process_data = res_dict.get("results") or []
+            event_counter = 0
+            to_process_data = client.convert_response(response)
+            for event in to_process_data:
+                try:
+                    group_info = event.get("group", {}) or {}
+                    for data_entry in event.get("data", []):
+                        interval_str = data_entry.get("interval")
+                        interval_start_time = (
+                            datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
+                            if interval_str else round(start_time.timestamp(), 3)
+                        )
 
-                for event in to_process_data:
-                    try:
-                        group_info = event.get("group", {}) or {}
-                        for data_entry in event.get("data", []):
-                            interval_str = data_entry.get("interval")
-                            interval_start_time = (
-                                datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
-                                if interval_str else round(start_time.timestamp(), 3)
-                            )
+                        for metric in data_entry.get("metrics", []):
+                            enriched_metric = {
+                                "metric": metric.get("metric"),
+                                "qualifier": metric.get("qualifier"),
+                                "stats": metric.get("stats", {}),
+                                "group": group_info,
+                                "interval": interval_str
+                            }
 
-                            for metric in data_entry.get("metrics", []):
-                                enriched_metric = {
-                                    "metric": metric.get("metric"),
-                                    "qualifier": metric.get("qualifier"),
-                                    "stats": metric.get("stats", {}),
-                                    "group": group_info,
-                                    "interval": interval_str
-                                }
-
-                                event_writer.write_event(
-                                    smi.Event(
-                                        data=json.dumps(enriched_metric, ensure_ascii=False, default=str),
-                                        index=input_item.get("index"),
-                                        sourcetype=sourcetype,
-                                        time=interval_start_time
-                                    )
+                            event_writer.write_event(
+                                smi.Event(
+                                    data=json.dumps(enriched_metric, ensure_ascii=False, default=str),
+                                    index=input_item.get("index"),
+                                    sourcetype=sourcetype,
+                                    time=interval_start_time
                                 )
-                                event_counter += 1
-                    except Exception as e:
-                        logger.error(f"Failed to write event: {e}")
+                            )
+                            event_counter += 1
+                except Exception as e:
+                    logger.error(f"Failed to write event: {e}")
 
-                if event_counter > 0:
-                    new_checkpoint = end_time.timestamp()
-                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+            if event_counter > 0:
+                new_checkpoint = end_time.timestamp()
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
-                log.events_ingested(logger, input_name, sourcetype, event_counter, input_item.get("index"), account=account)
+            log.events_ingested(logger, input_name, sourcetype, event_counter, input_item.get("index"), account=account)
             log.modular_input_end(logger, normalized_input_name)
 
         except Exception as e:

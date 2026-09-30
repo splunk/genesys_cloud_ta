@@ -129,46 +129,44 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "ConversationAggregationQuery",
                 body
             )
-            if response:
-                event_counter = 0
-                res_dict = response.to_dict() or {}
-                to_process_data = res_dict.get("results") or []
-                for event in to_process_data:
-                    try:
-                        for data_entry in event["data"]:
-                            interval_start_time = (
-                                datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
-                                if event.get("data") else round(start_time.timestamp(), 3)
-                            )
-                            for metric in data_entry["metrics"]:
-                                metric["group"] = event["group"]
-                                metric["interval"] = data_entry["interval"]
-                                event_writer.write_event(
-                                    smi.Event(
-                                        data=json.dumps(metric, ensure_ascii=False, default=str),
-                                        index=input_item.get("index"),
-                                        sourcetype=sourcetype,
-                                        time=interval_start_time
-                                    )
+            to_process_data = client.convert_response(response)
+            event_counter = 0
+            for event in to_process_data:
+                try:
+                    for data_entry in event["data"]:
+                        interval_start_time = (
+                            datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
+                            if event.get("data") else round(start_time.timestamp(), 3)
+                        )
+                        for metric in data_entry["metrics"]:
+                            metric["group"] = event["group"]
+                            metric["interval"] = data_entry["interval"]
+                            event_writer.write_event(
+                                smi.Event(
+                                    data=json.dumps(metric, ensure_ascii=False, default=str),
+                                    index=input_item.get("index"),
+                                    sourcetype=sourcetype,
+                                    time=interval_start_time
                                 )
-                                event_counter += 1
-                    except Exception as e:
-                        logger.error(f"Failed to write event. Error: {str(e)}")
+                            )
+                            event_counter += 1
+                except Exception as e:
+                    logger.error(f"Failed to write event. Error: {str(e)}")
 
-                if event_counter > 0:
-                    logger.debug(f"Indexed '{event_counter}' events")
-                    new_checkpoint = now.timestamp()
-                    logger.debug(f"Updating checkpointer to {new_checkpoint}")
-                    kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+            if event_counter > 0:
+                logger.debug(f"Indexed '{event_counter}' events")
+                new_checkpoint = now.timestamp()
+                logger.debug(f"Updating checkpointer to {new_checkpoint}")
+                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
-                log.events_ingested(
-                    logger,
-                    input_name,
-                    sourcetype,
-                    event_counter,
-                    input_item.get("index"),
-                    account=input_item.get("account"),
-                )
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                event_counter,
+                input_item.get("index"),
+                account=input_item.get("account"),
+            )
 
             log.modular_input_end(logger, normalized_input_name)
 
