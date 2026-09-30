@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 
 - `us_east_1` as default fallback region for the Genesys Cloud client configuration ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
-- Supported python versions ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Supported python version(s) ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 
 ### Fixed
 
