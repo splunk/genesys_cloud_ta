@@ -144,30 +144,13 @@ jobs:
           APP_ID: ${{ steps.splunkbase.outputs.app_id }}
           VERSIONS: ${{ steps.splunkbase.outputs.splk_versions }}
           CIM_VERSIONS: ${{ steps.splunkbase.outputs.splk_cim }}
-          SPL_USER: ${{ secrets.SPL_COM_USERNAME }}
-          SPL_PASS: ${{ secrets.SPL_COM_PASSWORD }}
         run: |
           set -euo pipefail
           pip install splunk_add_on_ucc_framework
-
-          args=(
-            --app-id "$APP_ID"
-            --package-path release.tar.gz
-            --splunk-versions "$VERSIONS"
-            --username "$SPL_USER"
-            --password "$SPL_PASS"
-          )
-
-          if [[ -n "$CIM_VERSIONS" ]]; then
-            args+=(--cim-versions "$CIM_VERSIONS")
-          fi
-
-          ucc-gen publish "${args[@]}"
-
-          # ucc-gen publish \
-          #     --app-id "$APP_ID" \
-          #     --package-path release.tar.gz \
-          #     --splunk-versions "$VERSIONS" \
-          #     --cim-versions "$CIM_VERSIONS" \
-          #     --username ${{ secrets.SPL_COM_USERNAME }} \
-          #     --password ${{ secrets.SPL_COM_PASSWORD }}
+          ucc-gen publish \
+              --app-id "$APP_ID" \
+              --package-path release.tar.gz \
+              --splunk-versions "$VERSIONS" \
+              --username ${{ secrets.SPL_COM_USERNAME }} \
+              --password ${{ secrets.SPL_COM_PASSWORD }} \
+              --cim-versions "$CIM_VERSIONS"
