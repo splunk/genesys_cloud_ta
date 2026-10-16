@@ -4,17 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [v0.4.3] - 2026-09-30
+## [v0.4.3] - 2026-10-16
 
 ### Added
 
 - `us_east_1` as default fallback region for the Genesys Cloud client configuration ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 - Supported python version(s) ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- CIM 5.x compliance to inputs `audit_query` and `edges_metrics` ([#53](https://github.com/splunk/genesys_cloud_ta/pull/53)).
 
 ### Fixed
 
 - Negative remaining count batch mask ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 - Case of unknown ID aborting the whole ingestion and leading to duplicates for the inputs `edges_metrics`, `edges_trunks_metrics`, `queue_observations` and `user_aggregates` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- `AttributeError` occurring in `audit_query` when no entities were returned ([#52](https://github.com/splunk/genesys_cloud_ta/pull/52)).
 
 ### Changed
 
