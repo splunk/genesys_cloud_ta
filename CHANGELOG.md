@@ -24,7 +24,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 - General refactoring including:
   - Unused import(s) and redundant loops ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
   - Replaced warning logs to avoid usage of deprecated `warn()` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
-  - Avoid wasting an API call in the edge case of input `edges_trunks_metrics` with no trunk id ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+  - Avoid wasting an API call in the edge case of input `edges_trunks_metrics` with no trunk Id ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
 
 
 ## [v0.4.2] - 2026-09-09
