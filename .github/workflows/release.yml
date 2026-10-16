@@ -151,6 +151,6 @@ jobs:
               --app-id "$APP_ID" \
               --package-path release.tar.gz \
               --splunk-versions "$VERSIONS" \
+              --cim-versions "$CIM_VERSIONS" \
               --username ${{ secrets.SPL_COM_USERNAME }} \
-              --password ${{ secrets.SPL_COM_PASSWORD }} \
-              --cim-versions "$CIM_VERSIONS"
+              --password ${{ secrets.SPL_COM_PASSWORD }}
