@@ -104,7 +104,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             results = []
             if submit_response:
-                submit_dict = submit_response.to_dict() or {}
+                # client.post() always returns a list of API responses; the submit
+                # query endpoint returns a single object, so take the first element.
+                submit_obj = submit_response[0] if isinstance(submit_response, list) else submit_response
+                submit_dict = (submit_obj.to_dict() if hasattr(submit_obj, "to_dict") else submit_obj) or {}
                 execution_id = None if not submit_dict else submit_dict.get("execution_id") or submit_dict.get("id")
 
                 if not execution_id:

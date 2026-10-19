@@ -196,7 +196,8 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             body_usage()
         )
         assert response is not None
-        assert response.to_dict().get(id_key), f"Response does not contain '{id_key}'"
+        assert len(response) >= 1
+        assert response[0].to_dict().get(id_key), f"Response does not contain '{id_key}'"
 
 
     def test_POST_client_usage(self, body_usage):
@@ -210,7 +211,8 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             client_id=client_id
         )
         assert response is not None
-        assert response.to_dict().get("id"), "Response does not contain 'id'"
+        assert len(response) >= 1
+        assert response[0].to_dict().get("id"), "Response does not contain 'id'"
 
 
     @pytest.mark.parametrize("func_name, args",

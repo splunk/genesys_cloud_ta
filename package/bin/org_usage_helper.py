@@ -106,7 +106,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             results = []
             if job_response:
-                job_dict = job_response.to_dict() or {}
+                # client.post() always returns a list of API responses; the submit
+                # job endpoint returns a single object, so take the first element.
+                job_obj = job_response[0] if isinstance(job_response, list) else job_response
+                job_dict = (job_obj.to_dict() if hasattr(job_obj, "to_dict") else job_obj) or {}
                 job_id = None if not job_dict else job_dict.get("id") or job_dict.get("job_id")
 
                 if not job_id:
