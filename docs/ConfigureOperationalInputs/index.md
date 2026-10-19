@@ -114,6 +114,7 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |Input name               |Corresponding field in Splunk Web | Description|
 |-------------------------|----------------------------------|------------|
 |`input_name`             |Input Name                        |A unique name for your input.|
+|`account`                |Account Name                      |The Genesys Cloud account from which you want to gather data.|
 |`index`                  |Index                             |The index in which the data should be stored. The default is <code>default</code>.|
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>300</code> or  <code>86400</code> depending on the input.|
 |`max_poll_attempts`      |Max Poll Attempts                 |Maximum number of status checks (polls) performed for an audit query or usage query transaction before giving up. The default value is <code>10</code> for Audit Query and <code>30</code> for the usage inputs, to be increased for long-running queries.|
