@@ -1314,25 +1314,72 @@
       "method": "get",
       "endpoint": "api/v2/audits/query/:transactionId/results",
       "responses": [
-        {
-          "uuid": "a4f2b3c1-5e6d-4b8f-9a0c-1d2e3f4a5b6c",
-          "body": "{\n  \"id\": \"{{urlParam 'transactionId'}}\",\n  \"pageSize\": 5,\n  \"cursor\": null,\n  \"entities\": [\n    {{#repeat 5}}\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"userHomeOrgId\": \"{{faker 'string.uuid'}}\",\n      \"user\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"{{firstName}} {{lastName}}\"},\n      \"client\": {\"id\": \"{{faker 'string.uuid'}}\"},\n      \"remoteIp\": [\"{{ipv4}}\"],\n      \"serviceName\": \"platform.api\",\n      \"level\": \"USER\",\n      \"eventDate\": \"2025-03-24T12:00:3{{int 0 9}}.000Z\",\n      \"message\": {\"localizableMessageCode\": \"audit.sample\", \"message\": \"Updated entity\"},\n      \"action\": \"Update\",\n      \"entity\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"TestEntity\"},\n      \"entityType\": \"User\",\n      \"status\": \"SUCCESS\",\n      \"application\": \"TestApp\",\n      \"initiatingAction\": {\"transactionId\": \"{{urlParam 'transactionId'}}\", \"action\": \"Update\"},\n      \"transactionId\": \"{{urlParam 'transactionId'}}\",\n      \"transactionInitiator\": true,\n      \"propertyChanges\": [\n        {\"property\": \"name\", \"oldValues\": [\"Old\"], \"newValues\": [\"New\"]}\n      ],\n      \"context\": {\"ip\": \"{{ipv4}}\"}\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "Results page",
-          "headers": [{"key": "content-type", "value": "application/json"}],
-          "bodyType": "INLINE",
-          "rules": [
-            {"target": "params", "modifier": "transactionId", "value": "[0-9a-fA-F-]{36}", "invert": false, "operator": "regex"},
-            {"target": "header", "modifier": "Authorization", "value": "[B,b]earer .*", "invert": false, "operator": "regex"}
-          ],
-          "rulesOperator": "AND",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
+          {
+              "uuid": "a4f2b3c1-5e6d-4b8f-9a0c-1d2e3f4a5b6c",
+              "body": "{\n  \"id\": \"{{urlParam 'transactionId'}}\",\n  \"pageSize\": 5,\n  \"cursor\": null,\n  \"entities\": [\n    {{#repeat 5}}\n    {\n      \"id\": \"{{faker 'string.uuid'}}\",\n      \"userHomeOrgId\": \"{{faker 'string.uuid'}}\",\n      \"user\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"{{firstName}} {{lastName}}\"},\n      \"client\": {\"id\": \"{{faker 'string.uuid'}}\"},\n      \"remoteIp\": [\"{{ipv4}}\"],\n      \"serviceName\": \"platform.api\",\n      \"level\": \"USER\",\n      \"eventDate\": \"2025-03-24T12:00:3{{int 0 9}}.000Z\",\n      \"message\": {\"localizableMessageCode\": \"audit.sample\", \"message\": \"Updated entity\"},\n      \"action\": \"Update\",\n      \"entity\": {\"id\": \"{{faker 'string.uuid'}}\", \"name\": \"TestEntity\"},\n      \"entityType\": \"User\",\n      \"status\": \"SUCCESS\",\n      \"application\": \"TestApp\",\n      \"initiatingAction\": {\"transactionId\": \"{{urlParam 'transactionId'}}\", \"action\": \"Update\"},\n      \"transactionId\": \"{{urlParam 'transactionId'}}\",\n      \"transactionInitiator\": true,\n      \"propertyChanges\": [\n        {\"property\": \"name\", \"oldValues\": [\"Old\"], \"newValues\": [\"New\"]}\n      ],\n      \"context\": {\"ip\": \"{{ipv4}}\"}\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+              "latency": 0,
+              "statusCode": 200,
+              "label": "Results page",
+              "headers": [
+                  {
+                      "key": "content-type",
+                      "value": "application/json"
+                  }
+              ],
+              "bodyType": "INLINE",
+              "rules": [
+                  {
+                      "target": "params",
+                      "modifier": "transactionId",
+                      "value": "[0-9a-fA-F-]{36}",
+                      "invert": false,
+                      "operator": "regex"
+                  },
+                  {
+                      "target": "header",
+                      "modifier": "Authorization",
+                      "value": "[B,b]earer .*",
+                      "invert": false,
+                      "operator": "regex"
+                  }
+              ],
+              "rulesOperator": "AND",
+              "disableTemplating": false,
+              "fallbackTo404": false,
+              "default": true,
+              "crudKey": "id",
+              "callbacks": [],
+              "filePath": "",
+              "databucketID": "",
+              "sendFileAsBody": false
+          },
+          {
+              "uuid": "637da287-b52d-4798-9a66-890eaed67bdb",
+              "body": "{\n  \"id\": \"{{urlParam 'transactionId'}}\",\n  \"pageSize\": 5,\n  \"cursor\": null,\n  \"entities\": []\n}",
+              "latency": 0,
+              "statusCode": 200,
+              "label": "Empty results",
+              "headers": [],
+              "bodyType": "INLINE",
+              "filePath": "",
+              "databucketID": "",
+              "sendFileAsBody": false,
+              "rules": [
+                  {
+                      "target": "params",
+                      "modifier": "transactionId",
+                      "value": "0",
+                      "invert": false,
+                      "operator": "equals"
+                  }
+              ],
+              "rulesOperator": "OR",
+              "disableTemplating": false,
+              "fallbackTo404": false,
+              "default": false,
+              "crudKey": "id",
+              "callbacks": []
+          }
       ],
       "responseMode": null,
       "streamingMode": null,

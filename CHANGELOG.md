@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Added
+
+- Directory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support lookup-table correlation (user/queue ID to human-readable name) ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Operational usage modular inputs `usage_events`, `org_usage` and `oauth_client_usage` replacing the deprecated `POST /api/v2/usage/query` and `POST /api/v2/oauth/clients/{clientId}/usage/query` endpoints ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Sourcetypes `genesyscloud:directory:users`, `genesyscloud:directory:queues`, `genesyscloud:operational:events`, `genesyscloud:operational:usage:api` and `genesyscloud:operational:usage:clients_api` ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+
+
+## [v0.4.3] - 2026-10-19
+
+### Added
+
+- `us_east_1` as default fallback region for the Genesys Cloud client configuration ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Supported python version(s) to `globalConfig.json` as required by Splunk v10.1 and above ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- CIM 5.x compliance to inputs `audit_query` and `edges_metrics` ([#53](https://github.com/splunk/genesys_cloud_ta/pull/53)).
+
+### Fixed
+
+- Negative remaining count batch mask ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- Case of unknown Id aborting the whole ingestion and leading to duplicates for the inputs `edges_metrics`, `edges_trunks_metrics`, `queue_observations` and `user_aggregates` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- `AttributeError` occurring in `audit_query` when no entities were returned ([#52](https://github.com/splunk/genesys_cloud_ta/pull/52)).
+
+### Changed
+
+- `post()` return type normalization in the Genesys Cloud client ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+- General refactoring including:
+  - Unused import(s) and redundant loops ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+  - Replaced warning logs to avoid usage of deprecated `warn()` ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+  - Avoid wasting an API call in the edge case of input `edges_trunks_metrics` with no trunk Id ([#50](https://github.com/splunk/genesys_cloud_ta/pull/50)).
+
+
 ## [v0.4.2] - 2026-09-09
 
 ### Fixed

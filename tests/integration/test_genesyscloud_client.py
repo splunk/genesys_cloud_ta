@@ -92,6 +92,25 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         assert len(response) == 0
 
 
+    @pytest.mark.parametrize("api_name, func_name, params",
+        [
+            ("AuditApi", "get_audits_query_transaction_id_results", {"transaction_id": 0}),
+            ("TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks", {"page_number": 500}),
+            ("TelephonyProvidersEdgeApi", "get_telephony_providers_edges", {"page_number": 500}),
+            ("RoutingApi", "get_routing_queues", {"page_number": 500}),
+        ],
+    )
+    def test_GET_empty_entities(self, api_name, func_name, params):
+        """ Test GET calls returning responses with empty entities """
+
+        response = self.gc_client.get(
+            api_name,
+            func_name,
+            **params
+        )
+        assert len(response) == 0
+
+
     @pytest.mark.parametrize("api_name, func_name, model_name, expected_result, direction",
         [
             ("ConversationsApi", "post_analytics_conversations_aggregates_query", "ConversationAggregationQuery", 4, "inbound,outbound"),
