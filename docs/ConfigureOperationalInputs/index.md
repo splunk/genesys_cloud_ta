@@ -121,3 +121,27 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`poll_interval_seconds`  |Poll Interval (seconds)           |Seconds to wait between each status check of the audit query or usage query transaction. Lower values give quicker response but perform more API calls; higher values reduce rate-limit pressure. The default value is <code>2</code> for Audit Query and <code>10</code> for the usage inputs.|
 |`start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days ago. Format: `YYYY-MM-DD`.
 |`oauth_client_id`       |OAuth Client ID                   |Only for the OAuth Client API Usage input. The OAuth client ID to query usage for. If empty, queries usage for all clients.|
+
+## Directory inputs: usage notes
+
+The `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud directory on every run (`GET /api/v2/users` and `GET /api/v2/routing/queues`). They are intended for scenarios where the directory data must be **indexed** (for example, historical lookup-table generation or compliance retention), rather than resolved on demand.
+
+!!! note "On-demand alternative"
+    If you only need to resolve user or queue IDs into human-readable names at search time (for dashboards), prefer the `| genesysusers` and `| genesysqueues` custom search commands shipped in the [Genesys Cloud App for Splunk](https://github.com/splunk/genesys_cloud_app_for_splunk). Those commands run on the Search Head and do not index data, which avoids the duplication described below.
+
+### Deployment in a distributed environment
+
+- Like every other input in this add-on, the directory inputs run on the Splunk platform instance where the add-on is installed, usually a **heavy forwarder**. They collect and forward data to the indexers; results are then searched from the **search head**.
+- The data collected is directory/provisioning data (IDs, names, metadata), not time-series events. It changes infrequently, so a low collection frequency is recommended. The default `interval` for both inputs is `86400` (once per day), which is sufficient for most environments.
+
+### Handling duplicates
+
+- These inputs do **not** use checkpointing: each run re-indexes the **entire** directory as a fresh snapshot. This is intentional, so that deleted or renamed entities are reflected on each run, but it means the same `id` is indexed once per run and **duplicates accumulate over time**.
+- When searching the indexed data, keep only the most recent snapshot per entity, for example:
+
+```bash
+    sourcetype=genesyscloud:directory:users
+    | dedup id sortby -_time
+```
+
+- If the data is used purely for lookups and historical retention is not required, consider sending these inputs to a **dedicated index with a short retention policy** to keep the duplicate volume under control.
