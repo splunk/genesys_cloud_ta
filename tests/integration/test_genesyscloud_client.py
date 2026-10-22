@@ -199,6 +199,9 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         )
         assert response is None
 
+#
+# ---- [UsageApi] Testing ----
+#
 
     @pytest.mark.parametrize("func_name, model_name, id_key",
         [
