@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [Unreleased]
+
+### Added
+
+- Inventory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support compliance retention requirements ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Operational usage modular inputs `usage_events`, `org_usage` and `oauth_client_usage` ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+
+
 ## [v0.4.3] - 2026-10-19
 
 ### Added

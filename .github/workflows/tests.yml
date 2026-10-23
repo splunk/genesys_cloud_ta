@@ -17,7 +17,7 @@ concurrency:
 jobs:
   splunk-10x:
     name: Deploy and test the TA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
@@ -162,7 +162,7 @@ jobs:
 
   splunk-9x:
     name: Deploy and test the TA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
