@@ -6,9 +6,7 @@
 - Audit Query,
 - Usage Operational Events,
 - Organization API Usage,
-- OAuth Client API Usage,
-- Users Directory,
-- Queues Directory.
+- OAuth Client API Usage.
 
 
 ## Pre-Requirements
@@ -25,7 +23,7 @@ Configure your inputs on the Splunk platform instance responsible for collecting
 Configure your inputs using Splunk Web on the Splunk platform instance responsible for collecting data for this add-on, usually a heavy forwarder.
 
 1. In the Genesys Cloud Add-on for Splunk, click **Inputs > Create New Input > Operational**.
-2. Select one of the available inputs among **System Services Status**, **Audit Query**, **Usage Operational Events**, **Organization API Usage**, **OAuth Client API Usage**, **Users Directory** and **Queues Directory**.
+2. Select one of the available inputs among **System Services Status**, **Audit Query**, **Usage Operational Events**, **Organization API Usage** and **OAuth Client API Usage**.
 3. Enter the parameter values using information provided in the input parameter table below.
 4. Click **Add**.
 5. Verify that data is successfully arriving by running the following searches on your search head:
@@ -83,18 +81,6 @@ poll_interval_seconds = <value>
 max_poll_attempts = <value>
 oauth_client_id = <value>
 
-<!-- Users Directory -->
-[users_directory://<users_directory_input_name>]
-account = <value>
-index = <value>
-interval = <value>
-
-<!-- Queues Directory -->
-[queues_directory://<queues_directory_input_name>]
-account = <value>
-index = <value>
-interval = <value>
-
 ```
 
 3. (Optional) Configure a custom `index`.
@@ -121,27 +107,3 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`poll_interval_seconds`  |Poll Interval (seconds)           |Seconds to wait between each status check of the audit query or usage query transaction. Lower values give quicker response but perform more API calls; higher values reduce rate-limit pressure. The default value is <code>2</code> for Audit Query and <code>10</code> for the usage inputs.|
 |`start_date`            |Start Date                        |Date from which start collecting data. The default value is 7 days ago. Format: `YYYY-MM-DD`.
 |`oauth_client_id`       |OAuth Client ID                   |Only for the OAuth Client API Usage input. The OAuth client ID to query usage for. If empty, queries usage for all clients.|
-
-## Directory inputs: usage notes
-
-The `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud directory on every run through `GET /api/v2/users` and `GET /api/v2/routing/queues`.
-
-!!! warning
-    **These inputs are intended for scenarios such as compliance retention where the directory data must be indexed**, rather than resolved on demand. Therefore, if you only need to resolve user or queue IDs into human-readable names at search time (for dashboards), we strongly recommend leveraging custom search commands instead.
-
-### Deployment in a distributed environment
-
-- Like every other input in this add-on, the directory inputs run on the Splunk platform instance where the add-on is installed, usually a **heavy forwarder**. They collect and forward data to the indexers; results are then searched from the **search head**.
-- The data collected is directory/provisioning data (IDs, names, metadata), not time-series events. It changes infrequently, so a low collection frequency is recommended. The default `interval` for both inputs is `86400` (once per day), which is sufficient for most environments.
-
-### Handling duplicates
-
-- These inputs do **not** use checkpointing: each run re-indexes the **entire** directory as a fresh snapshot. This is intentional, so that deleted or renamed entities are reflected on each run, but it means the same `id` is indexed once per run and **duplicates accumulate over time**.
-- When searching the indexed data, keep only the most recent snapshot per entity, for example:
-
-```bash
-    sourcetype=genesyscloud:directory:users
-    | dedup id sortby -_time
-```
-
-- If the data is used purely for lookups and historical retention is not required, consider sending these inputs to a **dedicated index with a short retention policy** to keep the duplicate volume under control.
