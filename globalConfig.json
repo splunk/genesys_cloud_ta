@@ -1479,9 +1479,7 @@
                         "audit_query",
                         "usage_events",
                         "org_usage",
-                        "oauth_client_usage",
-                        "users_directory",
-                        "queues_directory"
+                        "oauth_client_usage"
                     ]
                 },
                 {
@@ -1499,6 +1497,14 @@
                     "groupServices": [
                         "user_aggregates",
                         "user_routing_status"
+                    ]
+                },
+                {
+                    "groupName": "inventory",
+                    "groupTitle": "Inventory",
+                    "groupServices": [
+                        "users_directory",
+                        "queues_directory"
                     ]
                 }
             ],

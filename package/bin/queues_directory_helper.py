@@ -7,14 +7,11 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from splunklib import modularinput as smi
 
 from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import QueueModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
 SOURCETYPE = "genesyscloud:inventory:queues"
-
-FIELDS_TO_INDEX = [
-    "id", "name", "description", "member_count", "division"
-]
 
 
 def logger_for_input(input_name: str) -> logging.Logger:
@@ -76,17 +73,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             queues = client.get("RoutingApi", "get_routing_queues")
 
             event_counter = 0
-            for queue_obj in queues:
-                queue_dict = queue_obj.to_dict() if hasattr(queue_obj, "to_dict") else queue_obj
-                record = {}
-                for field in FIELDS_TO_INDEX:
-                    if field in queue_dict and queue_dict[field] is not None:
-                        val = queue_dict[field]
-                        if field == "division" and isinstance(val, dict):
-                            record["division_id"] = val.get("id")
-                            record["division_name"] = val.get("name")
-                        else:
-                            record[field] = val
+            for record in QueueModel(queues).get_directory_records():
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(record, ensure_ascii=False, default=str),

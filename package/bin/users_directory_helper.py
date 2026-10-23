@@ -7,14 +7,11 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from splunklib import modularinput as smi
 
 from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import UserModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
 SOURCETYPE = "genesyscloud:inventory:users"
-
-FIELDS_TO_INDEX = [
-    "id", "name", "email", "department", "state", "division", "version"
-]
 
 
 def logger_for_input(input_name: str) -> logging.Logger:
@@ -76,17 +73,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             users = client.get("UsersApi", "get_users")
 
             event_counter = 0
-            for user_obj in users:
-                user_dict = user_obj.to_dict() if hasattr(user_obj, "to_dict") else user_obj
-                record = {}
-                for field in FIELDS_TO_INDEX:
-                    if field in user_dict and user_dict[field] is not None:
-                        val = user_dict[field]
-                        if field == "division" and isinstance(val, dict):
-                            record["division_id"] = val.get("id")
-                            record["division_name"] = val.get("name")
-                        else:
-                            record[field] = val
+            for record in UserModel(users).get_directory_records():
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(record, ensure_ascii=False, default=str),
