@@ -10,7 +10,7 @@ from genesyscloud_client import GenesysCloudClient
 
 
 ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:directory:queues"
+SOURCETYPE = "genesyscloud:inventory:queues"
 
 FIELDS_TO_INDEX = [
     "id", "name", "description", "member_count", "division"

@@ -124,10 +124,10 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 
 ## Directory inputs: usage notes
 
-The `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud directory on every run (`GET /api/v2/users` and `GET /api/v2/routing/queues`). They are intended for scenarios where the directory data must be **indexed** (for example, historical lookup-table generation or compliance retention), rather than resolved on demand.
+The `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud directory on every run through `GET /api/v2/users` and `GET /api/v2/routing/queues`.
 
-!!! note "On-demand alternative"
-    If you only need to resolve user or queue IDs into human-readable names at search time (for dashboards), prefer the `| genesysusers` and `| genesysqueues` custom search commands shipped in the [Genesys Cloud App for Splunk](https://github.com/splunk/genesys_cloud_app_for_splunk). Those commands run on the Search Head and do not index data, which avoids the duplication described below.
+!!! warning
+    **These inputs are intended for scenarios such as compliance retention where the directory data must be indexed**, rather than resolved on demand. Therefore, if you only need to resolve user or queue IDs into human-readable names at search time (for dashboards), we strongly recommend leveraging custom search commands instead.
 
 ### Deployment in a distributed environment
 

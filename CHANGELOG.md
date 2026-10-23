@@ -8,9 +8,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 
 ### Added
 
-- Directory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support lookup-table correlation (user/queue ID to human-readable name) ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
-- Operational usage modular inputs `usage_events`, `org_usage` and `oauth_client_usage` replacing the deprecated `POST /api/v2/usage/query` and `POST /api/v2/oauth/clients/{clientId}/usage/query` endpoints ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
-- Sourcetypes `genesyscloud:directory:users`, `genesyscloud:directory:queues`, `genesyscloud:operational:events`, `genesyscloud:operational:usage:api` and `genesyscloud:operational:usage:clients_api` ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Inventory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support compliance retention requirements ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Operational usage modular inputs `usage_events`, `org_usage` and `oauth_client_usage` ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
 
 
 ## [v0.4.3] - 2026-10-19

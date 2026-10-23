@@ -10,7 +10,7 @@ from genesyscloud_client import GenesysCloudClient
 
 
 ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:directory:users"
+SOURCETYPE = "genesyscloud:inventory:users"
 
 FIELDS_TO_INDEX = [
     "id", "name", "email", "department", "state", "division", "version"

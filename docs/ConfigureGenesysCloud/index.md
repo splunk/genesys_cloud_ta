@@ -26,9 +26,9 @@ OAuth2 protocol, so that it can access and gather the data according to the serv
    | `analytics:userAggregate:view`  | <ul><li>analytics<li>analytics:readonly</ul> | Read user aggregates for your organization. | Analytics |
    | Any of these: <ul><li>`integrations:action:view`<li>`bridge:actions:view`</ul>  | <ul><li>analytics<li>analytics:readonly</ul> | Read action aggregates for your organization. | Analytics |
    | `audits:audit:view`  | <ul><li>audits:readonly</ul> | Read audit logs for your organization. | Audits |
-   | `usage:query:execute`  | <ul><li>usage:readonly</ul> | Read API usage operational events and organization/OAuth-client API usage aggregates for your organization. | Usage |
-   | `directory:user:view`  | <ul><li>users:readonly</ul> | Read the user directory for your organization. | Directory |
-   | `routing:queue:view` | <ul><li>routing<li>routing:readonly</ul>   | Read queues and the queue directory for your organization. | Routing |
+   | Any of these: <ul><li>`usage:organization:view`<li>`usage:client:view`</ul>  | <ul><li>oauth<li>oauth:readonly</ul> | Read organization-level and OAuth-client API usage aggregates for your organization. | Usage |
+   | N/A  | <ul><li>users<li>users:readonly</ul> | Read the user directory for your organization. | Users |
+   | `routing:queue:view` | <ul><li>routing<li>routing:readonly</ul>   | Read routing queues for your organization. | Routing |
    | `telephony:plugin:all` | <ul><li>telephony<li>telephony:readonly</ul>  | Read edges, trunks and their metrics as well as phones for your organization. | Telephony Providers Edge   |
 
 

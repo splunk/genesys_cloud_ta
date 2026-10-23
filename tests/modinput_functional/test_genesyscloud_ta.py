@@ -209,7 +209,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         This test will check whether data was successfully indexed
         """
-        sourcetype = "genesyscloud:directory:users"
+        sourcetype = "genesyscloud:inventory:users"
         source = "users_directory://users_directory"
         spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
         results = self._search_oneshot(search_query=spl)
@@ -219,7 +219,7 @@ class TestGenesysCloudTA(BaseTATest):
         """
         This test will check whether data was successfully indexed
         """
-        sourcetype = "genesyscloud:directory:queues"
+        sourcetype = "genesyscloud:inventory:queues"
         source = "queues_directory://queues_directory"
         spl = f"search index={self.INDEX} sourcetype={sourcetype} source={source}"
         results = self._search_oneshot(search_query=spl)
