@@ -21,7 +21,10 @@
             "categories": [],
             "developmentStatus": null
         },
-        "commonInformationModels": null,
+        "commonInformationModels": {
+            "Change": "5.3.2",
+            "Performance": "5.3.2"
+        },
         "license": {
             "name": "LICENSE.txt",
             "text": "./LICENSES/LICENSE.txt",
