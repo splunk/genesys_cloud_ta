@@ -5,6 +5,8 @@
 - Users Directory,
 - Queues Directory.
 
+!!! warning
+    **These inputs are intended for scenarios such as compliance retention where provisioning data (IDs, names, metadata) must be indexed**, rather than resolved on demand. Therefore, if you only need to resolve user or routing queue IDs into human-readable names at search time (for dashboards), we strongly recommend leveraging custom search commands instead.
 
 ## Pre-Requirements
 
@@ -74,20 +76,15 @@ Each attribute in the following table corresponds to a field in Splunk Web.
 |`index`                  |Index                             |The index in which the data should be stored. The default is <code>default</code>.|
 |`interval`               |Interval (seconds)                |Rerun the input after the defined value, in seconds. The default value is <code>86400</code> (once per day), which is sufficient for most environments.|
 
-## Usage notes
+!!! note
+    Being the data collected directory/provisioning data (IDs, names, metadata) and not time-series events, changes are infrequent, hence a **low collection frequency is recommended**.
 
-The `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud directory on every run through `GET /api/v2/users` and `GET /api/v2/routing/queues`.
 
-!!! warning
-    **These inputs are intended for scenarios such as compliance retention where the directory data must be indexed**, rather than resolved on demand. Therefore, if you only need to resolve user or queue IDs into human-readable names at search time (for dashboards), we strongly recommend leveraging custom search commands instead.
+## Handling duplicates
 
-### Deployment in a distributed environment
+On every run the `users_directory` and `queues_directory` inputs ingest a **full snapshot** of the Genesys Cloud users and routing queues through `GET /api/v2/users` and `GET /api/v2/routing/queues` API calls.
 
-- Like every other input in this add-on, the inventory inputs run on the Splunk platform instance where the add-on is installed, usually a **heavy forwarder**. They collect and forward data to the indexers; results are then searched from the **search head**.
-- The data collected is directory/provisioning data (IDs, names, metadata), not time-series events. It changes infrequently, so a low collection frequency is recommended. The default `interval` for both inputs is `86400` (once per day), which is sufficient for most environments.
-
-### Handling duplicates
-
+Please mind that:
 - These inputs do **not** use checkpointing: each run re-indexes the **entire** directory as a fresh snapshot. This is intentional, so that deleted or renamed entities are reflected on each run, but it means the same `id` is indexed once per run and **duplicates accumulate over time**.
 - When searching the indexed data, keep only the most recent snapshot per entity, for example:
 
