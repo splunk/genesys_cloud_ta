@@ -1472,6 +1472,14 @@
                     ]
                 },
                 {
+                    "groupName": "inventory",
+                    "groupTitle": "Inventory",
+                    "groupServices": [
+                        "users_directory",
+                        "queues_directory"
+                    ]
+                },
+                {
                     "groupName": "operational",
                     "groupTitle": "Operational",
                     "groupServices": [
@@ -1497,14 +1505,6 @@
                     "groupServices": [
                         "user_aggregates",
                         "user_routing_status"
-                    ]
-                },
-                {
-                    "groupName": "inventory",
-                    "groupTitle": "Inventory",
-                    "groupServices": [
-                        "users_directory",
-                        "queues_directory"
                     ]
                 }
             ],
