@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/) and this p
 ### Added
 
 - Inventory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support compliance retention requirements ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
-- Operational usage modular inputs `usage_events`, `org_usage` and `oauth_client_usage` ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Operational modular inputs `usage_events`, `org_usage` and `oauth_client_usage` to fetch usage records as well as organization-level and OAuth clients API usage aggregates ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
 
 
 ## [v0.4.3] - 2026-10-19
