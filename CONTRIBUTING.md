@@ -52,7 +52,7 @@ A CI/CD workflow will automatically perform tests when a PR is opened. The Genes
 Scope is to avoid introducing regressions in the `package/bin/genesyscloud_client.py`, to run these tests in your **local environment** execute:
 
 ```bash
-$~ make run-tests
+$~ make integration-test
 ```
 
 ### Functional
@@ -65,33 +65,19 @@ Please download and install it as per [instructions](https://docs.docker.com/com
 
 **Getting Started**
 
-To execute tests in your **local environment** follow these instructions:
+To execute tests in your **local environment**:
 
 ```bash
-# 1. Build the TA -> will generate the 'output' folder
-$ make build
-
-# 2. Copy the configuration file
-#    !! Create 'local' dir if it does not exist !!
-$ cp ./etc/cicd/inputs.conf ./output/genesys_cloud_ta/local
-
-# 3. Spin up the test environment
-$ cd tests/vendor && \
-  export APP_NAME=genesys_cloud_ta && \
-  docker compose up -d
-
-# 4. Test whether Splunk is ready
-$ export EXPECTED="Ansible playbook complete, will begin streaming splunkd_stderr.log"
-$ docker logs gc_splunk 2>&1 | tail -n 20 | grep -F "$EXPECTED" && echo "Found expected line near end of logs." || (echo "Expected line not found." && exit 1)
-
-# 5. Test connectivity between Splunk and Genesys Cloud Mock
-$ docker exec gc_splunk curl -v http://mockoon:3004/ || echo "Failed to reach Genesys Cloud Mock from Splunk"
-
-# 6. Go back to the project root folder and run
-$ make run-functional-tests
+$ make modinput-tests
 ```
 
-:point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `run-functional-tests`
+To troubleshoot connectivity between Splunk and the Genesys Cloud mock execute:
+
+```bash
+$ docker exec gc_splunk curl -v http://mockoon:3004/ || echo "Failed to reach Genesys Cloud Mock from Splunk"
+```
+
+:point_right: For debugging purposes, you can enable logging to stdout by adding `-o log_cli=true` to the pytest command executed in `modinput-tests`
 
 **Repeat same test**
 
@@ -119,11 +105,11 @@ On push to `main`, the following checks will be executed before releasing a new 
 A `CHANGELOG.md` file is used to document changes between versions. The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## Documentation
-Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow.
+Documentation made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/) and served by a CI/CD workflow. To contribute, please check `docs/` subfolders and files.
 
 [MkDocs](https://www.mkdocs.org/getting-started/) comes with a built-in dev-server that lets you preview your documentation as you work on it.
 
 ```bash
 # Preview your docs
-$~ make run-docs
+$~ make docs
 ```
