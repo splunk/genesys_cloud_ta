@@ -15,7 +15,8 @@ LOG_HANDLER.setFormatter(logging.Formatter(fmt=LOG_FORMAT))
 LOGGER.addHandler(LOG_HANDLER)
 LOG_HANDLER.setLevel(logging.DEBUG)
 
-class BaseTATest():
+
+class BaseTATest:
     TA_APP_NAME = "genesys_cloud_ta"
     TA_APP_USER = "nobody"
     INDEX = "genesyscloud"
@@ -42,14 +43,14 @@ class BaseTATest():
             username=cls.username,
             password=cls.password,
             verify=False,
-            sharing='app',
-            app=cls.TA_APP_NAME)
+            sharing="app",
+            app=cls.TA_APP_NAME,
+        )
         cls.create_genesyscloud_accounts()
         cls.logger.info("Creating index")
         cls.splunk_client.indexes.create(cls.INDEX)
         # Reloading the app to avoid issues
         cls.splunk_client.apps[cls.TA_APP_NAME].reload()
-
 
     @classmethod
     def teardown_class(cls):
@@ -74,13 +75,15 @@ class BaseTATest():
         cls.toggle_input(input_name, 1)
         # Clean up checkpointers
         try:
-            checkpointer=f"{input_name}_checkpointer"
+            checkpointer = f"{input_name}_checkpointer"
             kvstore_collection = cls.splunk_client.kvstore[checkpointer]
             cls.logger.info(f"Cleaning up checkpointer for input '{input_name}'")
             kvstore_collection.data.delete()
         except KeyError as err:
             # queue_observations does not use checkpointers
-            cls.logger.warning(f"Skipping checkpointer cleanup: {checkpointer} not found - {err}")
+            cls.logger.warning(
+                f"Skipping checkpointer cleanup: {checkpointer} not found - {err}"
+            )
 
     @classmethod
     def toggle_input(cls, input_name: str, new_state: int):
@@ -92,7 +95,7 @@ class BaseTATest():
         input_obj = cls.splunk_client.inputs[input_name]
         cls.logger.info(f"Refreshing state of input {input_obj.content}")
         input_obj.refresh()
-        current_state = input_obj.content.get('disabled')
+        current_state = input_obj.content.get("disabled")
         if int(current_state) != new_state:
             msg = "Disabling" if new_state == 1 else "Enabling"
             cls.logger.info(f"{msg} {input_name}")
@@ -116,7 +119,8 @@ class BaseTATest():
         # Create account
         conf_filename = f"conf-{cls.TA_APP_NAME}_account"
         response = cls.splunk_client.post(
-            f"configs/{conf_filename}", name="mock", **configs)
+            f"configs/{conf_filename}", name="mock", **configs
+        )
         cls.logger.info(f"Response {response}")
 
     @classmethod
@@ -139,6 +143,6 @@ class BaseTATest():
         configs = {
             "client_id": cls.CLIENT_ID,
             "client_secret": cls.CLIENT_SECRET,
-            "aws_region": cls.AWS_REGION
+            "aws_region": cls.AWS_REGION,
         }
         return configs

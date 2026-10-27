@@ -20,17 +20,17 @@ def pytest_addoption(parser):
         "--client-id",
         dest="client_id",
         help="the client id to access Genesys Cloud, defaults to myclientid",
-        default="myclientid"
+        default="myclientid",
     )
     gc_group.addoption(
         "--client-secret",
         dest="client_secret",
         help="the password for client_id, defaults to myclientsecret",
-        default="myclientsecret"
+        default="myclientsecret",
     )
     gc_group.addoption(
         "--aws-region",
         dest="aws_region",
         help="The AWS Region Genesys Cloud runs in, defaults to localhost:3004",
-        default="localhost:3004"
+        default="localhost:3004",
     )
