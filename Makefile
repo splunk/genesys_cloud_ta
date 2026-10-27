@@ -53,7 +53,7 @@ setup-docs: ## Setup docs virtual environment
 # ── Build ──────────────────────────
 
 build: setup-venv ## Build with UCC
-	$(UCC_GEN) build --ta-version=$(APP_VERSION);
+	$(UCC_GEN) build --ta-version=$(APP_VERSION)
 
 package: build ## Build and package with UCC
 	mkdir -p dist
