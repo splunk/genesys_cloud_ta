@@ -4,6 +4,8 @@ For reporting unexpected behavior, documentation gaps, entirely new features, pl
 Contributions via pull requests are also welcome:
 * Create a branch for the issue / new feature
 * Make your changes on your branch
+* Install [pre-commit](https://pre-commit.com/#install) on your system, if not already installed, and then run `pre-commit install` while inside the app repo. _Note: This step is not required, but **strongly** recommended! It will allow you to catch issues before even pushing any code._
+* Thoroughly test your changes. See the [Tests](#tests) section for information about provided basic automated checks.
 * Open a [pull request](https://github.com/splunk/genesys_cloud_ta/pulls)
 * Add as reviewers [@edro15](https://www.github.com/edro15) and [@ahoang-splunk](https://www.github.com/ahoang-splunk)
 
