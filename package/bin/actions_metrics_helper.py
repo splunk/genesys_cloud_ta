@@ -12,9 +12,11 @@ from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     """Create and return a logger for the specified input."""
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     """Retrieve a specific property for a given Genesys Cloud account."""
@@ -26,9 +28,11 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -43,8 +47,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             log_level = conf_manager.get_log_level(
-                logger=logger, session_key=session_key,
-                app_name=ADDON_NAME, conf_name="genesys_cloud_ta_settings"
+                logger=logger,
+                session_key=session_key,
+                app_name=ADDON_NAME,
+                conf_name="genesys_cloud_ta_settings",
             )
             logger.setLevel(log_level)
             try:
@@ -73,7 +79,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_id = get_account_property(session_key, account, "client_id")
             client_secret = get_account_property(session_key, account, "client_secret")
 
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_config)
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region, proxy_config
+            )
 
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
@@ -100,9 +108,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "AnalyticsApi",
                 "post_analytics_actions_aggregates_query",
                 "ActionAggregationQuery",
-                body
+                body,
             )
-            sourcetype="genesyscloud:analytics:actions:metrics"
+            sourcetype = "genesyscloud:analytics:actions:metrics"
 
             event_counter = 0
             to_process_data = client.convert_response(response)
@@ -112,8 +120,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     for data_entry in event.get("data", []):
                         interval_str = data_entry.get("interval")
                         interval_start_time = (
-                            datetime.strptime(interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
-                            if interval_str else round(start_time.timestamp(), 3)
+                            datetime.strptime(
+                                interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ"
+                            )
+                            .replace(tzinfo=timezone.utc)
+                            .timestamp()
+                            if interval_str
+                            else round(start_time.timestamp(), 3)
                         )
 
                         for metric in data_entry.get("metrics", []):
@@ -122,15 +135,17 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 "qualifier": metric.get("qualifier"),
                                 "stats": metric.get("stats", {}),
                                 "group": group_info,
-                                "interval": interval_str
+                                "interval": interval_str,
                             }
 
                             event_writer.write_event(
                                 smi.Event(
-                                    data=json.dumps(enriched_metric, ensure_ascii=False, default=str),
+                                    data=json.dumps(
+                                        enriched_metric, ensure_ascii=False, default=str
+                                    ),
                                     index=input_item.get("index"),
                                     sourcetype=sourcetype,
-                                    time=interval_start_time
+                                    time=interval_start_time,
                                 )
                             )
                             event_counter += 1
@@ -141,8 +156,20 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 new_checkpoint = end_time.timestamp()
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
-            log.events_ingested(logger, input_name, sourcetype, event_counter, input_item.get("index"), account=account)
+            log.events_ingested(
+                logger,
+                input_name,
+                sourcetype,
+                event_counter,
+                input_item.get("index"),
+                account=account,
+            )
             log.modular_input_end(logger, normalized_input_name)
 
         except Exception as e:
-            log.log_exception(logger, e, "IngestionError", msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}")
+            log.log_exception(
+                logger,
+                e,
+                "IngestionError",
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
+            )

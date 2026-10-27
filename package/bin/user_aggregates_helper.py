@@ -15,8 +15,10 @@ from genesyscloud_models import UserModel
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
 
@@ -27,6 +29,7 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     )
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
+
 
 def validate_input(definition: smi.ValidationDefinition):
     return
@@ -69,9 +72,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
 
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(
@@ -82,17 +91,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = input_name.split("/")[-1]
             now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
-            last_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or (now - relativedelta(years=4)).strftime("%Y-%m-%dT%H:%M:%SZ")
-            )
+            last_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or (
+                now - relativedelta(years=4)
+            ).strftime("%Y-%m-%dT%H:%M:%SZ")
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             # Getting data from API
             logger.info("Getting data from users endpoint")
-            user_model = UserModel(
-                client.get("UsersApi", "get_users")
-            )
+            user_model = UserModel(client.get("UsersApi", "get_users"))
 
             # Getting metrics
             interval = f"{last_checkpoint}/{new_checkpoint}"
@@ -111,27 +117,24 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "metrics": [
                         "tAgentRoutingStatus",
                         "tOrganizationPresence",
-                        "tSystemPresence"
+                        "tSystemPresence",
                     ],
                     "filter": {
                         "type": "or",
                         "predicates": [
-                            {
-                                "dimension": "userId",
-                                "operator": "matches",
-                                "value": uid
-                            } for uid in user_ids
-                        ]
-                    }
+                            {"dimension": "userId", "operator": "matches", "value": uid}
+                            for uid in user_ids
+                        ],
+                    },
                 }
                 data = client.post(
                     "UsersApi",
                     "post_analytics_users_aggregates_query",
                     "UserAggregationQuery",
-                    body
+                    body,
                 )
                 results.extend(client.convert_response(data))
-                cnt+=1
+                cnt += 1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 
             sourcetype = "genesyscloud:users:users:aggregates"
@@ -140,16 +143,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 for data_entry in item["data"]:
                     for metrics in data_entry["metrics"]:
                         try:
-                            metrics["user"] = user_model.get_user(item["group"]["userId"])
+                            metrics["user"] = user_model.get_user(
+                                item["group"]["userId"]
+                            )
                         except ValueError as ve:
-                            logger.warning(f"Could not get user information - {ve}. Skipping.")
+                            logger.warning(
+                                f"Could not get user information - {ve}. Skipping."
+                            )
                             metrics["user"] = {}
                         metrics["interval"] = data_entry["interval"]
                         event_writer.write_event(
                             smi.Event(
-                                data=json.dumps(metrics, ensure_ascii=False, default=str),
+                                data=json.dumps(
+                                    metrics, ensure_ascii=False, default=str
+                                ),
                                 index=input_item.get("index"),
-                                sourcetype=sourcetype
+                                sourcetype=sourcetype,
                             )
                         )
                         event_counter += 1
@@ -166,7 +175,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 sourcetype,
                 event_counter,
                 input_item.get("index"),
-                account = input_item.get("account")
+                account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
@@ -174,5 +183,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

@@ -12,9 +12,11 @@ from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     """Create and return a logger for the specified input."""
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     """Retrieve a specific property for a given Genesys Cloud account."""
@@ -26,9 +28,11 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -69,35 +73,83 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_config)
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region, proxy_config
+            )
 
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
             fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
             start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
             interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
 
             metrics = [
-                "nBlindTransferred", "nBotInteractions", "nCobrowseSessions", "nConnected",
-                "nConsult", "nConsultTransferred", "nError", "nOffered", "nOutbound",
-                "nOutboundAbandoned", "nOutboundAttempted", "nOutboundConnected", "nOverSla",
-                "nStateTransitionError", "nTransferred", "oExternalMediaCount", "oMediaCount",
-                "oMessageTurn", "oServiceLevel", "oServiceTarget",
-                "tWait", "tAbandon", "tAcd", "tActiveCallback", "tActiveCallbackComplete",
-                "tAcw", "tAgentResponseTime", "tAlert", "tAnswered", "tBarging", "tCoaching",
-                "tCoachingComplete", "tConnected", "tContacting", "tDialing", "tFirstConnect",
-                "tFirstDial", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
-                "tMonitoring", "tMonitoringComplete", "tNotResponding", "tPark", "tParkComplete",
-                "tShortAbandon", "tTalk", "tTalkComplete", "tUserResponseTime", "tVoicemail"
+                "nBlindTransferred",
+                "nBotInteractions",
+                "nCobrowseSessions",
+                "nConnected",
+                "nConsult",
+                "nConsultTransferred",
+                "nError",
+                "nOffered",
+                "nOutbound",
+                "nOutboundAbandoned",
+                "nOutboundAttempted",
+                "nOutboundConnected",
+                "nOverSla",
+                "nStateTransitionError",
+                "nTransferred",
+                "oExternalMediaCount",
+                "oMediaCount",
+                "oMessageTurn",
+                "oServiceLevel",
+                "oServiceTarget",
+                "tWait",
+                "tAbandon",
+                "tAcd",
+                "tActiveCallback",
+                "tActiveCallbackComplete",
+                "tAcw",
+                "tAgentResponseTime",
+                "tAlert",
+                "tAnswered",
+                "tBarging",
+                "tCoaching",
+                "tCoachingComplete",
+                "tConnected",
+                "tContacting",
+                "tDialing",
+                "tFirstConnect",
+                "tFirstDial",
+                "tFlowOut",
+                "tHandle",
+                "tHeld",
+                "tHeldComplete",
+                "tIvr",
+                "tMonitoring",
+                "tMonitoringComplete",
+                "tNotResponding",
+                "tPark",
+                "tParkComplete",
+                "tShortAbandon",
+                "tTalk",
+                "tTalkComplete",
+                "tUserResponseTime",
+                "tVoicemail",
             ]
             group_by = ["queueId"]
 
@@ -106,20 +158,28 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             media_types = media_types_raw.split("|") if media_types_raw else []
             directions = directions_raw.split("|") if directions_raw else []
 
-            media_type_predicates = [{"dimension": "mediaType", "value": mt} for mt in media_types]
-            direction_predicates = [{"dimension": "direction", "value": d} for d in directions]
+            media_type_predicates = [
+                {"dimension": "mediaType", "value": mt} for mt in media_types
+            ]
+            direction_predicates = [
+                {"dimension": "direction", "value": d} for d in directions
+            ]
 
             filter_block = {"type": "and", "clauses": []}
             if media_type_predicates:
-                filter_block["clauses"].append({"type": "or", "predicates": media_type_predicates})
+                filter_block["clauses"].append(
+                    {"type": "or", "predicates": media_type_predicates}
+                )
             if direction_predicates:
-                filter_block["clauses"].append({"type": "or", "predicates": direction_predicates})
+                filter_block["clauses"].append(
+                    {"type": "or", "predicates": direction_predicates}
+                )
 
             body = {
                 "interval": interval,
                 "metrics": metrics,
                 "group_by": group_by,
-                "filter": filter_block
+                "filter": filter_block,
             }
 
             sourcetype = "genesyscloud:analytics:flows:metrics"
@@ -127,7 +187,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "ConversationsApi",
                 "post_analytics_conversations_aggregates_query",
                 "ConversationAggregationQuery",
-                body
+                body,
             )
             to_process_data = client.convert_response(response)
             event_counter = 0
@@ -135,18 +195,26 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 try:
                     for data_entry in event["data"]:
                         interval_start_time = (
-                            datetime.strptime(data_entry["interval"].split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc).timestamp()
-                            if event.get("data") else round(start_time.timestamp(), 3)
+                            datetime.strptime(
+                                data_entry["interval"].split("/")[0],
+                                "%Y-%m-%dT%H:%M:%S.%fZ",
+                            )
+                            .replace(tzinfo=timezone.utc)
+                            .timestamp()
+                            if event.get("data")
+                            else round(start_time.timestamp(), 3)
                         )
                         for metric in data_entry["metrics"]:
                             metric["group"] = event["group"]
                             metric["interval"] = data_entry["interval"]
                             event_writer.write_event(
                                 smi.Event(
-                                    data=json.dumps(metric, ensure_ascii=False, default=str),
+                                    data=json.dumps(
+                                        metric, ensure_ascii=False, default=str
+                                    ),
                                     index=input_item.get("index"),
                                     sourcetype=sourcetype,
-                                    time=interval_start_time
+                                    time=interval_start_time,
                                 )
                             )
                             event_counter += 1
@@ -175,5 +243,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

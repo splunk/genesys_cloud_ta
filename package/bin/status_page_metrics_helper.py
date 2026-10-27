@@ -15,11 +15,14 @@ from genesyscloud_client import ProxyHandler
 ADDON_NAME = "genesys_cloud_ta"
 STATUS_PAGE_API_URL = "https://status.mypurecloud.com/api"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
 
+
 def validate_input(definition: smi.ValidationDefinition):
     return
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     cfm = conf_manager.ConfManager(
@@ -42,7 +45,9 @@ def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
                 "https": proxy_url,
             }
             logger.info(f"Proxy enabled to fetch data.")
-        summary_response = requests.get(f"{STATUS_PAGE_API_URL}/v2/summary.json", proxies=proxies)
+        summary_response = requests.get(
+            f"{STATUS_PAGE_API_URL}/v2/summary.json", proxies=proxies
+        )
         summary_response.raise_for_status()
         summary_data = summary_response.json()
 
@@ -50,6 +55,7 @@ def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
     except Exception as e:
         logger.error(f"Error fetching status page data: {str(e)}")
         return {}
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -114,12 +120,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             for component in summary.get("components", []):
                 updated_at = component.get("updated_at", None)
                 if updated_at:
-                    component_updated_at = datetime.fromisoformat(updated_at.replace("Z", "+00:00")).timestamp()
-                    logger.debug(f"Component updated at timestamp: {component_updated_at}")
+                    component_updated_at = datetime.fromisoformat(
+                        updated_at.replace("Z", "+00:00")
+                    ).timestamp()
+                    logger.debug(
+                        f"Component updated at timestamp: {component_updated_at}"
+                    )
 
                     # Only process if newer than our checkpoint
                     if component_updated_at > status_page_checkpoint:
-
                         component["page"] = page
                         # Delete page_id field if it exists
                         if "page_id" in component:
@@ -129,10 +138,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
                         event_writer.write_event(
                             smi.Event(
-                                data=json.dumps(component, ensure_ascii=False, default=str),
+                                data=json.dumps(
+                                    component, ensure_ascii=False, default=str
+                                ),
                                 index=input_item.get("index"),
                                 sourcetype=sourcetype,
-                                time=component_updated_at
+                                time=component_updated_at,
                             )
                         )
                         logger.debug(f"Status summary event written")
@@ -146,11 +157,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 status_page_checkpointer.update(checkpointer_key_name, current_time)
 
             log.events_ingested(
-                logger,
-                input_name,
-                sourcetype,
-                events_count,
-                input_item.get("index")
+                logger, input_name, sourcetype, events_count, input_item.get("index")
             )
 
             log.modular_input_end(logger, normalized_input_name)
@@ -160,5 +167,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

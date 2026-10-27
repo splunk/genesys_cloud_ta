@@ -11,8 +11,10 @@ from genesyscloud_models import QueueModel
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     cfm = conf_manager.ConfManager(
@@ -23,8 +25,10 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+
 def validate_input(definition: smi.ValidationDefinition):
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -58,9 +62,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_config
@@ -68,11 +78,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Getting data from API
             logger.info("Getting data from queues endpoint")
-            queue_model = QueueModel(
-                client.get(
-                    "RoutingApi", "get_routing_queues"
-                )
-            )
+            queue_model = QueueModel(client.get("RoutingApi", "get_routing_queues"))
 
             # Getting metrics
             # Max 200 query predicates according to error received
@@ -89,21 +95,28 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             {
                                 "dimension": "queueId",
                                 "operator": "matches",
-                                "value": queue_id
-                            } for queue_id in queue_ids
-                        ]
+                                "value": queue_id,
+                            }
+                            for queue_id in queue_ids
+                        ],
                     },
                     "metrics": [
-                        "oActiveUsers", "oAlerting", "oInteracting",
-                        "oMemberUsers", "oOffQueueUsers", "oOnQueueUsers",
-                        "oUserPresences", "oUserRoutingStatuses", "oWaiting"
-                    ]
+                        "oActiveUsers",
+                        "oAlerting",
+                        "oInteracting",
+                        "oMemberUsers",
+                        "oOffQueueUsers",
+                        "oOnQueueUsers",
+                        "oUserPresences",
+                        "oUserRoutingStatuses",
+                        "oWaiting",
+                    ],
                 }
                 response = client.post(
                     "RoutingApi",
                     "post_analytics_queues_observations_query",
                     "QueueObservationQuery",
-                    body
+                    body,
                 )
                 results.extend(client.convert_response(response))
                 cnt += 1
@@ -114,16 +127,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             for item in results:
                 for data_entry in item["data"]:
                     try:
-                        data_entry["queue"] = queue_model.get_queue(item["group"]["queueId"])
+                        data_entry["queue"] = queue_model.get_queue(
+                            item["group"]["queueId"]
+                        )
                     except ValueError as ve:
-                        logger.warning(f"Could not get queue information - {ve}. Skipping.")
+                        logger.warning(
+                            f"Could not get queue information - {ve}. Skipping."
+                        )
                         data_entry["queue"] = {}
                     event_writer.write_event(
                         smi.Event(
                             # Index time not needed?
-                            data=json.dumps(data_entry, ensure_ascii=False, default=str),
+                            data=json.dumps(
+                                data_entry, ensure_ascii=False, default=str
+                            ),
                             index=input_item.get("index"),
-                            sourcetype=sourcetype
+                            sourcetype=sourcetype,
                         )
                     )
                     event_counter += 1
@@ -136,7 +155,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 sourcetype,
                 event_counter,
                 input_item.get("index"),
-                account = input_item.get("account")
+                account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
         except Exception as e:
@@ -144,5 +163,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

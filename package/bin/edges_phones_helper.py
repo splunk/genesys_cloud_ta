@@ -1,4 +1,3 @@
-
 import json
 import logging
 
@@ -14,6 +13,7 @@ from genesyscloud_models import PhoneModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
+
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
@@ -81,9 +81,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_config
@@ -94,15 +100,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
             p_model = PhoneModel(
                 client.get(
                     "TelephonyProvidersEdgeApi",
                     "get_telephony_providers_edges_phones",
-                    **{"expand":"site,status"}
+                    **{"expand": "site,status"},
                 )
             )
             # Max 10k results returned when filtering the results or sorting
@@ -113,11 +118,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
             event_counter = 0
             for status_obj in statuses:
-                event_time_epoch = p_model.to_datetime(status_obj["event_creation_time"]).timestamp()
+                event_time_epoch = p_model.to_datetime(
+                    status_obj["event_creation_time"]
+                ).timestamp()
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
                         smi.Event(
-                            data=json.dumps(status_obj, ensure_ascii=False, default=str),
+                            data=json.dumps(
+                                status_obj, ensure_ascii=False, default=str
+                            ),
                             time=event_time_epoch,
                             index=input_item.get("index"),
                             sourcetype=sourcetype,
@@ -147,5 +156,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

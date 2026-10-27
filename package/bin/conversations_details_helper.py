@@ -13,8 +13,10 @@ from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
     cfm = conf_manager.ConfManager(
@@ -24,6 +26,7 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     )
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
+
 
 def get_conversation_duration(start: datetime, end: datetime) -> int:
     """
@@ -37,8 +40,10 @@ def get_conversation_duration(start: datetime, end: datetime) -> int:
     duration = end - start
     return int(duration.total_seconds() * 1000)
 
-def exceed_range(start: str, end: str, max_days: int = 31,
-                  fmt: str = "%Y-%m-%dT%H:%M:%SZ") -> bool:
+
+def exceed_range(
+    start: str, end: str, max_days: int = 31, fmt: str = "%Y-%m-%dT%H:%M:%SZ"
+) -> bool:
     """Verify interval range does not exceed threshold.
     :param start: Interval start string reference.
     :param end: Interval end string reference.
@@ -50,17 +55,23 @@ def exceed_range(start: str, end: str, max_days: int = 31,
     end_dt = datetime.strptime(end, fmt)
 
     if end_dt <= start_dt:
-        raise Exception(f"Invalid start date: {start} cannot be later or equal to {end}")
+        raise Exception(
+            f"Invalid start date: {start} cannot be later or equal to {end}"
+        )
 
     return (end_dt - start_dt) >= timedelta(days=max_days)
+
 
 def validate_input(definition: smi.ValidationDefinition):
     start_date = definition.parameters.get("start_date")
     fmt_str = "%Y-%m-%d"
     if start_date is not None:
         if exceed_range(start_date, datetime.now().strftime(fmt_str), fmt=fmt_str):
-            raise Exception(f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now.")
+            raise Exception(
+                f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
+            )
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -99,15 +110,23 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
             fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime(
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_config
@@ -120,27 +139,33 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Evaluating the interval. It can be no greater than 31 days.
             # [400] BadRequest - You must specify a search interval as part of your query that does not exceed 31 days.
-            if start_time is None or (start_time and exceed_range(start_time, end_time)):
-                logger.info(f"Checkpoint not found or exceeds interval range of 31 days [{start_time}]. Using the configured start_date as fallback [{fallback_start}].")
+            if start_time is None or (
+                start_time and exceed_range(start_time, end_time)
+            ):
+                logger.info(
+                    f"Checkpoint not found or exceeds interval range of 31 days [{start_time}]. Using the configured start_date as fallback [{fallback_start}]."
+                )
                 start_time = fallback_start
                 if exceed_range(fallback_start, end_time):
                     # This case keeps the system running in case of too far away in time checkpoint.
-                    reset_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                    logger.warning(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
+                    reset_start = (now - timedelta(days=7)).strftime(
+                        "%Y-%m-%dT%H:%M:%SZ"
+                    )
+                    logger.warning(
+                        f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}."
+                    )
                     start_time = reset_start
 
             interval = f"{start_time}/{end_time}"
 
-            body = {
-                "interval": interval
-            }
+            body = {"interval": interval}
             logger.debug(f"Request body: {body}")
 
             response = client.post(
                 "ConversationsApi",
                 "post_analytics_conversations_details_query",
                 "ConversationQuery",
-                body
+                body,
             )
             # Careful: API call w/ paging! Needs conversion.
             data = client.convert_response(response, "conversations")
@@ -150,13 +175,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 event_counter = 0
                 for event in data:
                     # Adding conversation duration in milliseconds
-                    duration = get_conversation_duration(event["conversation_start"], event["conversation_end"])
+                    duration = get_conversation_duration(
+                        event["conversation_start"], event["conversation_end"]
+                    )
                     event["conversation_duration"] = duration
                     event_writer.write_event(
                         smi.Event(
                             data=json.dumps(event, ensure_ascii=False, default=str),
                             index=input_item.get("index"),
-                            sourcetype=sourcetype
+                            sourcetype=sourcetype,
                         )
                     )
                     event_counter += 1
@@ -181,5 +208,5 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

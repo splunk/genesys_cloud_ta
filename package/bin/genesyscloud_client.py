@@ -12,8 +12,8 @@ from PureCloudPlatformClientV2.configuration import Configuration
 
 
 class ProxyHandler:
-    """Handle Proxy Configuration
-    """
+    """Handle Proxy Configuration"""
+
     url: str = None
     url_auth: str = None
     username: str = None
@@ -34,7 +34,9 @@ class ProxyHandler:
         if not all((self.username, self.password)):
             logger.info("Proxy has no authentication")
         else:
-            self.url_auth = f"{proxy_type}://{self.username}:{self.password}@{host}:{port}"
+            self.url_auth = (
+                f"{proxy_type}://{self.username}:{self.password}@{host}:{port}"
+            )
 
         self.url = f"{proxy_type}://{host}:{port}"
 
@@ -54,20 +56,34 @@ class GenesysCloudClient:
     """
     Interface with Genesys Cloud
     """
+
     DEFAULT_REGION = "us_east_1"
 
-    def __init__(self, logger: logging.Logger, client_id: str, client_secret: str, aws_region: str, proxy_config: dict = None):
+    def __init__(
+        self,
+        logger: logging.Logger,
+        client_id: str,
+        client_secret: str,
+        aws_region: str,
+        proxy_config: dict = None,
+    ):
         self.logger = logger
         proxy_handler = ProxyHandler(logger, proxy_config)
         if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
             region = PureCloudPlatformClientV2.PureCloudRegionHosts[aws_region]
             self.host = region.get_api_host()
         else:
-            self.logger.warning(f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable")
+            self.logger.warning(
+                f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable"
+            )
             self.host = os.environ.get("GENESYSCLOUD_HOST", None)
             if not self.host:
-                self.logger.info(f"'GENESYSCLOUD_HOST' env variable not found: setting default '{self.DEFAULT_REGION}'")
-                region = PureCloudPlatformClientV2.PureCloudRegionHosts[self.DEFAULT_REGION]
+                self.logger.info(
+                    f"'GENESYSCLOUD_HOST' env variable not found: setting default '{self.DEFAULT_REGION}'"
+                )
+                region = PureCloudPlatformClientV2.PureCloudRegionHosts[
+                    self.DEFAULT_REGION
+                ]
                 self.host = region.get_api_host()
 
         # Singleton pattern. Configuration() is a globally shared object.
@@ -93,7 +109,9 @@ class GenesysCloudClient:
         function = getattr(api_instance, f_name)
 
         if not callable(function):
-            raise AttributeError(f"{f_name} is not a callable function of the API instance")
+            raise AttributeError(
+                f"{f_name} is not a callable function of the API instance"
+            )
 
         # FIXME add a max_pages safeguard to avoid unbounded pagination
         while True:
@@ -125,9 +143,11 @@ class GenesysCloudClient:
                 items.extend(api_response)
             else:
                 # An object such as EdgeEntityListing|QueueEntityListing|AuditQueryExecutionResultsResponse|TrunkEntityListing is returned
-                enable_pagination = any(key in api_response.attribute_map for key in pagination_params)
+                enable_pagination = any(
+                    key in api_response.attribute_map for key in pagination_params
+                )
                 if hasattr(api_response, "entities"):
-                    for item in (api_response.entities or []):
+                    for item in api_response.entities or []:
                         # Skip if empty/none list
                         if not item:
                             continue
@@ -174,7 +194,9 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            err_message = f"Exception when calling {api_instance_name}->{function_name}:"
+            err_message = (
+                f"Exception when calling {api_instance_name}->{function_name}:"
+            )
             try:
                 body = json.loads(e.body)
                 message = body["message"]
@@ -213,7 +235,9 @@ class GenesysCloudClient:
         buffer = BytesIO()
         with http.request("GET", url, preload_content=False) as response:
             if response.status != 200:
-                raise urllib3.exceptions.HTTPError(f"Unexpected status: {response.status}")
+                raise urllib3.exceptions.HTTPError(
+                    f"Unexpected status: {response.status}"
+                )
             for chunk in response.stream(chunk_size):
                 if chunk:
                     buffer.write(chunk)
@@ -236,7 +260,15 @@ class GenesysCloudClient:
                 total_items.extend(res_dict.get(key, []) or [])
         return total_items
 
-    def post(self, api_instance_name: str, function_name: str, model_name: str, body: dict, *args, **kwargs) -> list:
+    def post(
+        self,
+        api_instance_name: str,
+        function_name: str,
+        model_name: str,
+        body: dict,
+        *args,
+        **kwargs,
+    ) -> list:
         """
         Send a POST request to the Genesys Cloud API.
 
@@ -257,7 +289,9 @@ class GenesysCloudClient:
         api_class = getattr(PureCloudPlatformClientV2, api_instance_name, None)
 
         if api_class is None:
-            self.logger.error(f"AttributeError - API class '{api_instance_name}' not found in PureCloudPlatformClientV2")
+            self.logger.error(
+                f"AttributeError - API class '{api_instance_name}' not found in PureCloudPlatformClientV2"
+            )
             return None
 
         # Instantiate the API with the authenticated client
@@ -266,13 +300,17 @@ class GenesysCloudClient:
         # Get the function from the API instance
         function = getattr(api_instance, function_name, None)
         if function is None or not callable(function):
-            self.logger.error(f"AttributeError - '{function_name}' is not a valid function of '{api_instance_name}'")
+            self.logger.error(
+                f"AttributeError - '{function_name}' is not a valid function of '{api_instance_name}'"
+            )
             return None
 
         # Dynamically get the data model class
         model_class = getattr(PureCloudPlatformClientV2, model_name, None)
         if model_class is None:
-            self.logger.error(f"AttributeError - Data model '{model_name}' not found in PureCloudPlatformClientV2")
+            self.logger.error(
+                f"AttributeError - Data model '{model_name}' not found in PureCloudPlatformClientV2"
+            )
             return None
 
         # Create an instance of the model
@@ -281,10 +319,7 @@ class GenesysCloudClient:
         # Add paging information to body
         if "paging" in model_instance.attribute_map:
             self.logger.debug(f"Enabling pagination for {function_name} - {model_name}")
-            body["paging"] = {
-                "pageSize": page_size,
-                "pageNumber": page_number
-            }
+            body["paging"] = {"pageSize": page_size, "pageNumber": page_number}
             enable_pagination = True
 
         if "page_size" in model_instance.attribute_map:
@@ -299,10 +334,14 @@ class GenesysCloudClient:
                 try:
                     setattr(model_instance, key, value)
                 except Exception as e:
-                    self.logger.warning(f"Exception setting attribute '{key}' in '{model_name}': {e}")
+                    self.logger.warning(
+                        f"Exception setting attribute '{key}' in '{model_name}': {e}"
+                    )
                     # NOTE: The API call will be executed even if this exception is thrown.
             else:
-                self.logger.debug(f"The model '{model_name}' does not have a method '{key}'")
+                self.logger.debug(
+                    f"The model '{model_name}' does not have a method '{key}'"
+                )
 
         try:
             # Call the function with the model instance and additional arguments
@@ -315,7 +354,9 @@ class GenesysCloudClient:
                         try:
                             total_hits = api_response.total
                         except Exception as e:
-                            self.logger.error(f"Pagination enabled but neither 'total_hits' nor 'total' is returned: {api_response.attribute_map}")
+                            self.logger.error(
+                                f"Pagination enabled but neither 'total_hits' nor 'total' is returned: {api_response.attribute_map}"
+                            )
                             return None
                     else:
                         total_hits = api_response.total_hits
@@ -339,7 +380,9 @@ class GenesysCloudClient:
                 # Haven't hit this yet. Message to be confirmed
                 self.logger.warning("Token expired. Refreshing token.")
                 self.client.handle_expired_access_token()
-            err_message = f"Exception when calling {api_instance_name}->{function_name}:"
+            err_message = (
+                f"Exception when calling {api_instance_name}->{function_name}:"
+            )
             try:
                 body = json.loads(e.body)
                 message = body["message"]
