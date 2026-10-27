@@ -22,8 +22,8 @@ jobs:
       artifact_name: ${{ steps.artifact.outputs.name }}
       ta_version: ${{ steps.app.outputs.version }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
@@ -65,7 +65,7 @@ jobs:
         run: |
           echo "name=${{ steps.app.outputs.name }}-${{ steps.app.outputs.version }}-py${{ matrix.python-version }}" >> $GITHUB_OUTPUT
 
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ steps.artifact.outputs.name }}
           path: ${{ steps.app.outputs.name }}*.tar.gz
@@ -78,8 +78,8 @@ jobs:
       version: ${{ steps.changelog.outputs.version }}
       skip_publication: ${{ steps.gh_release.outputs.skip_publication }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/download-artifact@v5
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ${{ needs.build.outputs.artifact_name }}
           path: dist
@@ -124,7 +124,7 @@ jobs:
     needs: release
     if: needs.release.outputs.skip_publication == 'false'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
         with:
           python-version: "3.13"

@@ -17,14 +17,14 @@ concurrency:
 jobs:
   splunk-10x:
     name: Deploy and test the TA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         version: [10.2.0]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.9
           cache: 'pip'
@@ -134,7 +134,7 @@ jobs:
 
       - name: Upload Test Execution log
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: conftest-${{ matrix.version }}.log
           path: tests/conftest.log
@@ -147,7 +147,7 @@ jobs:
 
       - name: Upload Mockoon logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
@@ -162,14 +162,14 @@ jobs:
 
   splunk-9x:
     name: Deploy and test the TA
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         version: [9.4.1, 9.3.3]
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-python@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: 3.9
           cache: 'pip'
@@ -273,7 +273,7 @@ jobs:
 
       - name: Upload Test Execution log
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: conftest-${{ matrix.version }}.log
           path: tests/conftest.log
@@ -286,7 +286,7 @@ jobs:
 
       - name: Upload Mockoon logs
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mockoon-logs-${{ matrix.version }}
           path: logs/mockoon-${{ matrix.version }}.log
