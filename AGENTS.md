@@ -37,6 +37,6 @@ Run commands from the repository root. Prefer existing `make` targets and use `m
 - Do not edit or commit files under `output/`
 - Do not commit, print, or expose values from `.env`, keys, OAuth credentials or credential-bearing environment variables
 - Update `docs/` when changing user-facing behavior
-- Do not edit `website/`, `README.md`, `.github/`
+- Do not edit `README.md`, `.github/`
 - Never skip pre-commit hooks, or route around by adding `# noqa`, or equivalent suppressions to silence a rule you would otherwise want to disable in config
 - Never introduce a nested or lower-precedence override file (e.g. a new `.eslintrc.yml` in a subdirectory, or an eslintConfig key in `package.json`)
