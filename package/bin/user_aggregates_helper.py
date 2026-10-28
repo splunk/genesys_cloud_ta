@@ -10,7 +10,6 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-
 ADDON_NAME = "genesys_cloud_ta"
 
 

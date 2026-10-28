@@ -9,7 +9,6 @@ from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-
 ADDON_NAME = "genesys_cloud_ta"
 
 
@@ -51,11 +50,12 @@ def exceed_range(
 def validate_input(definition: smi.ValidationDefinition):
     start_date = definition.parameters.get("start_date")
     fmt_str = "%Y-%m-%d"
-    if start_date is not None and \
-        exceed_range(start_date, datetime.now(timezone.utc).strftime(fmt_str), fmt=fmt_str):
-            raise ValueError(
-                f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
-            )
+    if start_date is not None and exceed_range(
+        start_date, datetime.now(timezone.utc).strftime(fmt_str), fmt=fmt_str
+    ):
+        raise ValueError(
+            f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
+        )
 
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):

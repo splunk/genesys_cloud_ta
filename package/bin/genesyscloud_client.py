@@ -1,12 +1,12 @@
+from __future__ import annotations
+
 import json
 import logging
 import os
 from io import BytesIO
-from typing import Optional
 
 import PureCloudPlatformClientV2
 import urllib3
-
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
 from PureCloudPlatformClientV2.rest import ApiException
@@ -67,7 +67,7 @@ class GenesysCloudClient:
         client_id: str,
         client_secret: str,
         aws_region: str,
-        proxy_config: Optional[dict] = None,
+        proxy_config: dict | None = None,
     ):
         self.logger = logger
         proxy_handler = ProxyHandler(logger, proxy_config)
@@ -111,9 +111,7 @@ class GenesysCloudClient:
         function = getattr(api_instance, f_name)
 
         if not callable(function):
-            raise TypeError(
-                f"{f_name} is not a callable function of the API instance"
-            )
+            raise TypeError(f"{f_name} is not a callable function of the API instance")
 
         # FIXME add a max_pages safeguard to avoid unbounded pagination
         while True:

@@ -29,7 +29,7 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             (
                 "TelephonyProvidersEdgeApi",
                 "get_telephony_providers_edges_phones",
-                expand="site,status",
+                {"expand": "site,status"},
             ),
             (
                 "TelephonyProvidersEdgeApi",

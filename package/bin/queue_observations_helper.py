@@ -7,7 +7,6 @@ from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from splunklib import modularinput as smi
 
-
 ADDON_NAME = "genesys_cloud_ta"
 
 

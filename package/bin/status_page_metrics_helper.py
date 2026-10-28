@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import json
 import logging
-from datetime import datetime, timezone
-from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 import requests
 from genesyscloud_client import ProxyHandler
@@ -9,7 +10,6 @@ from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
 
 ADDON_NAME = "genesys_cloud_ta"
 STATUS_PAGE_API_URL = "https://status.mypurecloud.com/api"
@@ -33,7 +33,7 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     return account_conf_file.get(account_name).get(property_name)
 
 
-def fetch_status_page_data(logger: logging.Logger, proxy_url: Optional[str] = None):
+def fetch_status_page_data(logger: logging.Logger, proxy_url: str | None = None):
     """Fetch status data from the Genesys Cloud Status Page API"""
     try:
         # Get status summary instead of incidents
@@ -104,8 +104,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = normalized_input_name
             # If we don't have any checkpoint, we default it to 1970
             status_page_checkpoint = (
-                status_page_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                status_page_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
             logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")

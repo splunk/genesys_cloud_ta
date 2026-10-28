@@ -1,6 +1,6 @@
 import json
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import TrunkModel
@@ -8,7 +8,6 @@ from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
 
 ADDON_NAME = "genesys_cloud_ta"
 
