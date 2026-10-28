@@ -1,15 +1,13 @@
 import json
 import logging
 import time
+from datetime import datetime, timedelta, timezone
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-from datetime import datetime, timedelta, timezone
-from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -27,8 +25,10 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf.get(account_name).get(property_name)
 
-def exceed_range(start: str, end: str, max_days: int = 31,
-                  fmt: str = "%Y-%m-%dT%H:%M:%SZ") -> bool:
+
+def exceed_range(
+    start: str, end: str, max_days: int = 31, fmt: str = "%Y-%m-%dT%H:%M:%SZ"
+) -> bool:
     """Verify interval range does not exceed threshold.
     :param start: Interval start string reference.
     :param end: Interval end string reference.
@@ -36,21 +36,27 @@ def exceed_range(start: str, end: str, max_days: int = 31,
     :param fmt: Datetime string format.
     :return: True if the range between start and end exceeds max_days.
     """
-    start_dt = datetime.strptime(start, fmt)
-    end_dt = datetime.strptime(end, fmt)
+    start_dt = datetime.strptime(start, fmt)  # noqa: DTZ007
+    end_dt = datetime.strptime(end, fmt)  # noqa: DTZ007
 
     if end_dt <= start_dt:
-        raise Exception(f"Invalid start date: {start} cannot be later or equal to {end}")
+        raise ValueError(
+            f"Invalid start date: {start} cannot be later or equal to {end}"
+        )
 
     return (end_dt - start_dt) >= timedelta(days=max_days)
+
 
 def validate_input(definition: smi.ValidationDefinition):
     start_date = definition.parameters.get("start_date")
     fmt_str = "%Y-%m-%d"
-    if start_date is not None:
-        if exceed_range(start_date, datetime.now().strftime(fmt_str), fmt=fmt_str):
-            raise Exception(f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now.")
-    return
+    if start_date is not None and exceed_range(
+        start_date, datetime.now(timezone.utc).strftime(fmt_str), fmt=fmt_str
+    ):
+        raise ValueError(
+            f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
+        )
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -58,7 +64,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
 
         try:
-
             session_key = inputs.metadata["session_key"]
 
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
@@ -93,11 +98,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
 
-            client = GenesysCloudClient(logger, client_id, client_secret, account_region, proxy_config)
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region, proxy_config
+            )
 
             checkpointer_key_name = normalized_input_name
 
@@ -106,37 +119,48 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime("%Y-%m-%dT%H:%M:%SZ")
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime(  # noqa: DTZ007
+                    "%Y-%m-%dT%H:%M:%SZ"
+                )
 
             start_time = kvstore_checkpointer.get(checkpointer_key_name)
             end_time = now.strftime("%Y-%m-%dT%H:%M:%SZ")
 
             # Evaluating the interval. It can be no greater than 31 days.
             # [400] BadRequest - You must specify a search interval as part of your query that does not exceed 31 days.
-            if start_time is None or (start_time and exceed_range(start_time, end_time)):
-                logger.info(f"Checkpoint not found or exceeds interval range of 31 days [{start_time}]. Using the configured start_date as fallback [{fallback_start}].")
+            if start_time is None or (
+                start_time and exceed_range(start_time, end_time)
+            ):
+                logger.info(
+                    f"Checkpoint not found or exceeds interval range of 31 days [{start_time}]. Using the configured start_date as fallback [{fallback_start}]."
+                )
                 start_time = fallback_start
                 if exceed_range(fallback_start, end_time):
                     # This case keeps the system running in case of too far away in time checkpoint.
-                    reset_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
-                    logger.warning(f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}.")
+                    reset_start = (now - timedelta(days=7)).strftime(
+                        "%Y-%m-%dT%H:%M:%SZ"
+                    )
+                    logger.warning(
+                        f"Fallback start_date exceeds interval range of 31 days. Resetting it to {reset_start}."
+                    )
                     start_time = reset_start
 
             interval = f"{start_time}/{end_time}"
 
-            body = { "interval": interval }
+            body = {"interval": interval}
             logger.debug(f"Request body: {body}")
 
             response = client.post(
-                "AuditApi",
-                "post_audits_query",
-                "AuditQueryRequest",
-                body
+                "AuditApi", "post_audits_query", "AuditQueryRequest", body
             )
             if not response:
-                raise Exception("No response was received from the audit POST request. Please verify the request parameters and try again.")
+                raise RuntimeError(
+                    "No response was received from the audit POST request. Please verify the request parameters and try again."
+                )
             if len(response) > 1:
-                logger.warning(f"AuditApi call returned too many responses: {len(response)}")
+                logger.warning(
+                    f"AuditApi call returned too many responses: {len(response)}"
+                )
 
             transaction_id = response[0].id
 
@@ -145,9 +169,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             status = ""
             for _ in range(max_polls):
-                state_resp = client.get("AuditApi", "get_audits_query_transaction_id", transaction_id)
+                state_resp = client.get(
+                    "AuditApi", "get_audits_query_transaction_id", transaction_id
+                )
                 if not state_resp:
-                    raise Exception(f"Failed to get status for transaction {transaction_id}")
+                    raise RuntimeError(
+                        f"Failed to get status for transaction {transaction_id}"
+                    )
                 status = state_resp[0].state
                 # Allowed statuses:
                 # https://github.com/MyPureCloud/platform-client-sdk-python/blob/master/build/PureCloudPlatformClientV2/models/audit_query_execution_status_response.py#L126
@@ -157,21 +185,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 time.sleep(poll_sleep)
 
             if status != "Succeeded":
-                raise Exception(f"Audit did not complete successfully: {status}")
+                raise RuntimeError(f"Audit did not complete successfully: {status}")
 
             params = {
                 "transaction_id": transaction_id,
                 "allow_redirect": True,
-                "page_size": 500
+                "page_size": 500,
             }
 
             results = client.get(
-                "AuditApi",
-                "get_audits_query_transaction_id_results",
-                **params
+                "AuditApi", "get_audits_query_transaction_id_results", **params
             )
             event_counter = 0
-            sourcetype="genesyscloud:operational:audits"
+            sourcetype = "genesyscloud:operational:audits"
 
             for entity in results:
                 if not isinstance(entity, dict):
@@ -180,13 +206,17 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 else:
                     # Retrieved via download URL file
                     value = entity
-                    time_value = datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp()
+                    time_value = (
+                        datetime.strptime(entity["eventTime"], "%Y-%m-%dT%H:%M:%SZ")
+                        .replace(tzinfo=timezone.utc)
+                        .timestamp()
+                    )
                 event_writer.write_event(
                     smi.Event(
                         data=json.dumps(value, ensure_ascii=False, default=str),
                         index=input_item.get("index"),
                         sourcetype=sourcetype,
-                        time=time_value
+                        time=time_value,
                     )
                 )
                 event_counter += 1
@@ -198,19 +228,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 kvstore_checkpointer.update(checkpointer_key_name, end_time)
 
             log.events_ingested(
-                    logger,
-                    input_name,
-                    sourcetype,
-                    event_counter,
-                    input_item.get("index"),
-                    account=input_item.get("account"),
-                )
+                logger,
+                input_name,
+                sourcetype,
+                event_counter,
+                input_item.get("index"),
+                account=input_item.get("account"),
+            )
 
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

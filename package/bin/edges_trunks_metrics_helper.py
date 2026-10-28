@@ -1,19 +1,16 @@
-
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import TrunkModel
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import TrunkModel
-
-
 ADDON_NAME = "genesys_cloud_ta"
+
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
@@ -27,6 +24,7 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     )
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
+
 
 def validate_input(definition: smi.ValidationDefinition):
     return
@@ -80,9 +78,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
             # aws_region = input_item.get('region')
 
             client = GenesysCloudClient(
@@ -94,12 +98,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
-            t_model = TrunkModel(client.get(
-                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks")
+            t_model = TrunkModel(
+                client.get(
+                    "TelephonyProvidersEdgeApi", "get_telephony_providers_edges_trunks"
+                )
             )
 
             # Max 100 trunkids supported
@@ -112,11 +117,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     data = client.get(
                         "TelephonyProvidersEdgeApi",
                         "get_telephony_providers_edges_trunks_metrics",
-                        ','.join(trunk_ids)
+                        ",".join(trunk_ids),
                     )
                     metrics.extend(data)
                 else:
-                    logger.info(f"{trunk_ids} trunk Ids found. Cannot fetch metrics. Skipping.")
+                    logger.info(
+                        f"{trunk_ids} trunk Ids found. Cannot fetch metrics. Skipping."
+                    )
                 cnt += 1
             logger.debug(f"Fetched '{len(metrics)}' metrics")
 
@@ -129,7 +136,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 try:
                     metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
                 except ValueError as ve:
-                    self.logger.warning(f"Could not get trunk information - {ve}. Skipping it.")
+                    logger.warning(
+                        f"Could not get trunk information - {ve}. Skipping it."
+                    )
                     metric["trunk"] = {}
                 if event_time_epoch > current_checkpoint:
                     event_writer.write_event(
@@ -157,10 +166,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

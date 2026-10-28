@@ -1,15 +1,12 @@
+import logging
 import os
 import sys
-import pytest
-import logging
-
 from io import StringIO
 
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../package/bin")))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../package/bin"))
+)
 from genesyscloud_client import GenesysCloudClient
-from PureCloudPlatformClientV2.api_client import ApiClient
-
 
 LOGGER = logging.getLogger(__name__)
 LOG_BUFFER = StringIO()
@@ -20,7 +17,8 @@ LOG_HANDLER.setFormatter(logging.Formatter(fmt=LOG_FORMAT))
 LOGGER.addHandler(LOG_HANDLER)
 LOG_HANDLER.setLevel(logging.DEBUG)
 
-class GenesysCloudTATest():
+
+class GenesysCloudTATest:
     CLIENT_ID = None
     AWS_REGION = None
     CLIENT_SECRET = None
@@ -72,7 +70,7 @@ class GenesysCloudTATest():
         configs = {
             "client_id": cls.CLIENT_ID,
             "client_secret": cls.CLIENT_SECRET,
-            "aws_region": cls.AWS_REGION
+            "aws_region": cls.AWS_REGION,
         }
         # cls.logger.info(f"{configs}")
         return configs

@@ -1,21 +1,21 @@
-import pytest
-import time
 import os
-import json
-# import hashlib
+import time
+
 import splunklib.results as splk_results
 
 from .BaseTATest import BaseTATest
 
-class TestGenesysCloudTA(BaseTATest):
 
+class TestGenesysCloudTA(BaseTATest):
     def setup_method(self, method):
-        super(TestGenesysCloudTA, self).setup_method(method)
+        super().setup_method(method)
 
     def teardown_method(self, method):
-        super(TestGenesysCloudTA, self).teardown_method(method)
+        super().teardown_method(method)
 
-    def _search_oneshot(self, search_query: str, base_sleep: int=2, timeout: int=40) -> list:
+    def _search_oneshot(
+        self, search_query: str, base_sleep: int = 2, timeout: int = 40
+    ) -> list:
         """
         Run search to verify data ingestion.
 
@@ -31,7 +31,7 @@ class TestGenesysCloudTA(BaseTATest):
             "earliest_time": 0,
             "latest_time": "now",
             "output_mode": "json",
-            "count": 0
+            "count": 0,
         }
 
         for attempt in range(max_retries):
@@ -46,12 +46,12 @@ class TestGenesysCloudTA(BaseTATest):
                 results.append(res)
 
             if len(results) > 0 or attempt == (max_retries - 1):
-                self.logger.debug(f"Attempt {attempt+1}, results {len(results)}")
+                self.logger.debug(f"Attempt {attempt + 1}, results {len(results)}")
                 break
 
             # Exponential backoff: base * 2^attempt, capped at timeout
-            wait = min(base_sleep * (2 ** (attempt+1)), timeout)
-            self.logger.debug(f"Attempt {attempt+1}, waiting {wait}s")
+            wait = min(base_sleep * (2 ** (attempt + 1)), timeout)
+            self.logger.debug(f"Attempt {attempt + 1}, waiting {wait}s")
             time.sleep(wait)
 
         self.logger.debug(f"Splunk search returned {len(results)} results")

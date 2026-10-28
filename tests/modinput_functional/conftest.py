@@ -1,9 +1,6 @@
-import logging
-import pytest
-import os
-import sys
 import base64
-import datetime
+import logging
+import os
 
 from .BaseTATest import BaseTATest
 

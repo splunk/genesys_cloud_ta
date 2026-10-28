@@ -13,3 +13,5 @@ local.meta
 dist/
 .pytest_cache
 *.ipynb
+.python-version
+.ruff_cache

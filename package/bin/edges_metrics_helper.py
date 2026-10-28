@@ -1,19 +1,16 @@
-
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import EdgeModel
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import EdgeModel
-
-
 ADDON_NAME = "genesys_cloud_ta"
+
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
@@ -81,9 +78,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
             # aws_region = input_item.get('region')
 
             client = GenesysCloudClient(
@@ -95,12 +98,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
-            e_model = EdgeModel(client.get(
-                "TelephonyProvidersEdgeApi", "get_telephony_providers_edges")
+            e_model = EdgeModel(
+                client.get("TelephonyProvidersEdgeApi", "get_telephony_providers_edges")
             )
 
             # Max 100 edgeids supported according to specs
@@ -112,10 +114,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 data = client.get(
                     "TelephonyProvidersEdgeApi",
                     "get_telephony_providers_edges_metrics",
-                    ','.join(edges_ids)
+                    ",".join(edges_ids),
                 )
                 metrics.extend(data)
-                cnt+=1
+                cnt += 1
             logger.debug(f"Fetched '{len(metrics)}' metrics")
 
             sourcetype = "genesyscloud:telephonyprovidersedge:edges:metrics"
@@ -155,10 +157,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )

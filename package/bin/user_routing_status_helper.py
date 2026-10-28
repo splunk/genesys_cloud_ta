@@ -1,21 +1,20 @@
 import json
 import logging
+from datetime import datetime, timedelta, timezone
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import UserModel
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import UserModel
-
-
 ADDON_NAME = "genesys_cloud_ta"
+
 
 def logger_for_input(input_name: str) -> logging.Logger:
     return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+
 
 def get_account_property(session_key: str, account_name: str, property_name: str):
 
@@ -27,8 +26,10 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
     return account_conf_file.get(account_name).get(property_name)
 
+
 def validate_input(definition: smi.ValidationDefinition):
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -67,9 +68,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
 
             # Initialize Genesys Cloud client
             client = GenesysCloudClient(
@@ -81,15 +88,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or fallback_start
+                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
             )
 
             # Getting user ids from API
             logger.info("Getting data from users endpoint")
-            user_model = UserModel(
-                client.get("UsersApi", "get_users")
-            )
+            user_model = UserModel(client.get("UsersApi", "get_users"))
 
             # Getting user routing status
             sourcetype = "genesyscloud:users:users:routingstatus"
@@ -104,10 +108,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     if event_time_epoch > current_checkpoint:
                         routing = response[0].to_dict()
                         routing["start_time"] = event_time_epoch
-                        routing['user_id'] = uid
+                        routing["user_id"] = uid
                         event_writer.write_event(
                             smi.Event(
-                                data=json.dumps(routing, ensure_ascii=False, default=str),
+                                data=json.dumps(
+                                    routing, ensure_ascii=False, default=str
+                                ),
                                 time=event_time_epoch,
                                 index=input_item.get("index"),
                                 sourcetype=sourcetype,
@@ -132,10 +138,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,
                 "IngestionError",
-                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}"
+                msg_before=f"Exception raised while ingesting data for input: {normalized_input_name}",
             )
