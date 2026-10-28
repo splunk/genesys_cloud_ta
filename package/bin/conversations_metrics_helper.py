@@ -1,14 +1,13 @@
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
 
 ADDON_NAME = "genesys_cloud_ta"
 
@@ -218,8 +217,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 )
                             )
                             event_counter += 1
-                except Exception as e:
-                    logger.error(f"Failed to write event. Error: {str(e)}")
+                except RuntimeError as e:
+                    logger.error(f"Failed to write event. Error: {e}")
 
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
@@ -238,7 +237,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_end(logger, normalized_input_name)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

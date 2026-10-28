@@ -1,12 +1,11 @@
-import re
 import datetime
+import re
 
-from typing import List, Tuple
 from PureCloudPlatformClientV2.models import Edge, Phone, Queue, Trunk, User
 
 
 class GCBaseModel:
-    def __init__(self, data: List[dict]) -> None:
+    def __init__(self, data: list[dict]) -> None:
         self.data = data
 
     def to_camelcase(self, s: str) -> str:
@@ -56,14 +55,14 @@ class GCBaseModel:
 class TrunkModel(GCBaseModel):
     MAX_TRUNK_IDS: int = 100
 
-    def __init__(self, trunks: List[Trunk]) -> None:
+    def __init__(self, trunks: list[Trunk]) -> None:
         super().__init__([trunk.to_dict() for trunk in trunks])
 
     @property
-    def trunk_ids(self) -> List[str]:
+    def trunk_ids(self) -> list[str]:
         return [trunk["id"] for trunk in self.data]
 
-    def get_trunk_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+    def get_trunk_ids(self, batch: int = 0) -> tuple[list[str], bool]:
         factor = self.MAX_TRUNK_IDS * batch
         slice_limit = self.MAX_TRUNK_IDS + factor
         remaining_trunks = max(0, len(self.data) - factor)
@@ -97,10 +96,10 @@ class TrunkModel(GCBaseModel):
 class EdgeModel(GCBaseModel):
     MAX_EDGE_IDS: int = 100
 
-    def __init__(self, edges: List[Edge]):
+    def __init__(self, edges: list[Edge]):
         super().__init__([edge.to_dict() for edge in edges])
 
-    def get_edge_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+    def get_edge_ids(self, batch: int = 0) -> tuple[list[str], bool]:
         factor = self.MAX_EDGE_IDS * batch
         slice_limit = self.MAX_EDGE_IDS + factor
         remaining_edges = max(0, len(self.data) - factor)
@@ -139,13 +138,13 @@ class EdgeModel(GCBaseModel):
 
 
 class PhoneModel(GCBaseModel):
-    STATUS_TYPES = ["status", "secondary_status"]
+    STATUS_TYPES = ("status", "secondary_status")
 
-    def __init__(self, phones: List[Phone]) -> None:
+    def __init__(self, phones: list[Phone]) -> None:
         super().__init__([phone.to_dict() for phone in phones])
 
     @property
-    def statuses(self) -> List[dict]:
+    def statuses(self) -> list[dict]:
         statuses = []
         for phone in self.data:
             for s_type in self.STATUS_TYPES:
@@ -153,7 +152,7 @@ class PhoneModel(GCBaseModel):
         return statuses
 
     @property
-    def extended_statuses(self) -> List[dict]:
+    def extended_statuses(self) -> list[dict]:
         """Returning statuses augmented with phones info"""
         required_keys = ["name", "date_created", "date_modified", "state", "site"]
         statuses = []
@@ -170,14 +169,14 @@ class PhoneModel(GCBaseModel):
 class QueueModel(GCBaseModel):
     MAX_QUEUE_IDS: int = 200
 
-    def __init__(self, queues: List[Queue]) -> None:
+    def __init__(self, queues: list[Queue]) -> None:
         super().__init__([queue.to_dict() for queue in queues])
 
     @property
-    def queue_ids(self) -> List[str]:
+    def queue_ids(self) -> list[str]:
         return [queue["id"] for queue in self.data]
 
-    def get_queue_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+    def get_queue_ids(self, batch: int = 0) -> tuple[list[str], bool]:
         factor = self.MAX_QUEUE_IDS * batch
         slice_limit = self.MAX_QUEUE_IDS + factor
         remaining_queues = max(0, len(self.data) - factor)
@@ -198,14 +197,14 @@ class QueueModel(GCBaseModel):
 class UserModel(GCBaseModel):
     MAX_USER_IDS: int = 100
 
-    def __init__(self, users: List[User]) -> None:
+    def __init__(self, users: list[User]) -> None:
         super().__init__([user.to_dict() for user in users])
 
     @property
-    def user_ids(self) -> List[str]:
+    def user_ids(self) -> list[str]:
         return [user["id"] for user in self.data]
 
-    def get_user_ids(self, batch: int = 0) -> Tuple[List[str], bool]:
+    def get_user_ids(self, batch: int = 0) -> tuple[list[str], bool]:
         factor = self.MAX_USER_IDS * batch
         slice_limit = self.MAX_USER_IDS + factor
         remaining_users = max(0, len(self.data) - factor)

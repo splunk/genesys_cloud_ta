@@ -1,15 +1,13 @@
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import TrunkModel
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import TrunkModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -139,7 +137,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 try:
                     metric["trunk"] = t_model.get_trunk(metric_obj.trunk.id)
                 except ValueError as ve:
-                    self.logger.warning(
+                    logger.warning(
                         f"Could not get trunk information - {ve}. Skipping it."
                     )
                     metric["trunk"] = {}
@@ -169,7 +167,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

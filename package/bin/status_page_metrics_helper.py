@@ -1,15 +1,14 @@
 import json
 import logging
-import requests
+from datetime import datetime, timezone
+from typing import Optional
 
-import import_declare_test
+import requests
+from genesyscloud_client import ProxyHandler
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
-from splunklib import modularinput as smi
 from solnlib.modular_input import checkpointer
-
-from datetime import datetime, timezone
-from genesyscloud_client import ProxyHandler
+from splunklib import modularinput as smi
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -34,7 +33,7 @@ def get_account_property(session_key: str, account_name: str, property_name: str
     return account_conf_file.get(account_name).get(property_name)
 
 
-def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
+def fetch_status_page_data(logger: logging.Logger, proxy_url: Optional[str] = None):
     """Fetch status data from the Genesys Cloud Status Page API"""
     try:
         # Get status summary instead of incidents
@@ -44,7 +43,7 @@ def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
                 "http": proxy_url,
                 "https": proxy_url,
             }
-            logger.info(f"Proxy enabled to fetch data.")
+            logger.info("Proxy enabled to fetch data.")
         summary_response = requests.get(
             f"{STATUS_PAGE_API_URL}/v2/summary.json", proxies=proxies
         )
@@ -52,8 +51,11 @@ def fetch_status_page_data(logger: logging.Logger, proxy_url: str = None):
         summary_data = summary_response.json()
 
         return summary_data
-    except Exception as e:
-        logger.error(f"Error fetching status page data: {str(e)}")
+    except requests.RequestException as re:
+        logger.error(f"Error fetching status page data: {re}")
+        return {}
+    except json.JSONDecodeError as e:
+        logger.error(f"Error parsing response: {e}")
         return {}
 
 
@@ -96,12 +98,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
+            now = datetime.now(timezone.utc)
+            fallback_start = (now - timedelta(days=7)).timestamp()
             # Get checkpoints for incidents
-            checkpointer_key_name = input_name.split("/")[-1]
+            checkpointer_key_name = normalized_input_name
             # If we don't have any checkpoint, we default it to 1970
             status_page_checkpoint = (
                 status_page_checkpointer.get(checkpointer_key_name)
-                or datetime(1970, 1, 1).timestamp()
+                or fallback_start
             )
 
             logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
@@ -132,7 +136,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         component["page"] = page
                         # Delete page_id field if it exists
                         if "page_id" in component:
-                            logger.debug(f"Removing page_id field from component")
+                            logger.debug("Removing page_id field from component")
                             del component["page_id"]
                         logger.debug(f"Event data: {component}")
 
@@ -146,7 +150,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                 time=component_updated_at,
                             )
                         )
-                        logger.debug(f"Status summary event written")
+                        logger.debug("Status summary event written")
                         events_count += 1
 
             # Update checkpoint if data was processed
@@ -162,7 +166,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_end(logger, normalized_input_name)
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

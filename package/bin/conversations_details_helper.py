@@ -1,14 +1,12 @@
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -51,11 +49,11 @@ def exceed_range(
     :param fmt: Datetime string format.
     :return: True if the range between start and end exceeds max_days.
     """
-    start_dt = datetime.strptime(start, fmt)
-    end_dt = datetime.strptime(end, fmt)
+    start_dt = datetime.strptime(start, fmt)  # noqa: DTZ007
+    end_dt = datetime.strptime(end, fmt)  # noqa: DTZ007
 
     if end_dt <= start_dt:
-        raise Exception(
+        raise ValueError(
             f"Invalid start date: {start} cannot be later or equal to {end}"
         )
 
@@ -65,12 +63,11 @@ def exceed_range(
 def validate_input(definition: smi.ValidationDefinition):
     start_date = definition.parameters.get("start_date")
     fmt_str = "%Y-%m-%d"
-    if start_date is not None:
-        if exceed_range(start_date, datetime.now().strftime(fmt_str), fmt=fmt_str):
-            raise Exception(
+    if start_date is not None and \
+        exceed_range(start_date, datetime.now(timezone.utc).strftime(fmt_str), fmt=fmt_str):
+            raise ValueError(
                 f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
             )
-    return
 
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
@@ -124,7 +121,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             fallback_start = (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
             start_date = input_item.get("start_date")
             if start_date is not None:
-                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime(
+                fallback_start = datetime.strptime(start_date, "%Y-%m-%d").strftime(  # noqa: DTZ007
                     "%Y-%m-%dT%H:%M:%SZ"
                 )
 
@@ -203,7 +200,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
 
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

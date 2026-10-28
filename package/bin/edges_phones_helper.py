@@ -1,15 +1,13 @@
 import json
 import logging
+from datetime import datetime, timezone, timedelta
 
-import import_declare_test
+from genesyscloud_client import GenesysCloudClient
+from genesyscloud_models import PhoneModel
 from solnlib import conf_manager, log
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-from datetime import datetime, timezone, timedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import PhoneModel
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -107,7 +105,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 client.get(
                     "TelephonyProvidersEdgeApi",
                     "get_telephony_providers_edges_phones",
-                    **{"expand": "site,status"},
+                    expand="site,status",
                 )
             )
             # Max 10k results returned when filtering the results or sorting
@@ -151,7 +149,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

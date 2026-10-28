@@ -1,16 +1,14 @@
 import json
 import logging
-
-import import_declare_test
-from solnlib import conf_manager, log
-from solnlib.modular_input import checkpointer
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
-from splunklib import modularinput as smi
 from datetime import datetime, timezone
-from dateutil.relativedelta import relativedelta
 
+from dateutil.relativedelta import relativedelta
 from genesyscloud_client import GenesysCloudClient
 from genesyscloud_models import UserModel
+from solnlib import conf_manager, log
+from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 ADDON_NAME = "genesys_cloud_ta"
@@ -178,7 +176,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

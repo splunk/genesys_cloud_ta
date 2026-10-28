@@ -1,14 +1,16 @@
-import PureCloudPlatformClientV2
-import logging
 import json
+import logging
 import os
+from io import BytesIO
+from typing import Optional
+
+import PureCloudPlatformClientV2
 import urllib3
 
-from io import BytesIO
-from solnlib.utils import is_true
-from PureCloudPlatformClientV2.rest import ApiException
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
+from PureCloudPlatformClientV2.rest import ApiException
+from solnlib.utils import is_true
 
 
 class ProxyHandler:
@@ -65,7 +67,7 @@ class GenesysCloudClient:
         client_id: str,
         client_secret: str,
         aws_region: str,
-        proxy_config: dict = None,
+        proxy_config: Optional[dict] = None,
     ):
         self.logger = logger
         proxy_handler = ProxyHandler(logger, proxy_config)
@@ -109,7 +111,7 @@ class GenesysCloudClient:
         function = getattr(api_instance, f_name)
 
         if not callable(function):
-            raise AttributeError(
+            raise TypeError(
                 f"{f_name} is not a callable function of the API instance"
             )
 
@@ -121,13 +123,12 @@ class GenesysCloudClient:
                 if e.status in (301, 302, 303, 307, 308):
                     # When getting audit query results API could return a redirect with downloadUrl.
                     body = json.loads(e.body)
-                    if "downloadUrl" in body.keys():
-                        self.logger.info(f"Got URL to download events from.")
+                    if "downloadUrl" in body:
+                        self.logger.info("Got URL to download events from.")
                         buf = self.download(body["downloadUrl"])
-                        for item in json.loads(buf.read()):
-                            items.append(item)
+                        items = list(json.loads(buf.read()))
 
-                        if "cursor" in body.keys():
+                        if "cursor" in body:
                             cursor = body["cursor"]
                             kwargs["cursor"] = cursor
                             continue
@@ -333,7 +334,7 @@ class GenesysCloudClient:
             if hasattr(model_instance, key):
                 try:
                     setattr(model_instance, key, value)
-                except Exception as e:
+                except AttributeError as e:
                     self.logger.warning(
                         f"Exception setting attribute '{key}' in '{model_name}': {e}"
                     )
@@ -353,7 +354,7 @@ class GenesysCloudClient:
                     if "total_hits" not in api_response.attribute_map:
                         try:
                             total_hits = api_response.total
-                        except Exception as e:
+                        except AttributeError:
                             self.logger.error(
                                 f"Pagination enabled but neither 'total_hits' nor 'total' is returned: {api_response.attribute_map}"
                             )
