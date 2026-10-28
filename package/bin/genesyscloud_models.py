@@ -193,6 +193,29 @@ class QueueModel(GCBaseModel):
         ret_queue.update({k: queue[k] for k in required_keys if k in queue})
         return ret_queue
 
+    def get_directory_records(self) -> List[dict]:
+        """
+        Build a flat directory snapshot record for every queue, keeping only the
+        relevant fields and flattening the nested ``division`` object into
+        ``division_id`` / ``division_name``.
+
+        :return: List of dictionaries ready to be indexed.
+        """
+        fields = ["id", "name", "description", "member_count", "division"]
+        records = []
+        for queue in self.data:
+            record = {}
+            for field in fields:
+                if field in queue and queue[field] is not None:
+                    val = queue[field]
+                    if field == "division" and isinstance(val, dict):
+                        record["division_id"] = val.get("id")
+                        record["division_name"] = val.get("name")
+                    else:
+                        record[field] = val
+            records.append(record)
+        return records
+
 
 class UserModel(GCBaseModel):
     MAX_USER_IDS: int = 100
@@ -220,3 +243,26 @@ class UserModel(GCBaseModel):
             raise ValueError(f"User {uid} not found")
         ret_user.update({k: user[k] for k in required_keys if k in user})
         return ret_user
+
+    def get_directory_records(self) -> List[dict]:
+        """
+        Build a flat directory snapshot record for every user, keeping only the
+        relevant fields and flattening the nested ``division`` object into
+        ``division_id`` / ``division_name``.
+
+        :return: List of dictionaries ready to be indexed.
+        """
+        fields = ["id", "name", "email", "department", "state", "division", "version"]
+        records = []
+        for user in self.data:
+            record = {}
+            for field in fields:
+                if field in user and user[field] is not None:
+                    val = user[field]
+                    if field == "division" and isinstance(val, dict):
+                        record["division_id"] = val.get("id")
+                        record["division_name"] = val.get("name")
+                    else:
+                        record[field] = val
+            records.append(record)
+        return records

@@ -343,9 +343,13 @@ class GenesysCloudClient:
                 )
 
         try:
-            # Call the function with the model instance and additional arguments
+            # Call the function with the model instance and additional arguments.
+            # The SDK POST methods always name the payload parameter 'body', while some
+            # endpoints (e.g. per-client usage) require leading path params such as
+            # 'client_id'. Passing the model as the 'body' keyword lets those extra
+            # positional/keyword arguments flow through correctly.
             while True:
-                api_response = function(model_instance, *args, **kwargs)
+                api_response = function(*args, body=model_instance, **kwargs)
                 api_responses.append(api_response)
 
                 if enable_pagination:
