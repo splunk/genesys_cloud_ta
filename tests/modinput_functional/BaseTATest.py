@@ -1,10 +1,8 @@
-import pytest
 import logging
 
 from io import StringIO
 
-import splunklib.client as client
-
+from splunklib import client
 
 LOGGER = logging.getLogger(__name__)
 LOG_BUFFER = StringIO()
@@ -60,7 +58,7 @@ class BaseTATest:
             # Clean index before deleting (removes all events).
             # index.clean(timeout=300)
             index.delete()
-        except Exception as e:
+        except RuntimeError as e:
             cls.logger.warning(f"Teardown failed: {e}")
 
         cls.splunk_client = None

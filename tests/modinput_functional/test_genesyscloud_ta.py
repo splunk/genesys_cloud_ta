@@ -1,9 +1,6 @@
-import pytest
-import time
 import os
-import json
+import time
 
-# import hashlib
 import splunklib.results as splk_results
 
 from .BaseTATest import BaseTATest
@@ -11,10 +8,10 @@ from .BaseTATest import BaseTATest
 
 class TestGenesysCloudTA(BaseTATest):
     def setup_method(self, method):
-        super(TestGenesysCloudTA, self).setup_method(method)
+        super().setup_method(method)
 
     def teardown_method(self, method):
-        super(TestGenesysCloudTA, self).teardown_method(method)
+        super().teardown_method(method)
 
     def _search_oneshot(
         self, search_query: str, base_sleep: int = 2, timeout: int = 40

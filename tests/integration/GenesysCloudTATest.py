@@ -1,17 +1,13 @@
+import logging
 import os
 import sys
-import pytest
-import logging
 
 from io import StringIO
-
 
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../package/bin"))
 )
 from genesyscloud_client import GenesysCloudClient
-from PureCloudPlatformClientV2.api_client import ApiClient
-
 
 LOGGER = logging.getLogger(__name__)
 LOG_BUFFER = StringIO()

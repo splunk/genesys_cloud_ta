@@ -1,9 +1,9 @@
-import logging
-import pytest
-import os
-import sys
 import base64
 import datetime
+import logging
+import os
+
+import pytest
 
 from .GenesysCloudTATest import GenesysCloudTATest
 

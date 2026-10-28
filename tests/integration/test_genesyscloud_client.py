@@ -1,5 +1,6 @@
-import pytest
 import uuid
+
+import pytest
 
 from .GenesysCloudTATest import GenesysCloudTATest
 
@@ -28,7 +29,7 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             (
                 "TelephonyProvidersEdgeApi",
                 "get_telephony_providers_edges_phones",
-                dict(expand="site,status"),
+                expand="site,status",
             ),
             (
                 "TelephonyProvidersEdgeApi",
@@ -77,7 +78,7 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         """Test GET calls throwing error for lack of function arguments"""
 
         with pytest.raises(TypeError) as excinfo:
-            response = self.gc_client.get(api_name, func_name)
+            self.gc_client.get(api_name, func_name)
         assert "missing 1 required positional argument: " in str(excinfo.value)
 
     @pytest.mark.parametrize(
