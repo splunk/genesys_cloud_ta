@@ -243,28 +243,29 @@ class TestGenesysCloudClient(GenesysCloudTATest):
         response = self.gc_client.post(api_name, func_name, model_name, body)
         assert response is None
 
-#
-# ---- [UsageApi] Testing ----
-#
+    #
+    # ---- [UsageApi] Testing ----
+    #
 
-    @pytest.mark.parametrize("func_name, model_name, id_key",
+    @pytest.mark.parametrize(
+        "func_name, model_name, id_key",
         [
             ("post_usage_query", "ApiUsageOrganizationQuery", "execution_id"),
-            ("post_usage_aggregates_query_jobs", "OrganizationPublicApiUsageQueryRequest", "id"),
+            (
+                "post_usage_aggregates_query_jobs",
+                "OrganizationPublicApiUsageQueryRequest",
+                "id",
+            ),
         ],
     )
     def test_POST_usage(self, body_usage, func_name, model_name, id_key):
         """Test POST calls submitting organization usage query jobs"""
-        response = self.gc_client.post(
-            "UsageApi",
-            func_name,
-            model_name,
-            body_usage()
-        )
+        response = self.gc_client.post("UsageApi", func_name, model_name, body_usage())
         assert response is not None
         assert len(response) >= 1
-        assert response[0].to_dict().get(id_key), f"Response does not contain '{id_key}'"
-
+        assert response[0].to_dict().get(id_key), (
+            f"Response does not contain '{id_key}'"
+        )
 
     def test_POST_client_usage(self, body_usage):
         """Test POST call submitting an OAuth client usage query job (requires client_id path param)"""
@@ -274,36 +275,32 @@ class TestGenesysCloudClient(GenesysCloudTATest):
             "post_usage_client_client_id_aggregates_query_jobs",
             "ClientPublicApiUsageQueryRequest",
             body_usage(),
-            client_id=client_id
+            client_id=client_id,
         )
         assert response is not None
         assert len(response) >= 1
         assert response[0].to_dict().get("id"), "Response does not contain 'id'"
 
-
-    @pytest.mark.parametrize("func_name, args",
+    @pytest.mark.parametrize(
+        "func_name, args",
         [
             ("get_usage_aggregates_query_job", (str(uuid.uuid4()),)),
-            ("get_usage_client_client_id_aggregates_query_job", (str(uuid.uuid4()), str(uuid.uuid4()))),
+            (
+                "get_usage_client_client_id_aggregates_query_job",
+                (str(uuid.uuid4()), str(uuid.uuid4())),
+            ),
         ],
     )
     def test_GET_usage_results(self, func_name, args):
         """Test GET calls retrieving usage query job results (entities)"""
-        response = self.gc_client.get(
-            "UsageApi",
-            func_name,
-            *args
-        )
+        response = self.gc_client.get("UsageApi", func_name, *args)
         assert len(response) == 3
-
 
     def test_GET_usage_events_results(self):
         """Test GET call retrieving usage events execution results"""
         execution_id = str(uuid.uuid4())
         response = self.gc_client.get(
-            "UsageApi",
-            "get_usage_query_execution_id_results",
-            execution_id
+            "UsageApi", "get_usage_query_execution_id_results", execution_id
         )
         results = self.gc_client.convert_response(response, "results")
         assert len(results) == 3

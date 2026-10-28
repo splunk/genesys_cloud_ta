@@ -1,16 +1,13 @@
 import json
 import logging
 import time
-
-import import_declare_test
-from solnlib import conf_manager, log
-from solnlib.modular_input import checkpointer
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
-from splunklib import modularinput as smi
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
 from genesyscloud_client import GenesysCloudClient
-
+from solnlib import conf_manager, log
+from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 ADDON_NAME = "genesys_cloud_ta"
 SOURCETYPE = "genesyscloud:operational:events"
@@ -71,9 +68,15 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             log.modular_input_start(logger, normalized_input_name)
 
-            client_id = get_account_property(session_key, input_item.get("account"), "client_id")
-            client_secret = get_account_property(session_key, input_item.get("account"), "client_secret")
-            account_region = get_account_property(session_key, input_item.get("account"), "region")
+            client_id = get_account_property(
+                session_key, input_item.get("account"), "client_id"
+            )
+            client_secret = get_account_property(
+                session_key, input_item.get("account"), "client_secret"
+            )
+            account_region = get_account_property(
+                session_key, input_item.get("account"), "region"
+            )
 
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_config
@@ -81,16 +84,21 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             checkpointer_key_name = input_name.split("/")[-1]
             now = datetime.now(timezone.utc)
-            last_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name)
-                or (now - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            )
+            last_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or (
+                now - timedelta(days=7)
+            ).strftime("%Y-%m-%dT%H:%M:%S.000Z")
             new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
-            max_polls = int(input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS))
-            poll_sleep = int(input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS))
+            max_polls = int(
+                input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS)
+            )
+            poll_sleep = int(
+                input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS)
+            )
 
-            logger.info(f"Submitting usage events query: {last_checkpoint} to {new_checkpoint}")
+            logger.info(
+                f"Submitting usage events query: {last_checkpoint} to {new_checkpoint}"
+            )
 
             body = {
                 "interval": f"{last_checkpoint}/{new_checkpoint}",
@@ -106,12 +114,26 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             if submit_response:
                 # client.post() always returns a list of API responses; the submit
                 # query endpoint returns a single object, so take the first element.
-                submit_obj = submit_response[0] if isinstance(submit_response, list) else submit_response
-                submit_dict = (submit_obj.to_dict() if hasattr(submit_obj, "to_dict") else submit_obj) or {}
-                execution_id = None if not submit_dict else submit_dict.get("execution_id") or submit_dict.get("id")
+                submit_obj = (
+                    submit_response[0]
+                    if isinstance(submit_response, list)
+                    else submit_response
+                )
+                submit_dict = (
+                    submit_obj.to_dict()
+                    if hasattr(submit_obj, "to_dict")
+                    else submit_obj
+                ) or {}
+                execution_id = (
+                    None
+                    if not submit_dict
+                    else submit_dict.get("execution_id") or submit_dict.get("id")
+                )
 
                 if not execution_id:
-                    logger.error(f"No execution ID returned from usage events query: {submit_response}")
+                    logger.error(
+                        f"No execution ID returned from usage events query: {submit_response}"
+                    )
                 else:
                     logger.info(f"Polling usage events execution {execution_id}")
                     for attempt in range(max_polls):
@@ -122,7 +144,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             execution_id,
                         )
                         if result_response:
-                            results = client.convert_response(result_response, "results")
+                            results = client.convert_response(
+                                result_response, "results"
+                            )
                             if results:
                                 break
                     else:
@@ -156,7 +180,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 account=input_item.get("account"),
             )
             log.modular_input_end(logger, normalized_input_name)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log.log_exception(
                 logger,
                 e,

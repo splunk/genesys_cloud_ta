@@ -175,7 +175,9 @@ def body_usage(request):
         if with_granularity:
             body["granularity"] = "Day"
         return body
+
     return _body_usage
+
 
 def pytest_configure(config):
     """

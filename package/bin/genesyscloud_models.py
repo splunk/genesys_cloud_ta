@@ -193,14 +193,7 @@ class QueueModel(GCBaseModel):
         ret_queue.update({k: queue[k] for k in required_keys if k in queue})
         return ret_queue
 
-    def get_directory_records(self) -> List[dict]:
-        """
-        Build a flat directory snapshot record for every queue, keeping only the
-        relevant fields and flattening the nested ``division`` object into
-        ``division_id`` / ``division_name``.
-
-        :return: List of dictionaries ready to be indexed.
-        """
+    def get_directory_records(self) -> list[dict]:
         fields = ["id", "name", "description", "member_count", "division"]
         records = []
         for queue in self.data:
@@ -244,14 +237,7 @@ class UserModel(GCBaseModel):
         ret_user.update({k: user[k] for k in required_keys if k in user})
         return ret_user
 
-    def get_directory_records(self) -> List[dict]:
-        """
-        Build a flat directory snapshot record for every user, keeping only the
-        relevant fields and flattening the nested ``division`` object into
-        ``division_id`` / ``division_name``.
-
-        :return: List of dictionaries ready to be indexed.
-        """
+    def get_directory_records(self) -> list[dict]:
         fields = ["id", "name", "email", "department", "state", "division", "version"]
         records = []
         for user in self.data:
