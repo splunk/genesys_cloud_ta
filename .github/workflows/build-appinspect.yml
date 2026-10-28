@@ -12,7 +12,7 @@ on:
 jobs:
   build:
     name: Bundle the App
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       app_name: ${{ steps.app.outputs.name }}
       app_version: ${{ steps.app.outputs.version }}
@@ -63,7 +63,7 @@ jobs:
 
   appinspect-cli:
     name: appinspect-cli ${{ matrix.tags }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     continue-on-error: true
     needs: build
     strategy:
