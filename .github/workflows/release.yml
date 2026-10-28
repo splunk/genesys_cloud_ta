@@ -107,7 +107,8 @@ jobs:
         run: |
           LATEST_RELEASE=$(gh release view --json tagName --jq '.tagName' 2>/dev/null || echo "v0.0.0")
           if [ "$VERSION" == "$LATEST_RELEASE" ]; then
-            echo "ℹ️ ${VERSION} is already released. Nothing to do (likely an [Unreleased]-only change)."
+            # echo "ℹ️ ${VERSION} is already released. Nothing to do (likely an [Unreleased]-only change)."
+            echo "::notice title=Create Release::Already released. Nothing to do (likely an [Unreleased]-only change)."
             echo "skip_publication=true" >> "$GITHUB_OUTPUT"
           else
             echo "Releasing $VERSION"
