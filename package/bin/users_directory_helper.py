@@ -1,28 +1,24 @@
+"""Users Inventory input handler."""
+
 import json
 import logging
 
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import UserModel
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib import log
+from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:inventory:users"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    SOURCETYPE_INVENTORY_USERS,
+)
+from genesys_cloud_ta.models import UserModel
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -35,25 +31,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            configure_logger(logger, session_key)
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -81,7 +61,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     smi.Event(
                         data=json.dumps(record, ensure_ascii=False, default=str),
                         index=input_item.get("index"),
-                        sourcetype=SOURCETYPE,
+                        sourcetype=SOURCETYPE_INVENTORY_USERS,
                     )
                 )
                 event_counter += 1
@@ -90,7 +70,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.events_ingested(
                 logger,
                 input_name,
-                SOURCETYPE,
+                SOURCETYPE_INVENTORY_USERS,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),

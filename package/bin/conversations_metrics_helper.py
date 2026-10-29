@@ -1,30 +1,29 @@
+"""Conversations Metrics input handler."""
+
 import json
 import logging
 from datetime import datetime, timedelta, timezone
 
-from genesyscloud_client import GenesysCloudClient
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-ADDON_NAME = "genesys_cloud_ta"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    """Create and return a logger for the specified input."""
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    """Retrieve a specific property for a given Genesys Cloud account."""
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    CONVERSATIONS_METRICS,
+    SOURCETYPE_ANALYTICS_CONVERSATIONS_METRICS,
+)
+from genesys_cloud_ta.time_utils import (
+    get_interval_str,
+    get_start_date,
+)
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -38,6 +37,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
 
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "conversations_metrics_checkpointer",
@@ -45,28 +45,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 ADDON_NAME,
             )
 
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -86,69 +66,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
-            fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
-            current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
-            )
+            current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
 
-            start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
-            interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{now.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
+            start_time = get_start_date(current_checkpoint, now)
+            interval = get_interval_str(start_time, now)
 
-            metrics = [
-                "nBlindTransferred",
-                "nBotInteractions",
-                "nCobrowseSessions",
-                "nConnected",
-                "nConsult",
-                "nConsultTransferred",
-                "nError",
-                "nOffered",
-                "nOutbound",
-                "nOutboundAbandoned",
-                "nOutboundAttempted",
-                "nOutboundConnected",
-                "nOverSla",
-                "nStateTransitionError",
-                "nTransferred",
-                "oExternalMediaCount",
-                "oMediaCount",
-                "oMessageTurn",
-                "oServiceLevel",
-                "oServiceTarget",
-                "tWait",
-                "tAbandon",
-                "tAcd",
-                "tActiveCallback",
-                "tActiveCallbackComplete",
-                "tAcw",
-                "tAgentResponseTime",
-                "tAlert",
-                "tAnswered",
-                "tBarging",
-                "tCoaching",
-                "tCoachingComplete",
-                "tConnected",
-                "tContacting",
-                "tDialing",
-                "tFirstConnect",
-                "tFirstDial",
-                "tFlowOut",
-                "tHandle",
-                "tHeld",
-                "tHeldComplete",
-                "tIvr",
-                "tMonitoring",
-                "tMonitoringComplete",
-                "tNotResponding",
-                "tPark",
-                "tParkComplete",
-                "tShortAbandon",
-                "tTalk",
-                "tTalkComplete",
-                "tUserResponseTime",
-                "tVoicemail",
-            ]
             group_by = ["queueId"]
 
             media_types_raw = input_item.get("media_types", "")
@@ -175,12 +98,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             body = {
                 "interval": interval,
-                "metrics": metrics,
+                "metrics": CONVERSATIONS_METRICS,
                 "group_by": group_by,
                 "filter": filter_block,
             }
 
-            sourcetype = "genesyscloud:analytics:flows:metrics"
             response = client.post(
                 "ConversationsApi",
                 "post_analytics_conversations_aggregates_query",
@@ -211,7 +133,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                         metric, ensure_ascii=False, default=str
                                     ),
                                     index=input_item.get("index"),
-                                    sourcetype=sourcetype,
+                                    sourcetype=SOURCETYPE_ANALYTICS_CONVERSATIONS_METRICS,
                                     time=interval_start_time,
                                 )
                             )
@@ -228,7 +150,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.events_ingested(
                 logger,
                 input_name,
-                sourcetype,
+                SOURCETYPE_ANALYTICS_CONVERSATIONS_METRICS,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),

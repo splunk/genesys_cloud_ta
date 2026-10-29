@@ -1,61 +1,37 @@
+"""Audit Query input handler."""
+
 import json
 import logging
 import time
 from datetime import datetime, timedelta, timezone
 
-from genesyscloud_client import GenesysCloudClient
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-ADDON_NAME = "genesys_cloud_ta"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf.get(account_name).get(property_name)
-
-
-def exceed_range(
-    start: str, end: str, max_days: int = 31, fmt: str = "%Y-%m-%dT%H:%M:%SZ"
-) -> bool:
-    """Verify interval range does not exceed threshold.
-    :param start: Interval start string reference.
-    :param end: Interval end string reference.
-    :param max_days: Threshold in number of days.
-    :param fmt: Datetime string format.
-    :return: True if the range between start and end exceeds max_days.
-    """
-    start_dt = datetime.strptime(start, fmt)  # noqa: DTZ007
-    end_dt = datetime.strptime(end, fmt)  # noqa: DTZ007
-
-    if end_dt <= start_dt:
-        raise ValueError(
-            f"Invalid start date: {start} cannot be later or equal to {end}"
-        )
-
-    return (end_dt - start_dt) >= timedelta(days=max_days)
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    AUDIT_QUERY_COMPLETED_STATUSES,
+    DEFAULT_MAX_POLL_ATTEMPTS,
+    DEFAULT_POLL_INTERVAL_SECONDS,
+    MAX_PAGE_SIZE,
+    SOURCETYPE_OPERATIONAL_AUDITS,
+)
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
+from genesys_cloud_ta.time_utils import exceed_range
+from genesys_cloud_ta.validators import (
+    validate_date,
+)
 
 
 def validate_input(definition: smi.ValidationDefinition):
-    start_date = definition.parameters.get("start_date")
-    fmt_str = "%Y-%m-%d"
-    if start_date is not None and exceed_range(
-        start_date, datetime.now(timezone.utc).strftime(fmt_str), fmt=fmt_str
-    ):
-        raise ValueError(
-            f"Invalid start date {start_date}. Start date for data collection cannot exceed 31 days from now."
-        )
+    validate_date(definition.parameters.get("start_date"))
 
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
@@ -65,6 +41,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
 
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "audit_query_checkpointer",
@@ -72,28 +49,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 ADDON_NAME,
             )
 
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -106,6 +63,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
             client_secret = get_account_property(
                 session_key, input_item.get("account"), "client_secret"
+            )
+
+            max_polls = int(
+                input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS)
+            )
+            poll_sleep = int(
+                input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS)
             )
 
             client = GenesysCloudClient(
@@ -163,11 +127,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 )
 
             transaction_id = response[0].id
-
-            max_polls = int(input_item.get("max_poll_attempts", "10"))
-            poll_sleep = int(input_item.get("poll_interval_seconds", "2"))
-
             status = ""
+
             for _ in range(max_polls):
                 state_resp = client.get(
                     "AuditApi", "get_audits_query_transaction_id", transaction_id
@@ -177,9 +138,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         f"Failed to get status for transaction {transaction_id}"
                     )
                 status = state_resp[0].state
-                # Allowed statuses:
-                # https://github.com/MyPureCloud/platform-client-sdk-python/blob/master/build/PureCloudPlatformClientV2/models/audit_query_execution_status_response.py#L126
-                if status in ("Succeeded", "Failed", "Cancelled"):
+                if status in AUDIT_QUERY_COMPLETED_STATUSES:
                     logger.debug(f"Audit complete with status '{status}'")
                     break
                 time.sleep(poll_sleep)
@@ -190,14 +149,13 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             params = {
                 "transaction_id": transaction_id,
                 "allow_redirect": True,
-                "page_size": 500,
+                "page_size": MAX_PAGE_SIZE,
             }
 
             results = client.get(
                 "AuditApi", "get_audits_query_transaction_id_results", **params
             )
             event_counter = 0
-            sourcetype = "genesyscloud:operational:audits"
 
             for entity in results:
                 if not isinstance(entity, dict):
@@ -215,7 +173,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     smi.Event(
                         data=json.dumps(value, ensure_ascii=False, default=str),
                         index=input_item.get("index"),
-                        sourcetype=sourcetype,
+                        sourcetype=SOURCETYPE_OPERATIONAL_AUDITS,
                         time=time_value,
                     )
                 )
@@ -230,7 +188,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.events_ingested(
                 logger,
                 input_name,
-                sourcetype,
+                SOURCETYPE_OPERATIONAL_AUDITS,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),

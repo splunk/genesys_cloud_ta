@@ -1,36 +1,34 @@
+"""Actions Metrics input handler."""
+
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
-from genesyscloud_client import GenesysCloudClient
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-ADDON_NAME = "genesys_cloud_ta"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    """Create and return a logger for the specified input."""
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    """Retrieve a specific property for a given Genesys Cloud account."""
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
-
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    DEFAULT_ACTIONS_INTERVAL_SECONDS,
+    SOURCETYPE_ANALYTICS_ACTIONS,
+)
+from genesys_cloud_ta.models import ActionModel
+from genesys_cloud_ta.time_utils import (
+    get_start_date,
+    get_interval_str,
+)
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
 
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
-
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():
@@ -39,33 +37,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger.info(f"Start processing input: {normalized_input_name}")
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
 
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "actions_metrics_checkpointer", session_key, ADDON_NAME
             )
 
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -77,24 +56,22 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             client_id = get_account_property(session_key, account, "client_id")
             client_secret = get_account_property(session_key, account, "client_secret")
 
+            interval_seconds = int(
+                input_item.get("interval", DEFAULT_ACTIONS_INTERVAL_SECONDS)
+            )
+
             client = GenesysCloudClient(
                 logger, client_id, client_secret, account_region, proxy_config
             )
 
             checkpointer_key_name = normalized_input_name
-            now = datetime.now(timezone.utc)
-
-            interval_seconds = int(input_item.get("interval", "300"))
-
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            if current_checkpoint:
-                start_time = datetime.fromtimestamp(current_checkpoint, tz=timezone.utc)
-            else:
-                start_time = now - timedelta(seconds=interval_seconds)
 
+            now = datetime.now(timezone.utc)
+            start_time = get_start_date(current_checkpoint, now, interval_seconds)
             end_time = now
 
-            interval = f"{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
+            interval = get_interval_str(start_time, end_time)
 
             body = {
                 "interval": interval,
@@ -108,45 +85,31 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 "ActionAggregationQuery",
                 body,
             )
-            sourcetype = "genesyscloud:analytics:actions:metrics"
 
             event_counter = 0
             to_process_data = client.convert_response(response)
             for event in to_process_data:
                 try:
                     group_info = event.get("group", {}) or {}
-                    for data_entry in event.get("data", []):
-                        interval_str = data_entry.get("interval")
+                    a_model = ActionModel(event.get("data", []), group_info)
+                    for data_entry in a_model.actions:
+                        interval_range = data_entry.get("interval")
                         interval_start_time = (
-                            datetime.strptime(
-                                interval_str.split("/")[0], "%Y-%m-%dT%H:%M:%S.%fZ"
-                            )
-                            .replace(tzinfo=timezone.utc)
-                            .timestamp()
-                            if interval_str
+                            data_entry.get_interval_start(interval_range)
+                            if interval_range
                             else round(start_time.timestamp(), 3)
                         )
-
-                        for metric in data_entry.get("metrics", []):
-                            enriched_metric = {
-                                "metric": metric.get("metric"),
-                                "qualifier": metric.get("qualifier"),
-                                "stats": metric.get("stats", {}),
-                                "group": group_info,
-                                "interval": interval_str,
-                            }
-
-                            event_writer.write_event(
-                                smi.Event(
-                                    data=json.dumps(
-                                        enriched_metric, ensure_ascii=False, default=str
-                                    ),
-                                    index=input_item.get("index"),
-                                    sourcetype=sourcetype,
-                                    time=interval_start_time,
-                                )
+                        event_writer.write_event(
+                            smi.Event(
+                                data=json.dumps(
+                                    data_entry, ensure_ascii=False, default=str
+                                ),
+                                index=input_item.get("index"),
+                                sourcetype=SOURCETYPE_ANALYTICS_ACTIONS,
+                                time=interval_start_time,
                             )
-                            event_counter += 1
+                        )
+                        event_counter += 1
                 except Exception as e:  # noqa: BLE001
                     logger.error(f"Failed to write event: {e}")
 
@@ -157,7 +120,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.events_ingested(
                 logger,
                 input_name,
-                sourcetype,
+                SOURCETYPE_ANALYTICS_ACTIONS,
                 event_counter,
                 input_item.get("index"),
                 account=account,

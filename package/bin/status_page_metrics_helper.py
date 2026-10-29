@@ -1,3 +1,5 @@
+"""Status Page Metrics input handler."""
+
 from __future__ import annotations
 
 import json
@@ -5,32 +7,29 @@ import logging
 from datetime import datetime, timedelta, timezone
 
 import requests
-from genesyscloud_client import ProxyHandler
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
 
-ADDON_NAME = "genesys_cloud_ta"
-STATUS_PAGE_API_URL = "https://status.mypurecloud.com/api"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.proxy import (
+    get_proxy_configuration,
+    ProxyHandler,
+)
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    STATUS_PAGE_API_URL,
+    SOURCETYPE_OPERATIONAL_SYSTEM,
+)
+from genesys_cloud_ta.time_utils import get_start_date
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
 
 
 def validate_input(definition: smi.ValidationDefinition):
     return
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
 
 
 def fetch_status_page_data(logger: logging.Logger, proxy_url: str | None = None):
@@ -65,56 +64,31 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
             status_page_checkpointer = checkpointer.KVStoreCheckpointer(
                 "status_page_metrics_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
-
-            # Setup logging
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
 
             now = datetime.now(timezone.utc)
-            fallback_start = (now - timedelta(days=7)).timestamp()
-            # Get checkpoints for incidents
             checkpointer_key_name = normalized_input_name
-            # If we don't have any checkpoint, we default it to 1970
-            status_page_checkpoint = (
-                status_page_checkpointer.get(checkpointer_key_name) or fallback_start
-            )
+            # If we don't have any checkpoint, we default it to 7 days ago
+            current_checkpoint = status_page_checkpointer.get(checkpointer_key_name)
+            start_date = get_start_date(current_checkpoint, now)
 
-            logger.debug(f"Current status page checkpoint: {status_page_checkpoint}")
+            logger.debug(f"Current status page checkpoint: {start_date}")
 
             proxy = ProxyHandler(logger, proxy_config)
             # Fetch data from Status Page API
             summary = fetch_status_page_data(logger, proxy_url=proxy.get_url_w_auth())
 
             # Process summary data
-            sourcetype = "genesyscloud:operational:system"
             events_count = 0
 
             page = summary.get("page", {})
@@ -131,7 +105,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     )
 
                     # Only process if newer than our checkpoint
-                    if component_updated_at > status_page_checkpoint:
+                    if component_updated_at > start_date.timestamp():
                         component["page"] = page
                         # Delete page_id field if it exists
                         if "page_id" in component:
@@ -145,7 +119,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                     component, ensure_ascii=False, default=str
                                 ),
                                 index=input_item.get("index"),
-                                sourcetype=sourcetype,
+                                sourcetype=SOURCETYPE_OPERATIONAL_SYSTEM,
                                 time=component_updated_at,
                             )
                         )
@@ -153,14 +127,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                         events_count += 1
 
             # Update checkpoint if data was processed
-            current_time = datetime.now(timezone.utc).timestamp()
+            new_checkpoint = now.timestamp()
 
             if events_count > 0:
-                logger.debug(f"Updating status page checkpoint to {current_time}")
-                status_page_checkpointer.update(checkpointer_key_name, current_time)
+                logger.debug(f"Updating status page checkpoint to {new_checkpoint}")
+                status_page_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
-                logger, input_name, sourcetype, events_count, input_item.get("index")
+                logger, input_name, SOURCETYPE_OPERATIONAL_SYSTEM, events_count, input_item.get("index")
             )
 
             log.modular_input_end(logger, normalized_input_name)

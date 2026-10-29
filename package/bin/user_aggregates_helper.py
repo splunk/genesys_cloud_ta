@@ -1,31 +1,27 @@
+"""User Aggregates input handler."""
+
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
-from dateutil.relativedelta import relativedelta
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import UserModel
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
-
-ADDON_NAME = "genesys_cloud_ta"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    SOURCETYPE_USERS_USERS_AGGREGATES,
+    USERS_AGGREGATES_METRICS,
+)
+from genesys_cloud_ta.models import UserModel
+from genesys_cloud_ta.time_utils import (
+    get_interval_str,
+    get_start_date,
+    to_epoch,
+)
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -38,33 +34,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "user_aggregates_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -85,20 +62,18 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             # Initialize checkpointing
-            checkpointer_key_name = input_name.split("/")[-1]
+            checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
-            last_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or (
-                now - relativedelta(years=4)
-            ).strftime("%Y-%m-%dT%H:%M:%SZ")
-            new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+            current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
+            start_date = get_start_date(to_epoch(current_checkpoint), now, 1461 * 86400)
 
             # Getting data from API
             logger.info("Getting data from users endpoint")
             user_model = UserModel(client.get("UsersApi", "get_users"))
 
             # Getting metrics
-            interval = f"{last_checkpoint}/{new_checkpoint}"
+            interval = get_interval_str(start_date, now),
             logger.debug(f"Range interval: {interval}")
 
             # Max 100 userids supported according to specs (??)
@@ -111,11 +86,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     "interval": interval,
                     "granularity": "P1D",
                     "group_by": ["userId"],
-                    "metrics": [
-                        "tAgentRoutingStatus",
-                        "tOrganizationPresence",
-                        "tSystemPresence",
-                    ],
+                    "metrics": USERS_AGGREGATES_METRICS,
                     "filter": {
                         "type": "or",
                         "predicates": [
@@ -134,7 +105,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 cnt += 1
             logger.debug(f"Fetched '{len(results)}' user aggregates")
 
-            sourcetype = "genesyscloud:users:users:aggregates"
             event_counter = 0
             for item in results:
                 for data_entry in item["data"]:
@@ -155,7 +125,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                                     metrics, ensure_ascii=False, default=str
                                 ),
                                 index=input_item.get("index"),
-                                sourcetype=sourcetype,
+                                sourcetype=SOURCETYPE_USERS_USERS_AGGREGATES,
                             )
                         )
                         event_counter += 1
@@ -163,13 +133,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             # Updating checkpoint if data was indexed to avoid losing info
             if event_counter > 0:
                 logger.debug(f"Indexed '{event_counter}' events")
+                new_checkpoint = now.timestamp()
                 logger.debug(f"Updating checkpointer to {new_checkpoint}")
                 kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
                 logger,
                 input_name,
-                sourcetype,
+                SOURCETYPE_USERS_USERS_AGGREGATES,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
