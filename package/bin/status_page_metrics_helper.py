@@ -4,28 +4,26 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import requests
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
-
-from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.proxy import (
-    get_proxy_configuration,
     ProxyHandler,
+    get_proxy_configuration,
 )
 from genesys_cloud_ta.constants import (
     ADDON_NAME,
-    STATUS_PAGE_API_URL,
     SOURCETYPE_OPERATIONAL_SYSTEM,
+    STATUS_PAGE_API_URL,
 )
 from genesys_cloud_ta.time_utils import get_start_date
 from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -134,7 +132,11 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 status_page_checkpointer.update(checkpointer_key_name, new_checkpoint)
 
             log.events_ingested(
-                logger, input_name, SOURCETYPE_OPERATIONAL_SYSTEM, events_count, input_item.get("index")
+                logger,
+                input_name,
+                SOURCETYPE_OPERATIONAL_SYSTEM,
+                events_count,
+                input_item.get("index"),
             )
 
             log.modular_input_end(logger, normalized_input_name)

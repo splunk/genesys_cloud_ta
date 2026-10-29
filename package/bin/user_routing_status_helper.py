@@ -1,12 +1,7 @@
 """Users Routing Status input handler."""
 
 import json
-import logging
-from datetime import datetime, timedelta, timezone
-
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
+from datetime import datetime, timezone
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -21,6 +16,9 @@ from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -65,7 +63,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             now = datetime.now(timezone.utc)
             checkpointer_key_name = normalized_input_name
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date_epoch = get_start_date(curr_checkpoint, now).timestamp()
+            start_date_epoch = get_start_date(current_checkpoint, now).timestamp()
 
             # Getting user ids from API
             logger.info("Getting data from users endpoint")

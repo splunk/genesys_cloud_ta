@@ -1,13 +1,8 @@
 """Audit Query input handler."""
 
 import json
-import logging
 import time
 from datetime import datetime, timedelta, timezone
-
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -20,14 +15,17 @@ from genesys_cloud_ta.constants import (
     MAX_PAGE_SIZE,
     SOURCETYPE_OPERATIONAL_AUDITS,
 )
+from genesys_cloud_ta.time_utils import exceed_range
 from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
-from genesys_cloud_ta.time_utils import exceed_range
 from genesys_cloud_ta.validators import (
     validate_date,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):

@@ -7,7 +7,7 @@ from PureCloudPlatformClientV2.models import (
     Phone,
     Queue,
     Trunk,
-    User
+    User,
 )
 
 
@@ -81,9 +81,7 @@ class ActionModel(GCBaseModel):
         return ret_actions
 
     def get_interval_start(self, interval_range: str) -> float:
-        return (
-            self.to_datetime(interval_range.split("/")[0])
-        ).timestamp()
+        return (self.to_datetime(interval_range.split("/")[0])).timestamp()
 
 
 class TrunkModel(GCBaseModel):

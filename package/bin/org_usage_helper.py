@@ -1,13 +1,8 @@
 """Organisation Usage input handler."""
 
 import json
-import logging
 import time
-from datetime import datetime, timedelta, timezone
-
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
+from datetime import datetime, timezone
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -27,6 +22,9 @@ from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):

@@ -1,12 +1,7 @@
 """Actions Metrics input handler."""
 
 import json
-import logging
 from datetime import datetime, timezone
-
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -18,17 +13,22 @@ from genesys_cloud_ta.constants import (
 )
 from genesys_cloud_ta.models import ActionModel
 from genesys_cloud_ta.time_utils import (
-    get_start_date,
     get_interval_str,
+    get_start_date,
 )
 from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
+
 
 def validate_input(definition: smi.ValidationDefinition):
     """Validation function for the modular input (currently unused)."""
     return
+
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
     for input_name, input_item in inputs.inputs.items():

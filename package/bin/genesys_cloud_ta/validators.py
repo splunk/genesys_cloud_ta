@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from genesys_cloud_ta.time_utils import exceed_range
 

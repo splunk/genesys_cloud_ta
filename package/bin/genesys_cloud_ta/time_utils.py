@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+
 from genesys_cloud_ta.constants import DEFAULT_HISTORICAL_DAYS
 
 
-def get_start_date(curr_checkpoint: float, now: datetime, interval_seconds: int | None = None) -> datetime:
+def get_start_date(
+    curr_checkpoint: float, now: datetime, interval_seconds: int | None = None
+) -> datetime:
     """Get start date: either from checkpoint or from a given point in the past.
     :param curr_checkpoint: Last checkpoint saved in the KVStore.
     :param now: Current datetime.
@@ -24,6 +27,7 @@ def get_interval_str(start_time: datetime, end_time: datetime) -> str:
         {start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/\
         {end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"
 
+
 def to_epoch(value: float | str) -> float:
     """Cast string datetime value into epoch."""
     if isinstance(value, float):
@@ -31,10 +35,13 @@ def to_epoch(value: float | str) -> float:
 
     if isinstance(value, str):
         # Supports strings like: "2026-10-29T12:34:56.123Z"
-        dt = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
+        dt = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
+            tzinfo=timezone.utc
+        )
         return dt.timestamp()
 
     raise TypeError(f"Expected float or str, got {type(value).__name__}")
+
 
 def exceed_range(
     start: str, end: str, max_days: int = 31, fmt: str = "%Y-%m-%dT%H:%M:%SZ"

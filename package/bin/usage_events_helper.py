@@ -1,9 +1,8 @@
 """Usage Events input handler."""
 
 import json
-import logging
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -23,6 +22,9 @@ from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -72,7 +74,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date = get_start_date(to_epoch(curr_checkpoint), now)
+            start_date = get_start_date(to_epoch(current_checkpoint), now)
 
             body = {
                 "interval": get_interval_str(start_date, now),

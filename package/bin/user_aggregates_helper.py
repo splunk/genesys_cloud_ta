@@ -1,8 +1,7 @@
 """User Aggregates input handler."""
 
 import json
-import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
@@ -22,6 +21,9 @@ from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from solnlib.modular_input import checkpointer
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -73,7 +75,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             user_model = UserModel(client.get("UsersApi", "get_users"))
 
             # Getting metrics
-            interval = get_interval_str(start_date, now),
+            interval = (get_interval_str(start_date, now),)
             logger.debug(f"Range interval: {interval}")
 
             # Max 100 userids supported according to specs (??)

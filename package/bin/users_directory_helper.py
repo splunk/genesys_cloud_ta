@@ -1,17 +1,11 @@
 """Users Inventory input handler."""
 
 import json
-import logging
-
-from solnlib import log
-from solnlib.modular_input import checkpointer
-from splunklib import modularinput as smi
 
 from genesys_cloud_ta.account import get_account_property
 from genesys_cloud_ta.api.client import GenesysCloudClient
 from genesys_cloud_ta.api.proxy import get_proxy_configuration
 from genesys_cloud_ta.constants import (
-    ADDON_NAME,
     SOURCETYPE_INVENTORY_USERS,
 )
 from genesys_cloud_ta.models import UserModel
@@ -19,6 +13,8 @@ from genesys_cloud_ta.utils import (
     configure_logger,
     logger_for_input,
 )
+from solnlib import log
+from splunklib import modularinput as smi
 
 
 def validate_input(definition: smi.ValidationDefinition):

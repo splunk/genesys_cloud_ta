@@ -1,8 +1,9 @@
 import logging
 
+from genesys_cloud_ta.constants import ADDON_NAME
+from solnlib import conf_manager
 from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
 from solnlib.utils import is_true
-from genesys_cloud_ta.constants import ADDON_NAME
 
 
 def get_proxy_configuration(logger: logging.Logger, session_key: str) -> dict:
@@ -22,6 +23,7 @@ def get_proxy_configuration(logger: logging.Logger, session_key: str) -> dict:
     except InvalidHostnameError as e:
         logger.error(f"Proxy configuration error: {e}")
         return None
+
 
 class ProxyHandler:
     """Handle Proxy Configuration"""

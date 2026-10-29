@@ -2,6 +2,7 @@ from solnlib import conf_manager
 
 ADDON_NAME = "genesys_cloud_ta"
 
+
 def get_account_property(session_key: str, account_name: str, property_name: str):
     """Retrieve a specific property for a given Genesys Cloud account."""
     cfm = conf_manager.ConfManager(
