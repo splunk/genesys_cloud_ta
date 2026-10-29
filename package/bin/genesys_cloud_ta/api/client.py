@@ -7,51 +7,10 @@ from io import BytesIO
 
 import PureCloudPlatformClientV2
 import urllib3
+from genesys_cloud_ta.api.proxy import ProxyHandler
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
 from PureCloudPlatformClientV2.rest import ApiException
-from solnlib.utils import is_true
-
-
-class ProxyHandler:
-    """Handle Proxy Configuration"""
-
-    url: str = None
-    url_auth: str = None
-    username: str = None
-    password: str = None
-
-    def __init__(self, logger: logging.Logger, proxy_config: dict) -> None:
-        if not proxy_config or not is_true(proxy_config.get("proxy_enabled")):
-            logger.info("Proxy is not enabled")
-            return
-
-        host = proxy_config.get("proxy_url")
-        port = proxy_config.get("proxy_port")
-        proxy_type = proxy_config.get("proxy_type")
-        proxy_type = proxy_type.lower() if proxy_type else "http"
-        self.username = proxy_config.get("proxy_username", None)
-        self.password = proxy_config.get("proxy_password", None)
-
-        if not all((self.username, self.password)):
-            logger.info("Proxy has no authentication")
-        else:
-            self.url_auth = (
-                f"{proxy_type}://{self.username}:{self.password}@{host}:{port}"
-            )
-
-        self.url = f"{proxy_type}://{host}:{port}"
-
-        logger.info(f"Using proxy: {self.url}")
-
-    def get_url_w_auth(self) -> str:
-        """
-        To comply with requests library.
-        """
-        if not all((self.username, self.password)):
-            return self.url
-        else:
-            return self.url_auth
 
 
 class GenesysCloudClient:

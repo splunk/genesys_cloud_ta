@@ -1,29 +1,24 @@
-import json
-import logging
-from datetime import datetime, timedelta, timezone
+"""Edges Phones input handler."""
 
-from genesyscloud_client import GenesysCloudClient
-from genesyscloud_models import PhoneModel
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+import json
+from datetime import datetime, timezone
+
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    SOURCETYPE_TELEPHONYPE_PHONES,
+)
+from genesys_cloud_ta.models import PhoneModel
+from genesys_cloud_ta.time_utils import get_start_date
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-ADDON_NAME = "genesys_cloud_ta"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -31,49 +26,21 @@ def validate_input(definition: smi.ValidationDefinition):
 
 
 def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
-    # inputs.inputs is a Python dictionary object like:
-    # {
-    #   "edges_phones://<input_name>": {
-    #     "account": "<account_name>",
-    #     "disabled": "0",
-    #     "host": "$decideOnStartup",
-    #     "index": "<index_name>",
-    #     "interval": "<interval_value>",
-    #     "python.version": "python3",
-    #   },
-    # }
     for input_name, input_item in inputs.inputs.items():
         normalized_input_name = input_name.split("/")[-1]
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
+
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "edges_phones_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            # Handle invalid port case
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
 
-            # Handle invalid hostname case
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -94,11 +61,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
-            fallback_start = (now - timedelta(days=7)).timestamp()
+            # fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
-            current_checkpoint = (
-                kvstore_checkpointer.get(checkpointer_key_name) or fallback_start
-            )
+            current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
+            start_date_epoch = get_start_date(current_checkpoint, now).timestamp()
 
             p_model = PhoneModel(
                 client.get(
@@ -112,13 +78,12 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             statuses = p_model.extended_statuses
             logger.debug(f"Fetched '{len(statuses)}' phone statuses")
 
-            sourcetype = "genesyscloud:telephonyprovidersedge:edges:phones"
             event_counter = 0
             for status_obj in statuses:
                 event_time_epoch = p_model.to_datetime(
                     status_obj["event_creation_time"]
                 ).timestamp()
-                if event_time_epoch > current_checkpoint:
+                if event_time_epoch > start_date_epoch:
                     event_writer.write_event(
                         smi.Event(
                             data=json.dumps(
@@ -126,7 +91,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                             ),
                             time=event_time_epoch,
                             index=input_item.get("index"),
-                            sourcetype=sourcetype,
+                            sourcetype=SOURCETYPE_TELEPHONYPE_PHONES,
                         )
                     )
                     event_counter += 1
@@ -141,7 +106,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             log.events_ingested(
                 logger,
                 input_name,
-                sourcetype,
+                SOURCETYPE_TELEPHONYPE_PHONES,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
