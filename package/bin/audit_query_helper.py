@@ -67,7 +67,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 input_item.get("max_poll_attempts", DEFAULT_AUDIT_MAX_POLL_ATTEMPTS)
             )
             poll_sleep = int(
-                input_item.get("poll_interval_seconds", DEFAULT_AUDIT_POLL_INTERVAL_SECONDS)
+                input_item.get(
+                    "poll_interval_seconds", DEFAULT_AUDIT_POLL_INTERVAL_SECONDS
+                )
             )
 
             client = GenesysCloudClient(

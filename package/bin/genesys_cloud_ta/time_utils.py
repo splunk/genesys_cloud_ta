@@ -19,6 +19,7 @@ def _to_epoch(value: float | str) -> float:
 
     raise TypeError(f"Expected float or str, got {type(value).__name__}")
 
+
 def get_start_date(
     curr_checkpoint: float, now: datetime, interval_seconds: int | None = None
 ) -> datetime:
@@ -37,7 +38,7 @@ def get_start_date(
 
 def get_interval_str(start_time: datetime, end_time: datetime) -> str:
     """Format interval as per API specs."""
-    return f"""{start_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z/{end_time.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]}Z"""
+    return f"""{start_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]}Z/{end_time.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3]}Z"""
 
 
 def exceed_range(
