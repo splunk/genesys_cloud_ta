@@ -16,7 +16,6 @@ from genesys_cloud_ta.constants import (
 from genesys_cloud_ta.time_utils import (
     get_interval_str,
     get_start_date,
-    to_epoch,
 )
 from genesys_cloud_ta.utils import (
     configure_logger,
@@ -75,7 +74,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             checkpointer_key_name = normalized_input_name
             now = datetime.now(timezone.utc)
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date = get_start_date(to_epoch(current_checkpoint), now)
+            start_date = get_start_date(current_checkpoint, now)
 
             body = {
                 "interval": get_interval_str(start_date, now),

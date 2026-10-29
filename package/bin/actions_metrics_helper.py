@@ -95,7 +95,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     for data_entry in a_model.actions:
                         interval_range = data_entry.get("interval")
                         interval_start_time = (
-                            data_entry.get_interval_start(interval_range)
+                            a_model.get_interval_start(interval_range)
                             if interval_range
                             else round(start_time.timestamp(), 3)
                         )

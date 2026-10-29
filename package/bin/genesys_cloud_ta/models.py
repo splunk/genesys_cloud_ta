@@ -2,7 +2,6 @@ import datetime
 import re
 
 from PureCloudPlatformClientV2.models import (
-    Action,
     Edge,
     Phone,
     Queue,
@@ -60,8 +59,8 @@ class GCBaseModel:
 
 
 class ActionModel(GCBaseModel):
-    def __init__(self, actions: list[Action], group_info: dict) -> None:
-        super().__init__([action.to_dict() for action in actions])
+    def __init__(self, actions: list[dict], group_info: dict) -> None:
+        super().__init__(actions)
         self.group_info = group_info
 
     @property

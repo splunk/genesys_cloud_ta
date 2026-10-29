@@ -15,7 +15,6 @@ from genesys_cloud_ta.models import UserModel
 from genesys_cloud_ta.time_utils import (
     get_interval_str,
     get_start_date,
-    to_epoch,
 )
 from genesys_cloud_ta.utils import (
     configure_logger,
@@ -68,14 +67,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date = get_start_date(to_epoch(current_checkpoint), now, 1461 * 86400)
+            start_date = get_start_date(current_checkpoint, now, 1461 * 86400)
 
             # Getting data from API
             logger.info("Getting data from users endpoint")
             user_model = UserModel(client.get("UsersApi", "get_users"))
 
             # Getting metrics
-            interval = (get_interval_str(start_date, now),)
+            interval = get_interval_str(start_date, now)
             logger.debug(f"Range interval: {interval}")
 
             # Max 100 userids supported according to specs (??)

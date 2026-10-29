@@ -10,8 +10,8 @@ from genesys_cloud_ta.api.proxy import get_proxy_configuration
 from genesys_cloud_ta.constants import (
     ADDON_NAME,
     AUDIT_QUERY_COMPLETED_STATUSES,
-    DEFAULT_MAX_POLL_ATTEMPTS,
-    DEFAULT_POLL_INTERVAL_SECONDS,
+    DEFAULT_AUDIT_MAX_POLL_ATTEMPTS,
+    DEFAULT_AUDIT_POLL_INTERVAL_SECONDS,
     MAX_PAGE_SIZE,
     SOURCETYPE_OPERATIONAL_AUDITS,
 )
@@ -64,10 +64,10 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             )
 
             max_polls = int(
-                input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS)
+                input_item.get("max_poll_attempts", DEFAULT_AUDIT_MAX_POLL_ATTEMPTS)
             )
             poll_sleep = int(
-                input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS)
+                input_item.get("poll_interval_seconds", DEFAULT_AUDIT_POLL_INTERVAL_SECONDS)
             )
 
             client = GenesysCloudClient(
