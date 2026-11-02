@@ -1,7 +1,8 @@
 import logging
 
-from genesys_cloud_ta.constants import ADDON_NAME
 from solnlib import conf_manager, log
+
+from genesys_cloud_ta.constants import ADDON_NAME
 
 
 def logger_for_input(input_name: str) -> logging.Logger:

@@ -1,5 +1,5 @@
-from solnlib import conf_manager
 from constants import ADDON_NAME
+from solnlib import conf_manager
 
 
 def get_account_property(session_key: str, account_name: str, property_name: str):

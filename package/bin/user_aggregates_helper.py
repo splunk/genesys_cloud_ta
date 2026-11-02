@@ -68,7 +68,9 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date = get_start_date(current_checkpoint, now, DEFAULT_HISTORICAL_YEARS_IN_SECS)
+            start_date = get_start_date(
+                current_checkpoint, now, DEFAULT_HISTORICAL_YEARS_IN_SECS
+            )
 
             # Getting data from API
             logger.info("Getting data from users endpoint")

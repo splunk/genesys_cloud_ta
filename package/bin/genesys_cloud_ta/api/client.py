@@ -7,10 +7,11 @@ from io import BytesIO
 
 import PureCloudPlatformClientV2
 import urllib3
-from genesys_cloud_ta.api.proxy import ProxyHandler
 from PureCloudPlatformClientV2.api_client import ApiClient
 from PureCloudPlatformClientV2.configuration import Configuration
 from PureCloudPlatformClientV2.rest import ApiException
+
+from genesys_cloud_ta.api.proxy import ProxyHandler
 
 
 class GenesysCloudClient:
