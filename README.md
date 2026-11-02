@@ -1,5 +1,6 @@
 # Genesys Cloud Add-on for Splunk
 
+![Custom badge](https://img.shields.io/endpoint?label=SplunkBase%20Downloads&url=https%3A%2F%2Fsplunkbasebadge.livehybrid.com%2Fv1%2Fdownloads%2F9730%2F)
 [![Actions Status: appinspect](https://github.com/splunk/genesys_cloud_ta/actions/workflows/build-appinspect.yml/badge.svg)](https://github.com/splunk/genesys_cloud_ta/actions?query=workflow%3A"AppInspect")
 [![Actions Status: tests](https://github.com/splunk/genesys_cloud_ta/actions/workflows/tests.yml/badge.svg)](https://github.com/splunk/genesys_cloud_ta/actions?query=workflow%3A"Tests")
 [![Latest release (latest by date)](https://img.shields.io/github/v/release/splunk/genesys_cloud_ta?label=Latest%20Release)](https://github.com/splunk/genesys_cloud_ta/releases)
