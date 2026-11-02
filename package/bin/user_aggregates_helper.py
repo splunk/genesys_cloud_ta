@@ -8,6 +8,7 @@ from genesys_cloud_ta.api.client import GenesysCloudClient
 from genesys_cloud_ta.api.proxy import get_proxy_configuration
 from genesys_cloud_ta.constants import (
     ADDON_NAME,
+    DEFAULT_HISTORICAL_YEARS_IN_SECS,
     SOURCETYPE_USERS_USERS_AGGREGATES,
     USERS_AGGREGATES_METRICS,
 )
@@ -67,7 +68,7 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
             now = datetime.now(timezone.utc)
             # No checkpoint? Default it to four years ago per API docs
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
-            start_date = get_start_date(current_checkpoint, now, 1461 * 86400)
+            start_date = get_start_date(current_checkpoint, now, DEFAULT_HISTORICAL_YEARS_IN_SECS)
 
             # Getting data from API
             logger.info("Getting data from users endpoint")

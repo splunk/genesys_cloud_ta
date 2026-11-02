@@ -61,7 +61,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
 
             # Setting a default start date of 7 days ago from now
             now = datetime.now(timezone.utc)
-            # fallback_start = (now - timedelta(days=7)).timestamp()
             checkpointer_key_name = normalized_input_name
             current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
             start_date_epoch = get_start_date(current_checkpoint, now).timestamp()

@@ -1,6 +1,5 @@
 from solnlib import conf_manager
-
-ADDON_NAME = "genesys_cloud_ta"
+from constants import ADDON_NAME
 
 
 def get_account_property(session_key: str, account_name: str, property_name: str):

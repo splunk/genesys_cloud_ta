@@ -5,19 +5,30 @@ from datetime import datetime, timedelta, timezone
 from genesys_cloud_ta.constants import DEFAULT_HISTORICAL_DAYS
 
 
-def _to_epoch(value: float | str) -> float:
-    """Cast string datetime value into epoch."""
-    if isinstance(value, float):
-        return value
+def _to_epoch(value: int | float | str) -> float:
+    """Convert a numeric epoch or UTC datetime string into an epoch timestamp."""
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return float(value)
 
     if isinstance(value, str):
-        # Supports strings like: "2026-10-29T12:34:56.123Z"
-        dt = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
-            tzinfo=timezone.utc
+        # Supports strings like: "2026-10-29T12:34:56.123Z" and "2026-10-29T12:34:56Z"
+        for datetime_format in (
+            "%Y-%m-%dT%H:%M:%S.%fZ",
+            "%Y-%m-%dT%H:%M:%SZ",
+        ):
+            try:
+                dt = datetime.strptime(value, datetime_format).replace(
+                    tzinfo=timezone.utc
+                )
+                return dt.timestamp()
+            except ValueError:
+                pass
+        raise ValueError(
+            "Expected a UTC datetime string in ISO format, with optional "
+            f"milliseconds; got {value}"
         )
-        return dt.timestamp()
 
-    raise TypeError(f"Expected float or str, got {type(value).__name__}")
+    raise TypeError(f"Expected int, float, or str, got {type(value).__name__}")
 
 
 def get_start_date(
