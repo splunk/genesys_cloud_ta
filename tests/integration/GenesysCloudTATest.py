@@ -6,7 +6,7 @@ from io import StringIO
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../package/bin"))
 )
-from genesyscloud_client import GenesysCloudClient
+from genesys_cloud_ta.api.client import GenesysCloudClient
 
 LOGGER = logging.getLogger(__name__)
 LOG_BUFFER = StringIO()

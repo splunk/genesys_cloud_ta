@@ -1,33 +1,29 @@
-import json
-import logging
-import time
-from datetime import datetime, timedelta, timezone
+"""OAuth Client Usage input handler."""
 
-from genesyscloud_client import GenesysCloudClient
-from solnlib import conf_manager, log
-from solnlib.conf_manager import InvalidHostnameError, InvalidPortError
+import json
+import time
+from datetime import datetime, timezone
+
+from genesys_cloud_ta.account import get_account_property
+from genesys_cloud_ta.api.client import GenesysCloudClient
+from genesys_cloud_ta.api.proxy import get_proxy_configuration
+from genesys_cloud_ta.constants import (
+    ADDON_NAME,
+    DEFAULT_MAX_POLL_ATTEMPTS,
+    DEFAULT_POLL_INTERVAL_SECONDS,
+    SOURCETYPE_OPERATIONAL_USAGE_CLIENTS,
+)
+from genesys_cloud_ta.time_utils import (
+    get_interval_str,
+    get_start_date,
+)
+from genesys_cloud_ta.utils import (
+    configure_logger,
+    logger_for_input,
+)
+from solnlib import log
 from solnlib.modular_input import checkpointer
 from splunklib import modularinput as smi
-
-ADDON_NAME = "genesys_cloud_ta"
-SOURCETYPE = "genesyscloud:operational:usage:clients_api"
-
-DEFAULT_POLL_INTERVAL_SECONDS = "10"
-DEFAULT_MAX_POLL_ATTEMPTS = "30"
-
-
-def logger_for_input(input_name: str) -> logging.Logger:
-    return log.Logs().get_logger(f"{ADDON_NAME.lower()}_{input_name}")
-
-
-def get_account_property(session_key: str, account_name: str, property_name: str):
-    cfm = conf_manager.ConfManager(
-        session_key,
-        ADDON_NAME,
-        realm=f"__REST_CREDENTIAL__#{ADDON_NAME}#configs/conf-genesys_cloud_ta_account",
-    )
-    account_conf_file = cfm.get_conf("genesys_cloud_ta_account")
-    return account_conf_file.get(account_name).get(property_name)
 
 
 def validate_input(definition: smi.ValidationDefinition):
@@ -40,30 +36,14 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
         logger = logger_for_input(normalized_input_name)
         try:
             session_key = inputs.metadata["session_key"]
+            configure_logger(logger, session_key)
             kvstore_checkpointer = checkpointer.KVStoreCheckpointer(
                 "oauth_client_usage_checkpointer",
                 session_key,
                 ADDON_NAME,
             )
-            log_level = conf_manager.get_log_level(
-                logger=logger,
-                session_key=session_key,
-                app_name=ADDON_NAME,
-                conf_name="genesys_cloud_ta_settings",
-            )
-            logger.setLevel(log_level)
-            try:
-                proxy_config = conf_manager.get_proxy_dict(
-                    logger=logger,
-                    session_key=session_key,
-                    app_name=ADDON_NAME,
-                    conf_name="genesys_cloud_ta_settings",
-                )
-            except InvalidPortError as e:
-                logger.error(f"Proxy configuration error: {e}")
-                continue
-            except InvalidHostnameError as e:
-                logger.error(f"Proxy configuration error: {e}")
+            proxy_config = get_proxy_configuration(logger, session_key)
+            if proxy_config is None:
                 continue
 
             log.modular_input_start(logger, normalized_input_name)
@@ -78,19 +58,6 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 session_key, input_item.get("account"), "region"
             )
 
-            client = GenesysCloudClient(
-                logger, client_id, client_secret, account_region, proxy_config
-            )
-
-            target_client_id = input_item.get("oauth_client_id") or client_id
-
-            checkpointer_key_name = input_name.split("/")[-1]
-            now = datetime.now(timezone.utc)
-            last_checkpoint = kvstore_checkpointer.get(checkpointer_key_name) or (
-                now - timedelta(days=7)
-            ).strftime("%Y-%m-%dT%H:%M:%S.000Z")
-            new_checkpoint = now.strftime("%Y-%m-%dT%H:%M:%S.000Z")
-
             max_polls = int(
                 input_item.get("max_poll_attempts", DEFAULT_MAX_POLL_ATTEMPTS)
             )
@@ -98,12 +65,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 input_item.get("poll_interval_seconds", DEFAULT_POLL_INTERVAL_SECONDS)
             )
 
-            logger.info(
-                f"Submitting OAuth client usage query job for client {target_client_id}: {last_checkpoint} to {new_checkpoint}"
+            target_client_id = input_item.get("oauth_client_id") or client_id
+
+            client = GenesysCloudClient(
+                logger, client_id, client_secret, account_region, proxy_config
             )
 
+            checkpointer_key_name = normalized_input_name
+            now = datetime.now(timezone.utc)
+            current_checkpoint = kvstore_checkpointer.get(checkpointer_key_name)
+            start_date = get_start_date(current_checkpoint, now)
+
             body = {
-                "interval": f"{last_checkpoint}/{new_checkpoint}",
+                "interval": get_interval_str(start_date, now),
                 "granularity": "Day",
             }
 
@@ -114,6 +88,8 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                 body,
                 client_id=target_client_id,
             )
+
+            logger.info("Fetching usage client aggregates events.")
 
             results = []
             if job_response:
@@ -166,19 +142,19 @@ def stream_events(inputs: smi.InputDefinition, event_writer: smi.EventWriter):
                     smi.Event(
                         data=json.dumps(item, ensure_ascii=False, default=str),
                         index=input_item.get("index"),
-                        sourcetype=SOURCETYPE,
+                        sourcetype=SOURCETYPE_OPERATIONAL_USAGE_CLIENTS,
                     )
                 )
                 event_counter += 1
 
             if event_counter > 0:
                 logger.debug(f"Indexed {event_counter} OAuth client usage records")
-                kvstore_checkpointer.update(checkpointer_key_name, new_checkpoint)
+                kvstore_checkpointer.update(checkpointer_key_name, now.timestamp())
 
             log.events_ingested(
                 logger,
                 input_name,
-                SOURCETYPE,
+                SOURCETYPE_OPERATIONAL_USAGE_CLIENTS,
                 event_counter,
                 input_item.get("index"),
                 account=input_item.get("account"),
