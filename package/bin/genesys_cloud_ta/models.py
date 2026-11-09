@@ -1,7 +1,13 @@
 import datetime
 import re
 
-from PureCloudPlatformClientV2.models import Edge, Phone, Queue, Trunk, User
+from PureCloudPlatformClientV2.models import (
+    Edge,
+    Phone,
+    Queue,
+    Trunk,
+    User,
+)
 
 
 class GCBaseModel:
@@ -50,6 +56,31 @@ class GCBaseModel:
             for key in keys_to_extract
             if key in sub_dict
         }
+
+
+class ActionModel(GCBaseModel):
+    def __init__(self, actions: list[dict], group_info: dict) -> None:
+        super().__init__(actions)
+        self.group_info = group_info
+
+    @property
+    def actions(self) -> list[dict]:
+        ret_actions = []
+        for action in self.data:
+            for metric in action.get("metrics", []):
+                ret_actions.append(
+                    {
+                        "metric": metric.get("metric", ""),
+                        "qualifier": metric.get("qualifier", ""),
+                        "stats": metric.get("stats", {}),
+                        "group": self.group_info,
+                        "interval": action.get("interval"),
+                    }
+                )
+        return ret_actions
+
+    def get_interval_start(self, interval_range: str) -> float:
+        return (self.to_datetime(interval_range.split("/")[0])).timestamp()
 
 
 class TrunkModel(GCBaseModel):

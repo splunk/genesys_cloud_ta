@@ -76,64 +76,72 @@
                             "options": {
                                 "autoCompleteFields": [
                                     {
-                                        "value": "us_east_1",
-                                        "label": "US East (Virginia)"
-                                    },
-                                    {
-                                        "value": "us_west_2",
-                                        "label": "US West (Oregon)"
-                                    },
-                                    {
-                                        "value": "eu_west_1",
-                                        "label": "Europe (Ireland)"
-                                    },
-                                    {
-                                        "value": "ap_southeast_2",
-                                        "label": "Asia Pacific (Sydney)"
-                                    },
-                                    {
                                         "value": "ap_northeast_1",
                                         "label": "Asia Pacific (Tokyo)"
-                                    },
-                                    {
-                                        "value": "eu_central_1",
-                                        "label": "Europe (Frankfurt)"
-                                    },
-                                    {
-                                        "value": "ca_central_1",
-                                        "label": "Canada (Central)"
                                     },
                                     {
                                         "value": "ap_northeast_2",
                                         "label": "Asia Pacific (Seoul)"
                                     },
                                     {
-                                        "value": "eu_west_2",
-                                        "label": "Europe (London)"
+                                        "value": "ap_northeast_3",
+                                        "label": "Asia Pacific (Osaka)"
                                     },
                                     {
                                         "value": "ap_south_1",
                                         "label": "Asia Pacific (Mumbai)"
                                     },
                                     {
-                                        "value": "us_east_2",
-                                        "label": "US East 2 (Ohio)"
+                                        "value": "ap-southeast-1",
+                                        "label": "Asia Pacific (Singapore)"
                                     },
                                     {
-                                        "value": "sa_east_1",
-                                        "label": "South America (Sao Paulo)"
+                                        "value": "ap_southeast_2",
+                                        "label": "Asia Pacific (Sydney)"
+                                    },
+                                    {
+                                        "value": "ca_central_1",
+                                        "label": "Canada (Central)"
+                                    },
+                                    {
+                                        "value": "eu_west_1",
+                                        "label": "Europe (Ireland)"
+                                    },
+                                    {
+                                        "value": "eu_west_2",
+                                        "label": "Europe (London)"
+                                    },
+                                    {
+                                        "value": "eu_central_1",
+                                        "label": "Europe (Frankfurt)"
+                                    },
+                                    {
+                                        "value": "eu_central_2",
+                                        "label": "Europe (Zurich)"
                                     },
                                     {
                                         "value": "me_central_1",
                                         "label": "Middle East (UAE)"
                                     },
                                     {
-                                        "value": "ap_northeast_3",
-                                        "label": "Asia Pacific (Osaka)"
+                                        "value": "mx-central-1",
+                                        "label": "Mexico (Central)"
                                     },
                                     {
-                                        "value": "eu_central_2",
-                                        "label": "Europe (Zurich)"
+                                        "value": "sa_east_1",
+                                        "label": "South America (Sao Paulo)"
+                                    },
+                                    {
+                                        "value": "us_east_1",
+                                        "label": "US East (Virginia)"
+                                    },
+                                    {
+                                        "value": "us_east_2",
+                                        "label": "US East 2 (Ohio)"
+                                    },
+                                    {
+                                        "value": "us_west_2",
+                                        "label": "US West (Oregon)"
                                     }
                                 ]
                             }
