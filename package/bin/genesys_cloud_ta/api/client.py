@@ -20,6 +20,8 @@ class GenesysCloudClient:
     """
 
     DEFAULT_REGION = "us_east_1"
+    EU_SOVEREIGN_REGION = "eusc-de-east-1"
+    EU_SOVEREIGN_REGION_HOST = "https://login.edee1.eusc-pure.cloud"
 
     def __init__(
         self,
@@ -34,6 +36,9 @@ class GenesysCloudClient:
         if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
             region = PureCloudPlatformClientV2.PureCloudRegionHosts[aws_region]
             self.host = region.get_api_host()
+        elif aws_region == EU_SOVEREIGN_REGION:
+            # Remove this if as soon as the SDK is updated. Such region is not supported by SDKv238.
+            self.host = EU_SOVEREIGN_REGION_HOST
         else:
             self.logger.warning(
                 f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable"

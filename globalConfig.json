@@ -120,6 +120,10 @@
                                         "label": "Europe (Zurich)"
                                     },
                                     {
+                                        "value": "eusc-de-east-1",
+                                        "label": "European Sovereign Region (Brandenburg)"
+                                    },
+                                    {
                                         "value": "me_central_1",
                                         "label": "Middle East (UAE)"
                                     },
