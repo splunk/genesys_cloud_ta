@@ -5,9 +5,9 @@ from datetime import datetime, timedelta, timezone
 from genesys_cloud_ta.constants import DEFAULT_HISTORICAL_DAYS
 
 
-def _to_epoch(value: float | str) -> float:
+def _to_epoch(value: int | float | str) -> float:
     """Convert a numeric epoch or UTC datetime string into an epoch timestamp."""
-    if isinstance(value, float) and not isinstance(value, bool):
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
         return value
 
     if isinstance(value, str):
