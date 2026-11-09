@@ -4,12 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
-## [Unreleased]
+## [v0.5.0] - 2026-11-09
 
 ### Added
 
 - Inventory modular inputs `users_directory` and `queues_directory` for daily full-snapshot ingestion to support compliance retention requirements ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
 - Operational modular inputs `usage_events`, `org_usage` and `oauth_client_usage` to fetch usage records as well as organization-level and OAuth clients API usage aggregates ([#48](https://github.com/splunk/genesys_cloud_ta/pull/48)).
+- Support to 3 new Genesys Cloud regions: Asia Pacific (Singapore), Mexico (Central) and European Sovereign Region (Brandenburg) ([#55](https://github.com/splunk/genesys_cloud_ta/pull/55)).
+
+### Changed
+
+- Major refactoring to reduce code repetitions across all inputs ([#55](https://github.com/splunk/genesys_cloud_ta/pull/55)).
 
 
 ## [v0.4.3] - 2026-10-19
