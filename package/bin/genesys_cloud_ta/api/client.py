@@ -36,9 +36,9 @@ class GenesysCloudClient:
         if PureCloudPlatformClientV2.PureCloudRegionHosts.__members__.get(aws_region):
             region = PureCloudPlatformClientV2.PureCloudRegionHosts[aws_region]
             self.host = region.get_api_host()
-        elif aws_region == EU_SOVEREIGN_REGION:
+        elif aws_region == self.EU_SOVEREIGN_REGION:
             # Remove this if as soon as the SDK is updated. Such region is not supported by SDKv238.
-            self.host = EU_SOVEREIGN_REGION_HOST
+            self.host = self.EU_SOVEREIGN_REGION_HOST
         else:
             self.logger.warning(
                 f"Region {aws_region} not found: searching 'GENESYSCLOUD_HOST' env variable"
