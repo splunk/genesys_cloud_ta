@@ -3,5 +3,5 @@ splunk-sdk
 solnlib
 PureCloudPlatformClientV2==238.0.0
 # PureCloudPlatformClientV2 requires watchdog >= 2.1.6
-# Using 3.0.0 for py3.7 compatibility
-# watchdog==3.0.0
+# Using <7 for py3.9 compatibility. v7 requires py3.11+
+watchdog>=5.0.0,<7
