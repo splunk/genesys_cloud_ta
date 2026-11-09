@@ -2,7 +2,7 @@
 
 |                          |                           |
 |--------------------------|---------------------------|
-| Version                  | 0.4.3                     |
+| Version                  | 0.5.0                     |
 | Vendor Products          | Genesys Cloud             |
 | Splunk platform versions | 9.3.x, 9.4.x, 10.x        |
 | CIM                      | 5.0.0                     |
