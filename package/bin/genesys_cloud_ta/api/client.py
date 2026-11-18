@@ -20,7 +20,7 @@ class GenesysCloudClient:
     """
 
     DEFAULT_REGION = "us_east_1"
-    EU_SOVEREIGN_REGION = "eusc-de-east-1"
+    EU_SOVEREIGN_REGION = "eusc_de_east_1"
     EU_SOVEREIGN_REGION_HOST = "https://login.edee1.eusc-pure.cloud"
 
     def __init__(

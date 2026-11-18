@@ -92,7 +92,7 @@
                                         "label": "Asia Pacific (Mumbai)"
                                     },
                                     {
-                                        "value": "ap-southeast-1",
+                                        "value": "ap_southeast_1",
                                         "label": "Asia Pacific (Singapore)"
                                     },
                                     {
@@ -120,7 +120,7 @@
                                         "label": "Europe (Zurich)"
                                     },
                                     {
-                                        "value": "eusc-de-east-1",
+                                        "value": "eusc_de_east_1",
                                         "label": "European Sovereign Region (Brandenburg)"
                                     },
                                     {
@@ -128,7 +128,7 @@
                                         "label": "Middle East (UAE)"
                                     },
                                     {
-                                        "value": "mx-central-1",
+                                        "value": "mx_central_1",
                                         "label": "Mexico (Central)"
                                     },
                                     {
@@ -1587,7 +1587,7 @@
     "meta": {
         "name": "genesys_cloud_ta",
         "restRoot": "genesys_cloud_ta",
-        "version": "0.5.0",
+        "version": "0.5.1",
         "displayName": "Genesys Cloud Add-on for Splunk",
         "schemaVersion": "0.0.10",
         "supportedThemes": [
