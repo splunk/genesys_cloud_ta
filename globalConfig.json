@@ -92,7 +92,7 @@
                                         "label": "Asia Pacific (Mumbai)"
                                     },
                                     {
-                                        "value": "ap-southeast-1",
+                                        "value": "ap_southeast_1",
                                         "label": "Asia Pacific (Singapore)"
                                     },
                                     {
@@ -120,7 +120,7 @@
                                         "label": "Europe (Zurich)"
                                     },
                                     {
-                                        "value": "eusc-de-east-1",
+                                        "value": "eusc_de_east_1",
                                         "label": "European Sovereign Region (Brandenburg)"
                                     },
                                     {
@@ -128,7 +128,7 @@
                                         "label": "Middle East (UAE)"
                                     },
                                     {
-                                        "value": "mx-central-1",
+                                        "value": "mx_central_1",
                                         "label": "Mexico (Central)"
                                     },
                                     {
